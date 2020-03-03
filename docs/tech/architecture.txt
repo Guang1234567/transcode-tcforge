@@ -1,0 +1,262 @@
+====================================================
+A video frame in transcode -- Birth, life and death.
+====================================================
+
+This article has information about the generic stages of a frame in
+the transcode core. It may help you when you want to do a filter for
+transcode or just understand how transcode works.
+
+Transcode is a threaded application. The different threads which are
+of importance here are one decoder thread, one encoder thread and N
+frame processing threads. N is a number the user can control via
+the second argument of transcodes -u option.
+
+Each frame is put into a frame_list_t (/src/framebuffer.h)
+structure. The frames are buffered internally in a double linked
+list. The order of an frame in this list denotes the decoding (and
+therefore) the encoding order (/src/video_buffer.c)
+
+The import module decompresses a frame from the input file into a
+format the core of transcode likes. Just after the frame arrives in
+the decoder, the status of the frame is set to FRAME_WAIT.
+the first frame pre-processing takes place here.
+
+1) preprocess_vid_frame() (/src/frame_preprocess.c)
+   If the frame number is out-of-range as denoted by -c, the skipped
+   attribute is attached to the frame and it is ignored by further
+   processing routines. If the user has given --pre_clip, this will
+   happen here.
+
+After the very early clipping the filters get their draw with the tag:
+
+2) TC_PRE_S_PROCESS
+   The _S_ stands for synchronous. This means for the filter it will
+   recieve one frame after another in decoding order. The filter is
+   executed by the decoding thread and runs inside this thread
+   putting the decoder on halt for its execution time.
+
+When all filters are done with TC_PRE_S_PROCESS, the frame leaves
+the decoder and the sychronous part and now waits to be picked up by
+one of the frame processing threads (/src/frame_threads.c). One
+frame processing thread does the following: It grabs one frame from
+the frame_list and sets its state to FRAME_LOCK to make sure no
+other frame processing thread will take this frame. Now the frame
+enters the filters again:
+
+3) TC_PRE_M_PROCESS
+   The frame passes all the filters in the order specified on the
+   command line. The frame ordering is not garanteed any more; the
+   frames may arrive in the filter in any order. The filter must be
+   reentrant in some way.
+
+Next, the internal processing routines take place:
+
+4) process_vid_frame() (/src/video_trans.c)
+   The following operations are applied to the frame in the hereby
+   given order
+   -j (clip) -I (deinterlace) -X (fast scale up) -B (fast scale
+   down) -Z (slow zoom) -Y (clip) -r (scale half) -z (flip)
+   -l (mirror) -k (rgbswap) -K (make grayscale) -G (gamma)
+   -C (antialias)
+   short: "jIXBZYrzlkKGC"
+
+The frame wanders off into the filters a third time:
+
+5) TC_POST_M_PROCESS
+   (the same as for 3) applies here, too)
+
+The frame processing thread now sets the status of the frame to
+FRAME_READY which means the frame can now be picked up by the
+encoder. The encoder does again some processing and calls the
+filters for the fourth and last time.
+
+6) TC_POST_S_PROCESS
+   (the same as for 2) applies here, too)
+
+After this a internal post processing takes place:
+
+7) postprocess_vid_frame() (/src/frame_postprocess.c)
+   Very last clipping if the user wants this via --post_clip
+
+Finally, the processed frame is made available to preview filters with
+the tag:
+
+8) TC_PREVIEW
+   This tag is intended only for the "preview" and "pv" filters (and any
+   new ones created with the same purpose), and allows the final video
+   frame after clipping via --post_clip to be shown to the user.  The
+   frame should not be modified here.
+
+When the frame has the skip flag set it will not be encoded, all
+other frames will encoded and freed.
+
+
+===================
+Graphical structure
+===================
+
+                         decode()
+                            |
+                     1) preprocess()
+                            |
+               2) filters(TC_PRE_S_PROCESS)
+                            |
+             _____________/ | \______________
+            /      |        |        |       \
+           /       |        |        |        \
+     N  F R A M E  P R O C E S S I N G  T H R E A D S
+        /          .        .        .         .
+       |           .        .        .         .
+       |
+ 3) filters(TC_PRE_M_PROCESS)
+       |
+ 4) process_vid_frame()
+       |
+ 5) filters(TC_POST_M_PROCESS)
+       |
+       |           .        .        .         .
+        \          .        .        .         .
+         \         |        |        |        /
+          \________|______  |  ______|_______/
+                          \ | /
+                            |
+             6) filters(TC_POST_S_PROCESS)
+                            |
+                   7) postprocess()
+                            |
+                 8) filters(TC_PREVIEW)
+                            |
+                         encode()
+
+
+==============
+Cloning Frames
+==============
+
+A filter can clone a frame. What this means and when it is possible
+to do it will be the topic of this section. We only consider the
+filters slots since non of the core video function does cloning.
+"Cloning a frame" means a frame gets duplicated (cloned) and encoded
+twice. Of course, if the cloned frame gets modified, a different
+cloned frame gets encoded. As the reader might know, there are four
+filter slots in transcode (excluding TC_PREVIEW, which is not
+relevant to this discussion). I'll abbrevate them for easier reading:
+
+ Slot                 | Abb. | Comment
+ ---------------------+------+----------------------------------
+ TC_PRE_S_PROCESS     |  ES  | synchronous pre processing
+ TC_PRE_M_PROCESS     |  EM  | multithreaded pre processing
+ TC_POST_M_PROCESS    |  OM  | multithreaded post processing
+ TC_POST_S_PROCESS    |  OS  | synchronous post processing
+
+Every filter in every slot can clone frames but the filter may not
+be called again with the cloned frame again. This depends on the
+slot the filter lives in. Note that a filter can live in several
+slots, for example, it can set the clone flag at ES time and catch
+the cloned frame at OM time if it likes to do so. The filter must
+keep in mind, that the cloned frame may have different geometry at
+OM time because it may be rescaled or resampled.
+
+How to read the following table. The field "Slot" denotes the slot
+the filter is in when it sets CLONE. The "Slots to pass" field tells
+the slots the cloned frame will pass.
+
+ Slot  | Slots to pass | Slots NOT passed
+ ------+---------------+-----------------
+ ES    | EM OM OS      | ES
+ EM    | EM OM OS      | ES
+ OM    |       OS      | ES EM OM
+ OS    |       OS      | ES EM OM
+
+Example 1:
+A filter in ES sets CLONE. The filter itself will not see the cloned
+frame, but all filters in following slots will.
+
+Example 2:
+A filter in EM sets CLONE. The filter _will_ see the cloned frame
+again and all consecutive slots will get it again, too.
+
+Notes on Cloning.
+To clone a frame, the filter adds TC_FRAME_IS_CLONED to the frame
+pointer attributes. The frame ID never gets incremented to reflect
+the count of cloned frames. If the filter decides to clone a frame,
+it gets the frame back with the same ID but with TC_FRAME_WAS_CLONED
+set, so its easy to distinguish between the frame with the original
+ID and the duplicated ID.
+
+
+===============
+Skipping Frames
+===============
+
+A filter can apply the skipped attribute to a frame which tells
+transcode the frame is not to be encoded but dropped. Not all slots
+can skip a frame; only slots where there is asynchronous A/V are
+allowed to do so.
+
+ Slot  | slot in which the frame will be dropped
+ ------+----------------------------------------
+ ES    |  Before EM
+ EM    |  After EM, before OM
+ OM    |  After OM, before OS
+ OS    |  After OS, before encode
+
+In other words, a skipped frame gets dropped right after the filter
+has returned.
+
+=================================
+Choosing the Slot for your Filter
+=================================
+
+If you want to do a filter you may not be sure in which slot it
+should be in. This section helps you in finding the correct slot for
+your filter.
+
+Multithreaded vs. Synchronous
+
+ You should try as hard as possible to put your filter into one of
+ the _M_ slots. An _M_ slot is usually faster than an _S_ slot.
+ Imagine the decoder waits for data to arrive from the harddrive and
+ the encoder is busy. Having your filter run in _M_ could use the
+ time while noone else is doing something to process the frame.
+ The _S_ stages are run directly by the decoder respectivly the
+ encoder and will block the de/encoder in doing their real work.
+
+ However, its not always possible to put a filter in _M_. In _M_
+ slots the filter may recieve the frames in any order. So if the
+ filter does depend on correct frame ordering it cannot be in _M_.
+ It may be possible to rewrite the filter in a way so that it does
+ not depend on the order of frames, check if it can be done for your
+ filter.
+
+PRE vs. POST
+
+ This decision is merely driven by the fact what your filter
+ actually does and which kind of data you want to have. Its usually
+ true, that a POST filter has to deal with less data than a PRE
+ filter. Of course, this is only true, if the user scales down and
+ not up but this is what most users do.
+
+ As an example, a deinterlace should always be run as a PRE filter
+ before the the up/down scaling of the frame happens in
+ transcode-core. A denoiser can be either run in PRE or in POST
+ because it just does not matter. One can assume that if the user
+ wants deinterlacing, in POST you can be pretty sure that you work
+ with progressive material.
+
+Always keep in mind that a filter can be in multiple slots. It
+depends on the filter which tag it wants.
+
+
+=================================
+Multiple Instances of your Filter
+=================================
+
+If your you want to be able to run XXX: see /filter/filter_32detect.c
+
+=======================
+Linked Framebuffer List
+=======================
+// XXX: WRITEME
+
+// vim: tw=68

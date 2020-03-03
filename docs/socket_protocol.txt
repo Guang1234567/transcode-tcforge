@@ -1,0 +1,177 @@
+Date: 2008-09-09
+Version: 1.0
+Author: Tilmann Bitterberg <transcode@tibit.org>
+
+** PREFACE
+
+<filter> is a placeholder for a filter name, without its prefix
+filter_. So <filter> for "filter_smooth.so" is "smooth".
+The <filter> name can be suffixed with `#[0-9]' to specify an
+instance. Some filters may be loaded multiple times with
+different parameters. If you don't care about the instance of a
+filter, use `#-1' or just don't specify anything.
+
+<string> depends on the filter, but mostly nowadays it is an
+optstr argument (see src/optstr.h:optstr_get())
+
+** SOCKET PROTOCOL
+
+To use the socket, start transcode with --socket FILE, then use
+tcmodinfo -s FILE to connect.
+
+After each command, the server will write an OK or FAILED back
+to the client, depending of the success of the requested action.
+
+load <filter> <initial string>
+  Load <filter> with options set to <initial string>
+  If you don't have an <initial string>, just pass '0' or leave
+  it blank. The filter is enabled after loading.
+  Example:
+    load smooth
+    load smooth 0
+    load smooth#0 strength=0.9
+
+config <filter> <string>
+  Configure <filter> with <string>. This will call the filters
+  Close routine and will init the filter again with the new
+  parameters.
+
+parameters <filter>
+  Read available paramers from <filter> if supporte. The Output
+  will be a CSV list of the following format. See FILTER
+  PROTOCOL below.
+
+preview <command>
+  Send commands to the `pv' Preview filter. The filter will be
+  startet, if it is not already loaded. The filter has to be
+  loaded with the `cache=NR' argument (NR == Cache Buffers)
+
+  commands:
+  draw <NR> -- Will apply the Filter Chain
+    <NR> is an optional integer from 1 to 255, specifying on how
+    many frames the filter will be run. If it is ommitted, it
+    defaults to 1.
+  pause  -- Will pause the Filter
+  undo   -- Will restore the previous buffer
+  fastfw -- Step 25 frames forward
+  fastbw -- Step 25 frames backward
+  slowfw -- Step 1 frame forward
+  slowbw -- Step 1 frame backward
+  rotate -- Save to an Avi in Passthrough-Mode (rotate AVI)
+ display -- Disable writing to the preview Window. Do display
+            again to reeanble it
+  slower -- Slow down transcode (and preview speed)
+  faster -- Speed up transcode (and preview speed). Please note
+            you cannot gain any extra speed out of transcode
+	    when using this.
+  toggle -- preview only every 10th or so image. This saves a
+            lot of CPU time.
+  grab -- Save a jpeg of the current buffer.
+
+quit
+  Disconnect from the socket
+
+help
+  Print available commands
+
+version
+  Protocol version
+
+enable <filter>
+  <filter> will be processed in the filter loop.
+
+disable <filter>
+  <filter> will NOT be processed in the filter loop.
+
+unload <filter>
+  Unload a filter completely. (not implemented)
+
+list [ load | enable | disable ]
+  Query list of loaded, enabled or disabled filters.
+  Output will be a CSV list like "smooth", "smartdeinter"
+
+stop
+  Immediately stop the processing and order to transcode to
+  shutdown as soon as is possible, exactly like sending an
+  interruption from command line.
+
+processing
+  Report the processing status by sending back to the client
+  a format string like that
+   E=%lu|D=%lu|im=%i|fl=%i|ex=%i
+  with the following meaning: [E]ncoded frame so far; [D]ropped
+  frames so far; frames currently staging in [im]port, [f]i[l]ter
+  and [ex]port buffers.
+
+
+/* ********************************************************* */
+
+** FILTER PROTOCOL
+
+  The first line is
+  special, it contains various meta data about the filter.
+  Syntax:
+    name, comment, version, author, Capabilities, Frames needed
+  Capabilities:
+                  "V":  Can do Video
+                  "A":  Can do Audio
+                  "R":  Can do RGB
+                  "Y":  Can do YUV
+                  "4":  Can do YUV422
+                  "M":  Can do Multiple Instances
+                  "E":  Is a PRE filter
+                  "O":  Is a POST filter
+               Valid examples:
+                  "VR"  : Video and RGB
+                  "VRY" : Video and YUV and RGB
+  Example:
+     "filter_foo.so", "comment", "0.1", "no@one", "VRY", "1"
+
+
+  All other lines describe one paramter per line. The output will be in CSV
+  Syntax:
+    name, comment, fmt, val, (...)
+  Example:
+   "radius", "Search radius", "%d", "8", "8", "24"
+
+   name:    The name of the parameter (eg "radius")
+   comment: A short description (eg "Search radius")
+   fmt:     A printf style parse string (eg "%d")
+   val:     Current value (eg "8")
+   (...):   Always pairs: Legal values for the parameter
+            (eg "8", "24" -- meaning, the radius parameter is valid
+            from 8 to 24)
+
+  More examples:
+   "pos", "Position (0-width x 0-height)", "%dx%d", "0x0", "0", "width", "0", "height"
+    "%dx%d" is interesting, because this parameter takes two values in this format
+            so we must supply two ranges (one for each parameter), when this
+            param is valid ("0", "width", "0", "height")
+
+   "flip", "Mirror image", "", "0"
+     This is a boolean, defaults to false. A boolean has no
+     argument, eg "filter_foo=flip"
+
+Example of the filter_yuvdenoiser.so
+START
+"filter_yuvdenoise.so", "mjpegs YUV denoiser", "v0.1.0 (2002-08-28)", "Stefan Fendt, Tilmann Bitterberg", "VY", "3"
+"radius", "Search radius", "%d", "8", "8", "24"
+"threshold", "Denoiser threshold", "%d", "5", "0", "255"
+"pp_threshold", "Pass II threshold", "%d", "4", "0", "255"
+"delay", "Average 'n' frames for a time-lowpassed pixel", "%d", "3", "1", "255"
+"postprocess", "Filter internal postprocessing", "%d", "1", "0", "1"
+"luma_contrast", "Luminance contrast in percent", "%d", "100", "0", "255"
+"chroma_contrast", "Chrominance contrast in percent.", "%d", "100", "0", "255"
+"sharpen", "Sharpness in percent", "%d", "125", "0", "255"
+"deinterlace", "Force deinterlacing", "%d", "0", "0", "1"
+"mode", "[0]: Progressive [1]: Interlaced [2]: Fast", "%d", "0", "0", "2"
+"scene_thres", "Blocks where motion estimation should fail before scenechange", "%d%%", "50", "0", "100"
+"block_thres", "Every SAD value greater than this will be considered bad", "%d", "1024", "0", "-1"
+"do_reset", "Reset the filter for `n' frames after a scene", "%d", "2", "0", "oo"
+"increment_cr", "Increment Cr with constant", "%d", "2", "-128", "127"
+"increment_cb", "Increment Cb with constant", "%d", "2", "-128", "127"
+"border", "Active image area", "%dx%d-%dx%d", "0x0-32x32", "0", "W", "0", "H", "0", "W", "0", "H"
+END
+
+/* vim: sw=2 tw=64
+ */

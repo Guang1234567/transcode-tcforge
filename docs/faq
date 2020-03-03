@@ -1,0 +1,298 @@
+----
+Q:	I am using version 0.6.x where x <= 14, and I'm having
+	some sort of problem
+A:	Upgrade to the CVS version, this is the only version
+	that is supported.
+---
+Q:	How do I obtain transcode from CVS
+A:	There are instructions available at
+	http://www.transcoding.org/#cvs (tibit)
+---
+Q:	I now got transcode from CVS, how do I compile
+	and install it?
+A:	See the INSTALL file.
+---
+Q:	So I got transcode from CVS and compiled it according
+	to the directions in the INSTALL file, and now I (still)
+	have some sort of problem
+A:	Join the transcode-users mailing list
+	(see www.transcoding.org) and check the archive if
+	your problem has been discussed at the mailing list before.
+---
+Q:	I still have a problem and it hasn't been discussed before.
+A:	If your problem is that transcode "hangs" without doing anything,
+	that is a known problem which is hard to solve. Often running
+	transcode this way: "env LD_ASSUME_KERNEL=2.4.0 transcode ..."
+	seems to help.
+---
+Q:	I still have a problem and it's not that transcode
+	hangs.
+A:	If your problem is that transcode is killed by a signal
+	(e.g. segmentation fault), perform these steps (carefully!)
+	- recompile transcode for debugging (see the INSTALL file
+	  for details)
+	- install it
+	- start transcode from within gdb like this:
+	  $ gdb transcode
+	  (gdb) <transcode command line options>
+	- when gdb stops, type these commands:
+	  (gdb) where
+	  (gdb) bt full
+	- now file a bug report in transcode-users, including:
+	  * the complete transcode command line your're using
+	  * the complete output of the transcode run, with option -q 2
+	  * the output of gdb
+	- only with a full bug report we can do ANYTHING at all.
+---
+Q:	How do I make a copy of a DVD-9
+A:	For german reading users here is a link http://linuxwiki.de/DvdAuthoring (felix)
+---
+Q:	Finally, there's the questions about the justly infamous
+	ffmpeg.cfg file. What are all the parameters and what do
+	they mean?
+A:	The easiest way to find out is to look at the mplayer manpage at
+	http://www.mplayerhq.hu/DOCS/man/en/manpage.html#CODEC%20SPECIFIC%20ENCODING%20OPTIONS%20(MENCODER%20ONLY)
+	and scroll down to "lavc"<br />
+	If you\'re just going to encode to (S)VCD or DVD, you\'d better use the
+	profile support.
+	In transcode, you can put these options into a config file (use -q2 to
+	generate one) called ffmpeg.cfg (ems, tibit)
+---
+Q:	What's the difference between -j and -Y?
+A:	This one I know. The difference between -j and -Y is only
+	the order that transcode does the clipping. In the manual
+	page we find
+
+	The video frame operations ordering is fixed:
+	"-j -I -X -B -Z -Y -r -z -l -k -K -G -C"
+	(executed from left to right).
+
+	So if one needs to do frame clipping and resizing, in a
+	specific order, he can choose the apropriate transcode
+	options.
+
+	For instance, if one wants to clip and then resize the
+	video frame, in this order, he can use -j (clip) and
+	-B (resize). In this case -Y and -B would not work, as
+	the operation -Y is done after -B.
+
+	There are still two other options for clipping:
+	--pre_clip (executed before -j) and
+	--post_clip (executed after -Y). (ems)
+---
+Q:	How do I transcode an avi to mpeg?
+PA:	(Partial answer) In this form, your question cannot
+	easily be answered. You're talking of _container_
+	formats (avi, mpeg) while you probably mean _codec_
+	formats.
+	<br />
+	A _container_ is a file format designed to hold both
+	audio and video (and sometimes more) data in a way that
+	a player application can play them back	properly (that
+	means, with audio and video synchronised).
+	<br />
+	Examples of container formats are avi, mpeg-ps, mpeg-ts,
+	asf, quicktime, mp4.
+	<br />
+	The _codec_ on the other hand, determines what's inside
+	the _container_, it is the (compressed) video or audio
+	data itself.
+	<br />
+	Examples of video codecs are: mpeg1, mpeg2,	mpeg4 (aka
+	"divx", "xvid"), realvideo, wmv, dv.
+	<br />
+	Examples of audio codecs are: mpeg1-layer2 (aka "mp2"),
+	mpeg1-layer3 (aka "mp3"), wma, aac, pcm.
+	<br />
+	BTW in avi container files, there's mostly mpeg4 video
+	content and mp3 audio content (although this is
+	absolutely not obligatory, use tcprobe to find out).
+	If you want to burn material on a SVCD or DVD, you need
+	to have the video in mpeg2, the audio in mp2 (or ac3 in
+	case of DVD) and both of these in a mpeg-ps (program
+	stream aka "vob") container.
+
+	With this information you should be able to refrase
+	your question a get a proper answer ;-) (ems)
+---
+Q:	Peoples' faces are purple!
+A1:	This probably means that the u and v planes (Cr/Cb) are
+	being swapped. As there is no clean definition whether u
+	should be Cr or Cb (and vv), this easily happens. (ems)
+A2:	I solved this problem with the -k option to transcode.
+	People are no longer purple.  Hence, if you're transcoding
+	from YUY2 to YV12 and you get purple people, you need
+	to use the -k option. (ems)
+---
+Q:	People are upside-down!
+A:      Use -z. Usually it goes away when you turn on YUV mode with -V. (tibit)
+---
+Q:	I have installed latest transcode tool from source and
+	then from rpm. Whenever I run program it falls over as
+	it cannot find export_mp2enc.so.
+A:	RPM packages of some distributions are not complete. This is a
+	general problem. If you want to use the mpeg2enc export module, you
+	will have to compile transcode yourself, or try to find a complete rpm
+	on the net. (ems)
+---
+Q:	Do I need the avifile library to write AVI files?
+A:	No. Transcode has its own library for writing AVI files. The avifile
+	library is used to enable support for win32 binary codecs. The libavcodec
+	from the ffmpeg project has a free implementation for most of these codecs
+	anyway. (tibit)
+---
+Q:	Help! I got lots of "no"s after running ./configure!
+A:	This is not necessarily a bad thing. transcode has configure checks
+	for some very "obscure" import and export codecs which you probably
+	never use anyway. <br />
+	If you are sure you have a specific library installed and transcode still
+	does not find it, have a look at config.log to find out the reason. (tibit)
+---
+Q:	When trying to read a DVD I get something like
+	<tt> (dvd_reader.c) no support for DVD reading configured - exit. </tt>
+	What am I missing, ie what do I need to do to fix it?
+A:	You have probably installed transcode from source and you are missing
+	the dvdread library. This library (including the -devel packages) must be
+	installed at compile time and transcode must find it. If transcode
+	found it, it will print <tt>"DVD navigation support with libdvdread
+	yes"</tt> at the end of the configure run. (tibit)
+---
+Q:	I am missing the mp3 import module (import_mp3.so)!
+A:	You need to have a recent lame library installed. Including all header
+	files (-devel package) (tibit)
+---
+Q:	How do I calculate the best tcrequant number from within a script
+	when going from a DVD9 to a DVD5?
+A:	Once you have separated (using tcextract) the audio and the video,
+	get the file sizes of the audio and video files.  If you are burning to
+	a DVD5, the maximum image size is 4700000000.  So the following
+	equation will give you a 'best fit' number.  1.04 is a fudge factor to
+	leave space for the file system and other overhead.
+	<br />
+	If you are including more that one audio stream or a subtitle stream,
+	those filesizes must also be subtracted from the maximum dvd image size.
+
+	<pre>
+	requant_factor = (video_size / (dvdmax_size - audio_size)) * 1.04;
+	tcrequant -i ofile.m2v -o movie.m2v -f requant_factor
+	</pre> (cooper)
+---
+Q:      What options to set in ~/.transcode/ffmpeg.cfg for encoding to dvd with
+        ffmpeg, when not using profile support
+A:      <pre>vrc_minrate=0
+        vrc_maxrate=9800
+	vrc_buf_size=1792
+
+        </pre>
+	If ratecontrol still is insufficient, try:
+	<pre>
+	lmin=0
+	lmax=10000
+
+	</pre>
+	(try lower lmax if still not right) (ems).
+---
+Q:	What does "Can't step back 17" (or similar) means?
+A:	This message comes from the mp3 decoder (lame). It means (since
+        mp3 has interdependent chunks) that one ore more previous mp3
+	chunks are missing "Can't step back ...". This usually happens when
+	the file was split at some time.
+	There is not much you can do about it. (tibit)
+---
+Q:	I have problems encoding with the divx4linux libraries from divx.com
+A:	Transcode ships two divx encoder modules. One is divx4 and one is divx5.
+	Please note that the `4' in divx_4_linux only stands for the word "for"
+	it does <b>not</b> denote the version number.<br />
+	Use -y divx4 if you have a really old version of the divx4linux
+	libraries installed. The divx5 export module is usuable depended on the
+	divx4linux libraries you had installed when you compiled transcode. The
+	Developers from divx.com changed their API in a backwards incompatible
+	way causeing that -y divx5 either supports the new API or the old one.
+	They are mutually exclusive. So if you have problems with -y divx4 try
+	-y divx5.
+	<br />
+	Please note that the current version of the divx4linux libraries
+	available form divx.com have a bug on they may segfault on Pentium4
+	systems. There is another bug in older versions of divx4linux where it
+	crashes when writting data to a FAT32 windows partition. Look at
+	http://www.exit1.org/dvdrip/doc/faq.cipp#faq11
+	<br />
+---
+Q:	transcode cannot find libdivxdecore.so/libdivxencore.so/libxvidcore.so ...
+A:	The best place to put these libraries is the transcode libdir
+	(/usr/local/lib/transcode/ by default). You can find out the libdir of
+	your transcode installation by executing <tt>tcmodinfo -p</tt>.
+	Transcode will look into this libdir first when searching for a
+	library. When that fails, transcode will look at the standard library
+	locations. You should make sure that the location of the library is in
+	<tt>/etc/ld.so.conf</tt> and don't forget to run ldconfig afterwards.
+	You do not need to put the transcode libdir into the dlloader config
+	file.
+---
+Q:	I have VOB files from a DVD which transcode won\'t encode
+	correctly. At some point, there\'s a \"broken stream\" error,
+	and in the resulting AVI the picture exhibits some artifacts at
+	that point and the AV sync is gone from there on. The VOB files
+	can be played back perfectly without any problems with various
+	players, though.
+A:	First, concatenate the VOB files into a single file all.vob .
+	Next, use mencoder to generate an AVI file:
+	<pre>
+	mencoder all.vob -o all.avi -ovc copy -oac copy
+
+	</pre>
+	Then process the AVI file with transcode. If mencoder crashes
+	(as it did on my system), use
+	<pre>
+	mencoder all.vob -o all_noaudio.avi -ovc copy -nosound
+
+	</pre>
+	which will give you an AVI without sound. Transcode this:
+	<pre>
+	transcode -i all_noaudio.avi -x mpeg2,null -y xvid,null \\
+	          -V -R 1 -o /dev/null --print_status 100
+	transcode -i all_noaudio.avi -x mpeg2,null -y xvid,null \\
+	          -V -R 2 -o transcoded_noaudio.avi --print_status 100
+
+	</pre>
+	Assuming that the \"broken\" AVI file transcode generated before
+	is called broken.avi, extract the audio with
+	<pre>
+	tcextract -i broken.avi -x mp3 -a 0 > all.mp3
+
+	</pre>
+	and finally merge audio and video with
+
+	<pre>
+	avimerge -i all_noaudio.avi -p all.mp3 -o complete.avi
+
+	</pre>
+	This can probably be improved; I was happy enough that it
+	worked.  (meier)
+---
+Q:	How can I save the audio track of a DVD directly to a WAVE file
+	suitable for burning onto an AudioCD?
+A:	Suppose you want the audio from title 2, all chapters and you want the
+	second audio stream:
+	<pre>
+	  transcode -x null,dvd -i /dev/dvd -T2,-1 -a 1 \\
+	  -y wav -J resample -E 44100 -o foo.wav
+
+	</pre>
+	The resampling is needed since DVD audio is usually sampled at 48
+	kHz. (tibit)
+---
+Q:	How do I transfer my .avi .mpg .mov. asf .wmv etc. files to DVD so that
+	they playback on my stand-alone DVD player ?
+A:	A step by step howto can be found at
+	http://mightylegends.zapto.org/dvd/dvdauthor_howto.php (rickfharris)
+---
+Q:	What do I need to get the import_im and import_imlist modules?
+A:	These modules use the ImageMagick library from
+	http://www.imagemagick.org
+---
+Q:	I do have ImageMagick including the -devel package installed and still
+	get no import_im and import_imlist module.
+A:	Some distributions ship a ImageMagick-devel package which also needs
+	bzip2-devel package installed. Check config.log for details.
+---

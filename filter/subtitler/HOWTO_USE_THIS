@@ -1,0 +1,150 @@
+
+This describes how to create subtitles, and how to add these .
+*PLEASE READ CHANGES FOR THE NEW COMMANDS LIKE PICTURE INSERT ETC.!!!!*
+
+This is what I am doing, and I can only speak for that:
+
+I am recording from digital satellite with the Technisat SkyStar 1
+PC card, in Linux, with the driver -0.7.1 from www.convergence.de (links
+to Linux TV), using RedHat 6.1 and kernel 2.2.12-20.
+On a Tyan VIA based mobo, with DMA enabled, and video 4 linux disabled.
+(required for this driver).
+
+Recording is done simply with cat /dev/video0 > myfile.pva
+For one hour, expect 1.8 to 2.5 GB, filesize, depends on picture content
+and motion.
+
+Then I copy the .pva file to windows 98 SE second release (mounted in
+Linux).
+Here I convert the .pva format to .mpg (mpeg2) with Pvastrumento
+www.offeryn.de
+
+This creates a file myfile.pva.mpg
+
+Pvastrumento also fixes audio video sync (wich is broken in this
+convergence driver).
+
+Next I go back to Linux, mount the windows disk and do the following
+with transcode, make a script like this:
+Usage
+scriptname myfile.pva.mpg
+
+
+echo "Extracting sound from $1"
+transcode \
+-i $1 \
+-x mpeg2,mp3 \
+-y null,divx4 \
+-m sound.mp3
+
+echo "Converting sound to 44100 samples / second 16 bits mono wave file"
+# of cause you can also use 22050 or 11025 audio.
+nice -n 15 mpg123 -r 44100  -w sound.wav sound.mp3
+
+echo "Ready use sound.wav for xste"
+echo "Select WAV audio in xste"
+exit
+---
+
+
+Now I use the subtitle editor xste
+www.home.zonnet.nl/panteltje/subtitles/
+with this sound file, to create text in sync with the sound.
+
+In xste, from the FILE menu select projects, enter some projectname, here
+'myproject'.
+Then double click on the created entry.
+xste will complain about non existing configuration files, but just say OK.
+
+xste has created /root/.subtitles/myproject/
+and /video/vie/myproject/
+
+In the first go your sound files, better keep your movies in the
+corresponding /video/vie/myproject/
+There are more programs using the xste file directory structure, have not
+released it all yet, like 'viplay', so for compatibility perhaps.
+
+
+Now move
+mv sound.wav /root/.subtitles/myproject/
+
+OK, in xste press AUTO, this should load the audio, and set some edit
+points.
+Read the xste documentation.
+
+When finished writing text with xste, select an output file format
+from the FILE pulldown menu EXPORT SETTINGS, close the export form,
+press the OUTPUT button, and exit.
+If all is well, all should now be in sync.
+
+Copy the myproject.ppml file that xste generates to  /root/.subtitles/:
+cp /root/.subtitles/myproject/myproject.ppml /root/.subtitles/
+where subtitler will look for it.
+
+Then use the folowing script to create a a divx CD-R micro-dvd.
+(Here an extra offset of -4 is added to get the subtitles more precisely
+in sync with the sound, note these are REAL frames, of 40 ms each,
+so an 80 ms adjustment).
+
+echo "Starting first pass DivX codec"
+transcode \
+-i $1 \
+-x mpeg2,mp3 \
+-y divx4,null \
+-V \
+-R 1 \
+-w 1550 \
+-c 0-100000 \
+-J subtitler="color_depth=32 frame_offset=-4 \
+subtitle_file=/root/.subtitles/myproject/myproject.ppml" \
+-I 3 \
+-D 4
+
+echo "Ready pass 1"
+
+#echo "Ready PASS 1<<< run pass 2 manually"
+#exit
+
+echo "Starting second pass DivX codec"
+transcode \
+-i $1 \
+-o a1-divx.avi \
+-x mpeg2,mp3 \
+-y divx4 \
+-V \
+-R 2 \
+-w 1550 \
+-I 3 \
+-J subtitler="color_depth=32 frame_offset=-4 \
+subtitle_file=/root/.subtitles/myproject/myproject.ppml" \
+-c 0-100000 \
+-D 4
+
+echo "Ready pass 2"
+exit
+
+
+
+You can use -c 3000-8000 to extract a specific part of the source mpg
+
+frame_offset is now always opposite of -D, so if you move to -D 5, you
+should also move to frame_offset=-5.
+The TEXT is locked to the start of the picture<< so, if you delay video
+to get better audio sync (with -D), you should make the subtitles appear
+EARLIER (with frame_offset a negative number) to keep the text in sync
+with that audio!
+-4 4 seems to work best with things converted with pvastrumento in windows.
+May be different on a different system (mpg audio coder speed?, not sure)
+
+
+That is all.
+Linux xine can play the DivX, else to the windows disk or PC with it,
+and mediaplayer (install DivX4FullInstaller.exe or DivX4CodecInstaller.exe
+in windows so mediaplayer works on DivX (only tried win 98).
+
+
+0.8.1:
+specifying the word:
+anti_alias
+on the command line will process emphasis2 as anti alias.
+Set emphasis2 to grey and emphasis2 contrast to maximum (15) (You can use xste to generate this).

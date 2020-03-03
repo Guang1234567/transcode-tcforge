@@ -1,0 +1,664 @@
+<html>
+<head>
+<title> Linux Video Stream Processing Tool - Examples</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="keywords" content="DVD, digital video, DV, encoder, divx,
+DivX;-), lame, source, posix, avifile, opendivx, codec, linux, AC3,
+program stream, video, audio, transcode, decoder, stream, YV12">
+</head>
+
+<body bgcolor=#CDB5CD>
+
+
+<a name=top></a>
+<table cellspacing="10" cellpadding="0" border="0" width="100%">
+  <tr>
+    <td align=left valign="top" width=30% bgcolor="#a0a0a0">
+    <table border="0" cellpadding="10" cellspacing="3" font size=+2 bgcolor="#ffffff" width=100%>
+      <td align="left" bgcolor="#e9e9e9"> <FONT
+      FACE="Lucida,Helvetica"> <font >VCD/(S)VCD/DVD</font>
+    </tr>
+    <tr>
+
+      <td>
+
+  <ul>
+    <li> <a href="mpeg.html#pmpeg"> <FONT FACE="Lucida,Helvetica">
+
+	 encoding to MPEG (PAL)</font></a><br>
+	 <ul>
+	   <li>	<a href="mpeg.html#pmpeg1"> <FONT
+		FACE="Lucida,Helvetica"> VCD </font></a>
+	   <li>	<a href="mpeg.html#pvcd"> <FONT FACE="Lucida,Helvetica">
+		(S)VCD</font></a>
+	   <li> <a href="mpeg.html#pdvd"> <FONT FACE="Lucida,Helvetica">
+		DVD</font></a>
+	 </ul>
+	 <p>
+    <li> <a href="mpeg.html#nmpeg"> <FONT FACE="Lucida,Helvetica">
+	 encoding to MPEG (NTSC)</font></a><br>
+
+	 <ul>
+	   <li><a href="mpeg.html#nmpeg1"> <FONT FACE="Lucida,Helvetica"> VCD</font></a>
+	   <li> <a href="mpeg.html#nvcd"> <FONT FACE="Lucida,Helvetica">
+		(S)VCD</font></a>
+	   <li> <a href="mpeg.html#ndvd"> <FONT FACE="Lucida,Helvetica">
+		DVD</font></a>
+
+	 </ul>
+      </td>
+    </tr>
+</table>
+</table>
+
+
+<a name=pmpeg></a>
+<table cellspacing="10" cellpadding="0" border="0" width="100%">
+  <tr>
+    <td align=left valign="top" width=30% bgcolor="#a0a0a0">
+    <table border="0" cellpadding="10" cellspacing="3" font size=+2 bgcolor="#ffffff" width=100%>
+      <td align="left" bgcolor="#e9e9e9">
+
+      <font>encoding to MPEG (PAL)</font>
+    </tr>
+    <tr>
+      <td>
+
+
+Notes:
+ <ul>
+   <li> [...] denote import/processing options.
+
+   <li> if the aspect ratio changes after resizing the video frame,
+	use "--export_asr code" to notify encoder. Possible aspect
+	ratio codes are: 1=1:1, 2=4:3, 3=16:9, 4=2.21:1.
+
+   <li> muliplex add-on audio track with "-s filename". <i>tcmplex</i>
+	supports 1 video and 2 audio tracks.
+   <li> enable <i>sox</i> re-sampling filter with "-J resample"
+	(optional) instead of export modules resampling feature.
+   <li> for encoding with <i>mjpeg-tools</i>, the use of <i>mplex</i> is
+	recommended.
+   <li> Use <i>tcmplex</i> option "-D" to adjust a possible AV mismatch.
+ </ul>
+
+
+	   <a name=pmpeg1><h3>VCD (352x288)</h3></a>
+
+ Video CD's have a restricted format for audio (MP2, 44100 Hz,
+ 224 kBits/s, stereo) and video (MPEG-1, 352x288, 1152 kBits/s CBR) parameter.
+ The preset profiles take care of the VCD2.0 specification.
+
+	   <ul>
+	     <li> bbmpeg port to linux: <font color=red><bf>audio
+		 downsampling reported BROKEN! Additionally use "-J resample".</b></font>
+
+	   <table>
+	     <tr>
+	       <td align=left valign="top" bgcolor="#ccffcc">
+	       transcode  [...] -V -y mpeg -F v,1 -E 44100 -b 224 -o test</td>
+	     </tr>
+      </table>
+
+      <table>
+	<tr>
+	  <td align=left valign="top" bgcolor="#ccffcc">
+	  tcmplex -o test.mpg -i test.m1v -p test.mpa -m v</td>
+	</tr>
+ </table>
+
+ <p>
+ Replace "-F v,1" by "-F v" if you prefer resizing handled
+ by transcode. Example: reduce 720x576 to
+ 352x288 with "-B 18,23,16".<br><br>
+
+<li> mjpeg-tools interface:
+
+      <table>
+	<tr>
+	  <td align=left valign="top" bgcolor="#ccffcc">
+	  transcode [...] -V -y mpeg2enc,mp2enc -F 1 -Z 352x288 -E 44100 -b 224 -o test</td>
+	</tr>
+ </table>
+
+
+
+     <table>
+	<tr>
+	  <td align=left valign="top" bgcolor="#ccffcc">
+	  mplex -f 1 -S 680 -o test.mpg test.m1v test.mpa
+	</tr>
+ </table>
+
+ <p>
+ Replace "-Z 352x288" by "-B" if you prefer the fast resizing mode
+ by transcode. Example: reduce 720x576 to
+ 352x288 with "-B 18,23,16".<br><br>
+
+</ul>
+
+	   <a name=pvcd><h3>(S)VCD (480x576)</h3></a>
+ Super Video CD's have a less restricted format for audio (MP2, 44100 Hz,
+ 32-384 kBits/s, stereo) and video (MPEG-2, 480x576, up to 2600
+kBits/s VBR) parameter.
+ The preset profiles take care of the SVCD2.0 specification.
+
+ <ul>
+	     <li> bbmpeg port to linux:
+
+
+	     You may try to increase th bitrate for higher quality (X)SVCD.
+	     Most consumer DVD/(S)VCD player can cope with that.
+
+	     This is done with a profile file <i>xsvcd.prof</i>, which contains the
+	     following entries:<p>
+
+	     <code>
+	     #(S)VCD profile for improved quality<br>
+fixed_vbv_delay = 1 <br>
+vbv_buffer_size = 230<br>
+cbr = 1<br>
+cbr_bitrate = 4000000.0<br>
+quant_value = 2<br>
+qscale_type = 0<br>
+vbr_mux = 0<br>
+video_buf_size = 230<br>
+use_comp_bitrate = 1<br>
+	     </code>
+	     <p>
+
+	     and will bump up the bitrate to 4000 kbps. The additional
+	     profile parameter are passed with the file name as a 3rd argument to "-F".
+
+<br>
+
+
+<font color=red><bf>audio
+		 downsampling reported BROKEN! Additionally use "-J resample".</b></font>
+
+ <table>
+	     <tr>
+	       <td align=left valign="top" bgcolor="#ccffcc">
+	       transcode  [...] -V -y mpeg -F s,3,xsvcd.prof -E 44100 -b 128 -o test</td>
+	     </tr>
+      </table>
+
+
+     <table>
+	<tr>
+	  <td align=left valign="top" bgcolor="#ccffcc">
+	  tcmplex -o test.mpg -i test.m2v -p test.mpa -m s</td>
+	</tr>
+ </table>
+
+<br>
+
+ <li> mjpeg-tools interface:
+
+      <table>
+	<tr>
+	  <td align=left valign="top" bgcolor="#ccffcc">
+	  transcode [...] -V -y mpeg2enc,mp2enc -F 4 -Z 480x576 -E 44100 -b 128 -o test</td>
+	</tr>
+ </table>
+
+ <p>
+ Replace "-Z 480x576" by <i>transcode</i>'s fast resizing
+ option "-B" for speed improvements. Example: reduce 720x576 to
+ 480x576 with "-B 0,15,16".
+ <br>
+       <table>
+	<tr>
+	  <td align=left valign="top" bgcolor="#ccffcc">
+	  mplex -f 4 -S 680 -o test.mpg test.m2v test.mpa
+	</tr>
+ </table>
+
+
+</ul>
+
+
+
+<a name=pdvd><h3>DVD compliant format</h3></a>
+
+Possible frame parameter combination: 720x576, 704x576, 352x576 and 352x288.<br>
+For a video frame size of 352x288, resizing can be delegated to the
+export module with "-F d,1", all other values require use of transcode's
+resize options.
+
+
+<ul>
+  <li> bbmpeg port to linux:
+
+       <ul><br>
+	 <li> MP2 audio:<font color=red><bf>audio
+		 downsampling reported BROKEN! Additionally use "-J resample".</b></font>
+
+	   <table>
+	     <tr>
+	       <td align=left valign="top" bgcolor="#ccffcc">
+	       transcode  [...] -V -y mpeg -F d -E 44100 -b 224 -o test</td>
+	     </tr>
+      </table>
+
+      <table>
+	<tr>
+	  <td align=left valign="top" bgcolor="#ccffcc">
+	  tcmplex -o test.vob -i test.m2v -p test.mpa -m d</td>
+	</tr>
+ </table>
+
+
+
+      <br>
+ <li> MP3 audio: <font color=red><bf>fixed in 0.6.0rc2</b></font>
+
+	   <table>
+	     <tr>
+	       <td align=left valign="top" bgcolor="#ccffcc">
+	       transcode  [...] -V -y mpeg,raw -F d -m test.mp3</td>
+	     </tr>
+      </table>
+
+      <table>
+	<tr>
+	  <td align=left valign="top" bgcolor="#ccffcc">
+	  tcmplex  -o test.vob -i test.m2v -p test.mp3 -m d</td>
+	</tr>
+ </table>
+
+
+ <br>
+       <li> AC3 pass-through:<br>
+
+     In most cases, you will need to reduce the bitrate for
+     encoding. This is done with a profile file <i>dvd.prof</i>, which contains the
+     following entry:<p>
+
+     <code>
+     #DVD profile with reduced bitrate <br>
+     max_bitrate=4000000.0
+     </code>
+     <p>
+
+     and will reduce the bitrate to 4000 kbps. The
+     profile name is passed as a 3rd argument to "-F".
+
+
+	   <table>
+	     <tr>
+	       <td align=left valign="top" bgcolor="#ccffcc">
+	       transcode  [...] -V -y mpeg,raw -F d,,dvd.prof -m test.ac3 -A -0x2000</td>
+	     </tr>
+      </table>
+
+      <table>
+	<tr>
+	  <td align=left valign="top" bgcolor="#ccffcc">
+	  tcmplex -o test.vob -i test.m2v -p test.ac3 -m d</td>
+	</tr>
+ </table>
+ <br>
+ <li> PCM audio: (not yet supported by <i>tcmplex</i>)
+
+
+</ul>
+
+
+
+      </ul>
+
+    </table>
+</table>
+
+
+<a name=nmpeg></a>
+<table cellspacing="10" cellpadding="0" border="0" width="100%">
+  <tr>
+    <td align=left valign="top" width=30% bgcolor="#a0a0a0">
+    <table border="0" cellpadding="10" cellspacing="3" font size=+2 bgcolor="#ffffff" width=100%>
+      <td align="left" bgcolor="#e9e9e9">
+
+      <font>encoding to MPEG (NTSC)</font>
+    </tr>
+    <tr>
+      <td>
+
+<p>
+	   For NTSC material, transcode currently generates film mode, i.e., 23.976 fps
+	   (progressive) for most NTSC DVD sources.
+	   For generating NTSC MPEG video, the final result should be played at
+	   29.97 fps. Therefore the encoder must set the appropriate
+	   flags to force a decoder/player to generate a 3:2 pulldown
+	   (telecine) on demand.
+	   Transcode offers a long option "--pulldown" to encode to MPEG
+	   video with the appropriate flags set and switching the display rate
+	   from 23.976 to 29.97 fps.
+	   <br>
+
+<p>
+
+Notes:
+ <ul>
+   <li> [...] denote import/processing options.
+
+   <li> if the aspect ratio changes after resizing the video frame,
+	use "--export_asr code" to notify encoder. Possible aspect
+	ratio codes are: 1=1:1, 2=4:3, 3=16:9, 4=2.21:1.
+   <li> 3:2 pulldown flags must be enabled with long option "--pulldown"
+   <li> muliplex add-on audio track with "-s filename". <i>tcmplex</i>
+	supports 1 video and 2 audio tracks.
+   <li> enable <i>sox</i> re-sampling filter with "-J resample"
+	(optional) instead of export modules resampling feature.
+   <li> for encoding with <i>mjpeg-tools</i>, the use of <i>mplex</i> is
+	recommended.
+   <li> Use <i>tcmplex</i> option "-D" to adjust a possible AV mismatch.
+ </ul>
+
+ <a name=nmpeg1><h3>VCD (352x240)</h3></a>
+
+ Video CD's have a restricted format for audio (MP2, 44100 Hz,
+ 224 kBits/s, stereo) and video (MPEG-1, 352x240, 1152 kBits/s CBR) parameter.
+ The preset profiles take care of the VCD2.0 specification.
+
+	   <ul>
+	     <li> bbmpeg port to linux: <font color=red><bf>audio
+		 downsampling reported BROKEN! Additionally use "-J resample".</b></font>
+
+		  <ul>  <br>
+		    <li> NTSC film encoded @ 23.976 -> VCD @ 23.976 film mode:
+		    <li> NTSC video encoded  @ 29.97 -> VCD @ 29.97 video mode:
+			 <br>
+			 <table>
+
+			   <tr>
+			     <td align=left valign="top" bgcolor="#ccffcc">
+			     transcode  [...] -V -y mpeg -F v,4 -E 44100 -b 224 -o test</td>
+			   </tr>
+		    </table>
+
+		    <table>
+		      <tr>
+			<td align=left valign="top" bgcolor="#ccffcc">
+			tcmplex -o test.mpg -i test.m1v -p test.mpa -m v</td>
+		      </tr>
+	       </table>
+
+	       <br>
+	</ul>
+
+<p>
+<li> mjpeg-tools interface:
+
+
+		  <ul>  <br>
+	       <li> NTSC video encoded  @ 29.97 -> VCD @ 29.97 video mode:
+	       <li> NTSC film encoded @ 23.976 -> VCD @ 23.976
+		    film mode:
+
+		    <br>
+		    <table>
+
+		      <tr>
+			<td align=left valign="top" bgcolor="#ccffcc">
+			transcode  [...] -V -y mpeg2enc,mp2enc -F 1
+			-Z 352x240 -E 44100 -b 224 -o test</td>
+		      </tr>
+	       </table>
+
+	       <table>
+		 <tr>
+		   <td align=left valign="top" bgcolor="#ccffcc">
+		   mplex -f 1 -S 680 -o test.mpg test.m1v test.mpa</td>
+		 </tr>
+	  </table>
+
+
+	  <br>
+
+   </ul>
+
+   <p>
+   Replace "-Z 352x240" by <i>transcode</i>'s fast resizing
+   option "-B" for speed improvements. Example: reduce 720x480 to
+   352x240	with "-B 15,23,16".<br>
+
+</ul>
+<p>
+ <a name=nvcd><h3>(S)VCD (480x480)</h3></a>
+
+ Super Video CD's have a less restricted format for audio (MP2, 44100 Hz,
+ 32-384 kBits/s, stereo) and video (MPEG-2, 480x480, up to 2600
+	kBits/s VBR) parameter.
+	The preset profiles take care of the SVCD2.0 specification.
+	The default profile bitrate is 2376 kbps.
+
+ <ul>
+	     <li> bbmpeg port to linux:<font color=red><bf>audio
+		 downsampling reported BROKEN! Additionally use "-J resample".</b></font>
+		  <br>
+		  <ul><br>
+		    <li> NTSC film encoded @ 23.976 -> (S)VCD @ 23.976 film mode:
+		    <li> NTSC video encoded  @ 29.97 -> (S)VCD @ 29.97 video mode:
+			 <br>
+
+		  <table>
+		    <tr>
+		      <td align=left valign="top" bgcolor="#ccffcc">
+		      transcode  [...] -V -y mpeg -F s,2 -E 44100 -b 128 -o test</td>
+		    </tr>
+	     </table>
+	     <br>
+
+
+	<li> DVD film encoded @ 23.976 --> (S)VCD @ 29.97 with 3:2 pulldown flags enabled:<br>
+
+
+	     You may try to increase the bitrate for higher quality (X)VCD.
+	     Most consumer DVD/(S)VCD player can cope with that.
+
+	     This is done with a profile file <i>xsvcd.prof</i>, which contains the
+	     following entries:<p>
+
+	     <code>
+	     #(S)VCD profile for improved quality<br>
+fixed_vbv_delay = 1 <br>
+vbv_buffer_size = 230<br>
+cbr = 1<br>
+cbr_bitrate = 4000000.0<br>
+quant_value = 2<br>
+qscale_type = 0<br>
+vbr_mux = 0<br>
+video_buf_size = 230<br>
+use_comp_bitrate = 1<br>
+	     </code>
+	     <p>
+
+	     and will bump up the bitrate to 4000 kbps. The additional
+	     profile parameter are passed with the file name as a 3rd argument to "-F".
+
+<br>
+	    <font color=red><bf>audio
+		 downsampling reported BROKEN! Additionally use "-J resample".</b></font>
+	     <table>
+	       <tr>
+		 <td align=left valign="top" bgcolor="#ccffcc">
+		 transcode  [...] -V -y mpeg -F s,2,xsvcd.prof --pulldown -E 44100 -b 128 -o test</td>
+	       </tr>
+	</table>
+	</ul>
+
+	<br>
+	  Multiplexing the files:
+
+	  <table>
+	    <tr>
+	      <td align=left valign="top" bgcolor="#ccffcc">
+	      tcmplex -o test.mpg -i test.m2v -p test.mpa -m s</td>
+	    </tr>
+     </table>
+
+<p>
+<li> mjpeg-tools interface:
+
+     <br>
+     <ul><br>
+       <li> NTSC film encoded @ 23.976 -> (S)VCD @ 23.976 film mode:
+       <li> NTSC video encoded  @ 29.97 -> (S)VCD @ 29.97 video mode:
+	    <br>
+
+	    <table>
+	      <tr>
+		<td align=left valign="top" bgcolor="#ccffcc">
+		transcode  [...] -V -y mpeg2enc,mp2enc -F 4 -Z 480x480
+		-E 44100 -b 128 -o test</td>
+	      </tr>
+       </table>
+       <br>
+
+  You may try to increase the bitrate for higher quality (X)VCD.
+  Most consumer DVD/(S)VCD player can cope with that. You can
+  pass more options to "mpeg2enc" as a 2nd argument to "-F". In this
+  case you must use profile "-F 5".
+
+  <table>
+    <tr>
+      <td align=left valign="top" bgcolor="#ccffcc">
+      transcode  [...] -V -y mpeg2enc,mp2enc -F 5,"-b 4000" -Z 480x480 -E 44100 -b 128 -o test</td>
+    </tr>
+</table>
+
+
+</ul>
+
+
+<p>
+Replace "-Z 480x480" by <i>transcode</i>'s fast resizing
+option "-B" for speed improvements. Example: reduce 720x480 to
+480x480	with "-B 0,15,16".
+<br>
+Multiplexing the files:
+
+	  <table>
+	    <tr>
+	      <td align=left valign="top" bgcolor="#ccffcc">
+	      mplex -f 4 -S 680 -o test.mpg test.m2v test.mpa</td>
+	    </tr>
+     </table>
+
+     <br> or for "-F 5" profile with increased bitrate
+
+     <table>
+       <tr>
+	 <td align=left valign="top" bgcolor="#ccffcc">
+	 mplex -f 5 -S 680 -o test.mpg test.m2v test.mpa</td>
+       </tr>
+</table>
+
+<br>
+See the <i>mplex</i> manpage for more options.
+
+ </ul>
+<br>
+
+
+<a name=ndvd><h3>DVD  compliant format</h3></a>
+
+ Possible frame parameter combination: 720x480, 704x480, 352x480 and 352x240.<br>
+ For a video frame size of 352x240, resizing can be delegated to the
+ export module with "-F d,4", but this frame size is currently broken
+ in the exncoder, all other
+ values require use of transcode's resize options. The profile default
+ bitrate is 9800 kbps.
+
+<ul>
+  <li> bbmpeg port to linux:
+
+       <ul>  <br>
+	 <li> NTSC film encoded @ 23.976 -> DVD @ 23.976 film mode:
+	 <li> NTSC video encoded  @ 29.97 -> DVD @ 29.97 video mode:
+	      <br>
+
+
+       <ul><br>
+	 <li> MP2 audio:<font color=red><bf>audio
+		 downsampling reported BROKEN! Additionally use "-J resample".</b></font>
+
+	   <table>
+	     <tr>
+	       <td align=left valign="top" bgcolor="#ccffcc">
+	       transcode  [...] -V -y mpeg -F d -E 44100 -b 128 -o test</td>
+	     </tr>
+      </table>
+
+      <table>
+	<tr>
+	  <td align=left valign="top" bgcolor="#ccffcc">
+	  tcmplex -o test.vob -i test.m2v -p test.mpa -m d</td>
+	</tr>
+ </table>
+
+
+
+      <br>
+ <li> MP3 audio:<font color=red><bf>fixed in 0.6.0rc2</b></font>
+
+	   <table>
+	     <tr>
+	       <td align=left valign="top" bgcolor="#ccffcc">
+	       transcode  [...] -V -y mpeg,raw -F d -m test.mp3</td>
+	     </tr>
+      </table>
+
+      <table>
+	<tr>
+	  <td align=left valign="top" bgcolor="#ccffcc">
+	  tcmplex  -o test.vob -i test.m2v -p test.mp3 -m d</td>
+	</tr>
+ </table>
+
+<br>
+<li> PCM audio: (not yet supported by <i>tcmplex</i>)
+     </ul>
+<p>
+
+<li> DVD film encoded @ 23.976 --> DVD @ 29.97 with 3:2 pulldown flags enabled:<br>
+
+     In most cases, you will also wish to reduce the bitrate for
+     encoding. This is done with a profile file <i>dvd.prof</i>, which contains the
+     following entry:<p>
+
+     <code>
+     #DVD profile with reduced bitrate <br>
+     max_bitrate=4000000.0
+     </code>
+     <p>
+
+     and will reduce the bitrate to 4000 kbps. The
+     profile name is passed as a 3rd argument to "-F".
+
+     <ul><br>
+       <li> AC3 pass-through:
+
+	    <table>
+	      <tr>
+		<td align=left valign="top" bgcolor="#ccffcc">
+		transcode  [...] -V -y mpeg,raw -F d,,dvd.prof --pulldown -m test.ac3 -A -0x2000</td>
+	      </tr>
+       </table>
+
+</ul>
+
+
+
+</ul>
+
+</table>
+</table>
+
+
+<!-- hhmts start -->
+Last modified: Tue Jun 18 12:57:25 CEST 2002
+<!-- hhmts end -->
+
+</body> </html>

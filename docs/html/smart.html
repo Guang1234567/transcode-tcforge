@@ -1,0 +1,278 @@
+<!-- saved from url=(0022)http://internet.e-mail -->
+<html>
+<head>
+<title>Smart Deinterlacing Filter</title>
+</head>
+<body><font face=verdana>
+<center><h2>Smart Deinterlacing Filter<br><small>(Version 2.6)</small></h2></center>
+<small>[Place this HTML file in the VirtualDub plugins directory to
+make it available via the Help button on the filter configuration
+dialog box. The computer must have an HTML browser, such as Internet
+Explorer or Netscape,
+available in its search path.]</small>
+<p>
+This filter provides a smart, motion-based deinterlacing capability. In static
+picture areas, interlacing artifacts do not appear, so data from both fields is
+used to provide full detail. In moving areas, deinterlacing is performed. Also,
+some clips derived from telecined material can appear to be interlaced when in fact
+they only require field shift and/or swaps to recover progressive (noninterlaced)
+frames. The filter provides advanced processing options to deal with these clips.
+<p>
+The following options are available:
+<p>
+<h3>Motion Processing</h3>
+
+<b><i>Frame-only differencing</i></b>: When this option is checked (default), only inter-frame
+comparisons are made to detect motion. If a pixel differs from the corresponding
+pixel in the previous frame, the pixel is considered to be moving.
+<p>
+<b><i>Field-only differencing</i></b>: When this option is checked, only inter-field
+comparisons are made to detect motion. If a pixel differs from the corresponding
+pixels in the previous and following fields (the lines above and below the current
+line), the pixel is considered to be moving.
+<p>
+<b><i>Frame-and-field differencing</i></b>: When this option is checked, both inter-frame and
+inter-field comparisons are made to detect motion. If a pixel differs from the
+corresponding pixel in both the previous field and the previous frame, the pixel
+is considered to be moving.
+<p>
+The correct choice for differencing depends on the input video; each mode has problems
+with some kinds of clips. Field-only differencing alone may tend to overestimate motion.
+Frame-only and frame-and-field differencing may tend to underestimate it.
+Also to be considered is execution time; frame-only will be the
+fastest, followed by field-only, followed by frame-and-field.
+<p>
+In my experience, good results with a wide range of clips are obtained with frame-only
+differencing at a threshold of 15, and so these are
+the filter defaults. Motion map denoising is helpful with field-only differencing
+as it reduces the amount of picture detail that is erroneously detected as motion.
+<p>
+<b><i>Compare color channels instead of luma</i></b>: When comparing pixels, if this box is unchecked
+(default), the lumanance values are compared. When this box is checked, the individual
+color channels (red, green, and blue) are compared. Luma comparison is good for general
+video and especially where static alpha-blended logos appear (because video noise can
+cause subtle color changes that would be detected by color channel compares). Color
+channel comparisons are good for cartoons and other clips with large solid color areas.
+<p>
+<b><i>Show motion areas only</i></b>: When selected, only the moving areas of the image
+are displayed; static areas are black. This option can be used to assess the
+suitability of the choice of option settings and threshold.
+<p>
+<b><i>Blend instead of interpolate in motion areas</i></b>: If this checkbox is not selected (default),
+then, in motion areas, the filter will discard one field's data and recreate it
+by interpolating new lines from the retained field's lines. In static areas, both
+field's data is used. If this checkbox is checked, then, in motion areas, instead
+of interpolating, the filter blends each line with the lines above and below. This
+has the effect of blending the fields, which tends to blur out the interlacing
+artifacts. The choice of interpolation versus blending depends on the nature of
+the input video and your own esthetic preferences. The interpolate mode avoids
+the halos you can get with the blend mode, but it introduces some small amount
+of stairstepping, and may tend to emphasize any video noise that is present. Try
+both ways and see which you prefer for a given video clip.
+<p>
+<b><i>Use cubic for interpolation</i></b>: When doing line interpolation (not blending), if
+this option is not selected, a linear interpolation using two lines is used. If this option is
+selected, a cubic interpolation using 4 lines is used. Cubic interpolation is better but
+slower.
+<p>
+<b><i>Motion map denoising</i></b>: A dilemma for users of the filter is that to get the best deinterlacing,
+we like a low threshold, such as 10-15. A low threshold ensures that residual interlacing
+artifacts don't sneak through. But if we set the threshold too low, video noise gets
+detected as motion. This causes two undesirable results. First, the motion noise causes
+a random sprinkling of deinterlaced areas in what should be static areas. This often
+manifests as a kind of sparkling, which is objectionable. Second, any extra false
+motion that is detected reduces the picture area that is passed through from both fields,
+reducing the perceived resolution of the overall picture. So, what we want is a low threshold
+but without the effects of video noise. When this checkbox is checked, extra
+filtering is added in the motion detection pipeline (not in the main video pipeline, so the
+ouput video is not compromised) that does a good job of suppressing false motion noise.
+The downside is that the filter runs slower. Use the "Show motion areas only" option to
+tweak the threshold fairly low without introducing false motion noise. This
+option is especially helpful with field-only differencing.
+<p>
+<b><i>Motion Threshold</i></b>: This value determines the difference between a pixel and its corresponding
+value in the previous field or frame that must be exceeded for the pixel to be considered
+moving. A threshold that is too high will allow interlacing artifacts to slip through. A
+threshold that is too low will cause too much of the image to be treated as moving,
+reducing the perceived resolution. A too-low threshold will also tend to emphasize noise.
+Without motion map denoising (see above), a threshold of 15-25 is good.
+With denoising, 10-20 is good. You can view the effect of threshold on motion detection
+by selecting the "Show motion areas only" checkbox.
+<p>
+<b><i>Scene Change Threshold</i></b>: Sometimes when a scene change occurs between the fields of
+a frame, the result is not satisfactory. This option permits you to set a threshold of change such
+that if the threshold is exceeded, the entire frame will be treated as moving, i.e., the
+entire frame will be interpolated or blended. The value to be specified is the percentage of
+moving area detected; for example, with the default value of 30, if 30 percent or more of
+the frame is detected to be moving, the entire frame will be treated as moving. Note that
+the percentage calculation is made prior to motion-map denoising (if enabled).
+
+<h3>Advanced Processing</h3>
+
+Advanced Processing is most often used for "deinterlacing" captured PAL video originally
+made from films. If you have movies that seem to be interlaced, it is worth trying
+the advanced processing first, because it may allow you to recover the original progressive
+frames without quality loss. Because the processing is sufficient to recover the original
+progressive frames, full motion processing is usually disabled when Advanced Processing is
+enabled. But some capture cards do weird things when they capture, and if you are
+unlucky enough to have such a card, you may need to enable one or more of the Advanced
+Processing options and perform Motion Processing. Hopefully, the analysis below will help
+you to determine if you are so affected.
+<p>
+Before proceeding into the analysis, please note that, due to
+the way that this filter buffers frames internally, it may appear to not work correctly when
+scrubbing the time line or when single stepping backward. But single stepping forward will
+always work and, of course, saved processed video will always be correct. It is always advisable
+to hit the rewind button before starting processing.
+
+<h4>Technical Explanation</h4>
+
+I give the technical explanation first, then I explain what the options do. The former is
+necessary to understand the latter.
+<p>
+First, it is necessary to understand how capture cards might vary. Let us assume that the
+source material is simply a stream of bottom and top fields, as follows:
+<p>
+b1t1b2t2b3t3b4t4...
+<p>
+The symbol 'b' indicates a bottom field and 't' indicates a top field.
+The number indicates the frame number of the original progressive frame. Thus, fields
+b1 and t1 are both from frame 1 and contain information from the same temporal moment.
+<p>
+The capture card will capture this stream in memory, varying in two ways. First, it might
+start capturing on a bottom field or a top field. Second, it might place either the bottom field
+or the top field first in memory. This leads to 4 ways in which the stream may be captured,
+as follows:
+<p>
+1) b1t1-b2t2-b3t3-b4t4...<br>
+2) t1b1-t2b2-t3b3-t4b4...<br>
+3) t1b2-t2b3-t3b4-t4b5...<br>
+4) b2t1-b3t2-b4t3-b5t4...
+<p>
+where the '-' character indicates a frame boundary. A given capture card will be characterised
+by which of these capture patterns it uses. Note that if capture pattern 1 is used, no filtering
+is needed to re-create the original progressive frames.
+<p>
+It might seem that all we need to do now is to define the operations that the filter must
+perform to change each of the above capture patterns to the desired deinterlaced end result
+b1t1-b2t2-b3t3-b4t4. That would only tell half the story. The problem is that there is an
+alternative form for the input stream! Consider these two ways in which the original material
+may be telecined:
+<p>
+1) b1t1b2t2b3t3b4t4...  (as before)<br>
+2) b1t2b2t3b3t4b4t5...  ('perverse' telecining)
+<p>
+Note that both will appear fine when displayed on an interlaced display, but a capture of
+telecine type 2 with capture pattern 1 will no longer give deinterlaced output
+on a progressive display without filtering! This means that we must now consider 8 patterns,
+i.e., 4 capture patterns times 2 telecining types. For each type, we will have a specific operation
+that will need to be done to re-create the original progressive frames. We see below that by
+combining 3 building blocks we can cover all the possibilities. The building blocks are applied
+in order and each one is optional:
+<p>
+swap fields on input --> shift field phase by one --> swap fields on output
+<p>
+A phase shift by one means that a stream b1t1-b2t2-b3t3... becomes xxb1-t1b2-t2b3-t3b4...
+<p>
+Following are all 8 possibilities together with the processing required for each:
+<p>
+<b><i>Case 1</i></b>: Telecine 1, capture 1 gives after capture:
+<p>
+b1t1-b2t2-b3t3...
+<p>
+Required action: none.
+<p>
+<b><i>Case 2</i></b>: Telecine 1, capture 2, gives after capture:
+<p>
+t1b1-t2b2-t3b3...
+<p>
+Required action: swap on input.
+<p>
+<b><i>Case 3</i></b>: Telecine 1, capture 3, gives after capture:
+<p>
+t1b2-t2b3-t3b4...
+<p>
+Required action: phase shift.
+<p>
+<b><i>Case 4</i></b>: Telecine 1, capture 4, gives after capture:
+<p>
+b2t1-b3t2-b4t3...
+<p>
+Required action: swap on input, followed by phase shift.
+<p>
+<b><i>Case 5</i></b>: Telecine 2, capture 1, gives after capture:
+<p>
+b1t2-b2t3-b3t4...
+<p>
+Required action: phase shift, followed by swap on output.
+<p>
+<b><i>Case 6</i></b>: Telecine 2, capture 2, gives after capture:
+<p>
+t2b1-t3b2-t4b3...
+<p>
+Required action: swap on input, followed by phase shift, followed by swap on output.
+<p>
+<b><i>Case 7</i></b>: Telecine 2, capture 3, gives after capture:
+<p>
+t2b2-t3b3-t4b4...
+<p>
+Required action: swap on input.
+<p>
+<b><i>Case 8</i></b>: Telecine 2, capture 4, gives after capture:
+<p>
+b2t2-b3t3-b4t4...
+<p>
+Required action: none.
+<p>
+Unfortunately, it is not a trivial matter to determine which correction to apply.
+If one is sure that the material is telecined from progressive material, one can try
+all possibilities. When the correct one is found, one then knows for the future what the
+capture pattern must be for the capture card used. Thereafter, only two corrections
+need be tried to allow for the two possible telecine patterns. I wish things were simpler,
+but, alas, it is not so.
+<p>
+Note also that the telecining method can change in mid-clip. This filter does not adapt to
+such changes. A different filter, Telecide, is available that can adapt to such changes
+and output a continuous stream of progressive frames.
+<p>
+<h4>Advanced Processing Settings</h4>
+
+The advanced processing settings allow the possible 8 corrections to be applied. Simply check
+a given building block if you want it enabled.
+<p>
+<b><i>Field swap before phase shift</i></b>: Swaps the fields of the frames before an optional phase shift.
+<p>
+<b><i>Phase shift</i></b>: Shifts the field phase by one, i.e., b1t1-b2t2-b3t3... becomes
+xxb1-t1b2-t2b3-t3b4...
+<p>
+<b><i>Field swap after phase shift</i></b>: Swaps the fields of the frames after an optional phase shift.
+<p>
+<b><i>Disable motion processing</i></b>: When checked the filter will perform only the Advanced Processing and
+will not follow it with normal motion processing. This is useful for getting only a shift and/or
+swap when that is sufficient for processing telecined material. When this is unchecked the
+Advanced Processing will be performed first and then full motion processing will be performed.
+
+<h3>Note on 3:2 Pulldown, Etc.</h3>
+
+Some video streams are created from progressive video by a process called pulldown.
+This results in a mixture of progressive and interlaced frames, from which it is theoretically
+possible to recreate the original progressive frames without doing motion-adaptive deinterlacing.
+It is technically very challenging to write a filter that will recreate the original
+frames for all types of pulldown and in the presence of video edits, etc. I have created
+a filter that performs this function reasonably well (Telecide) and you may find that
+it meets all your needs. As an alternative, motion-adaptive deinterlacing will function quite
+acceptably for the majority of these video streams. Finally, some people use Telecide followed
+by Smart Deinterlacer in field-only mode to catch any interlaced frames that slip through
+Telecide.
+<p>
+For additional information, version updates, and other filters, please go to the following web site:
+<p>
+Filters for VirtualDub<br>
+<a href=http://sauron.mordor.net/dgraft/index.html>
+http://sauron.mordor.net/dgraft/index.html</a>
+<p>
+Donald Graft<br>
+August 6, 2001<br>
+(C) Copyright 1999-2001, All Rights Reserved
+</body>
+</html>

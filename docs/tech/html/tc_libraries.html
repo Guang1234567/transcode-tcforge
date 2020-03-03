@@ -1,0 +1,256 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Linux (vers 12 April 2005), see www.w3.org" />
+
+  <title>transcode internals</title>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=us-ascii" />
+  <meta name="Author" content="Francesco Romani" />
+  <meta name="Keywords" content="transcode architecture libraries" />
+  <meta name="Generator" content="ViM 7.x" />
+  <link rel="StyleSheet" href="tc_basic.css" type="text/css" media=
+  "screen" />
+</head>
+
+<body>
+  <div id="title" class="title">
+    <h1>Transcode - overview of libraries</h1>
+  </div>
+
+  <div id="summary">
+    <h3>Summary</h3>
+    <p>
+    As part of 1.1.0 development cycle, an huge internal reorganization
+    effort has undergone. Reorganization isn't yet (as 1.1.0 released)
+    complete, and will involve every component in transcode codebase.
+    This document provide an overview of reorganized internal transcode
+    libraries, internal dependencies and purposes.
+    </p>
+    <h4>General Warning:</h4>
+    <p>
+    transcode libraries are quite carefully designed and implemented
+    in order to be independent, self contained as much as is possible,
+    but they <strong>are not</strong> intended to be easily separated by transcode
+    codebase and to be used in external projects. <strong>We don't care too
+    much about API/ABI stability yet, and we don't do testing on
+    this direction</strong>. Help us to improve code, or use it at own risk :)
+    </p>
+  </div>
+
+  <hr />
+  
+  <div id="index">
+    <table>
+      <tr>
+        <td><a href="#aclib">aclib</a></td>
+	    <td><p>low-level, optimized core routines.</p></td>
+      </tr>
+      <tr>
+        <td><a href="#avilib">avilib</a></td>
+        <td><p>simple AVI I/O support.</p></td>
+      </tr>
+      <tr>
+        <td><a href="#libtc">libtc</a></td>
+        <td><p>core utilities repository.</p></td>
+      </tr>
+      <tr>
+        <td><a href="#libtcaudio">libtcaudio</a></td>
+        <td><p>audio manipulation routines.</p></td>
+      </tr>
+      <tr>
+        <td><a href="#libtcvideo">libtcvideo</a></td>
+        <td><p>video manipulation routines.</p></td>
+      </tr>
+    </table>
+  </div>
+
+  <hr />
+
+  <div id="aclib">
+    <a name="aclib"><h4>aclib</h4></a>
+      <table>
+      <tr>
+        <td>
+          <h5>Dependencies:</h5>
+        </td>
+        <td>
+          <h5>Introduced in version:</h5>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>None</p>
+        </td>
+        <td>
+          <p>0.6.x or before</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h5>Description:</h5>
+          <p>
+            provides accelerated, machine-dependent, utility functions like memcpy, colorspace conversion routines and so on.
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h5>Notes:</h5>
+          <ul>      
+            <li>
+              <p><strong>"AC"</strong> stands originally for "<strong>A</strong>dvanced 
+                 <strong>C</strong> <strong>lib</strong>rary,
+                 but at present day meaning of "AC" has been unspecified :)
+              </p>
+            </li>
+            <li>
+              <p>Rewritten completely during 1.1.0 cycle by Andrew Church.</p>
+            </li>
+          </ul>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="avilib">
+    <a name="avilib"><h4>avilib</h4></a>
+    <table>
+      <tr>
+        <td>
+          <h5>Dependencies:</h5>
+        </td>
+        <td>
+          <h5>Introduced in version:</h5>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>None</p>
+        </td>
+        <td>
+          <p>0.6.x or before</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h5>Description:</h5>
+          <p>
+            provides I/O stream access to AVI files. Only multiplexing/demultiplexing, no encoding/decoding.
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h5>Notes:</h5>
+          <p>Scheduled for an heavy reorganization/refactoring during 1.2.0/1.3.0 cycle.</p>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="libtc">
+    <a name="libtc"><h4>libtc</h4></a>
+    <table>
+      <tr>
+        <td>
+          <h5>Dependencies:</h5>
+        </td>
+        <td>
+          <h5>Introduced in version:</h5>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>None</p>
+        </td>
+        <td>
+          <p>1.0.x</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h5>Description:</h5>
+          <p>
+           utility/helpers collection. Provides memory allocation/disposal, string
+           manipulation, I/O helper functions. Also holds all low-level code
+           shared between modules.
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h5>Notes:</h5>
+          <p>Greatly enhanced during 1.1.0 cycle.</p>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="libtcaudio">
+    <a name="libtcaudio"><h4>libtcaudio</h4></a>
+    <table>
+      <tr>
+        <td>
+          <h5>Dependencies:</h5>
+        </td>
+        <td>
+          <h5>Introduced in version:</h5>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>None</p>
+        </td>
+        <td>
+          <p>1.1.x</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h5>Description:</h5>
+          <p>
+            provides various audio manipulation functions used by transcode core and modules.
+          </p>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="libtcvideo">
+    <a name="libtcvideo"><h4>libtcvideo</h4></a>
+    <table>
+      <tr>
+        <td>
+          <h5>Dependencies:</h5>
+        </td>
+        <td>
+          <h5>Introduced in version:</h5>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p><a href="#aclib">aclib</a></p>
+        </td>
+        <td>
+          <p>1.1.x</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+         <h5>Description:</h5>
+         <p>
+          provides various video manipulation functions used by transcode core and modules.
+         </p>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+
+</body>
+</html>

@@ -1,0 +1,207 @@
+M=Nodule
+D=Description
+C=compile time dependend
+R=runtime dependend
+I=Info
+S=Status
+P=processing modes
+
+M: import_ac3.c
+D: (audio) AC3
+C: none
+R: none
+S: +
+I: decodes AC3 audio from MPEG program streams or raw streams.
+P: audio - PCM AC3, video - none
+
+M: import_avi.c
+D: (video) * | (audio) *
+C: none
+R: none
+S: +
+I: RGB/PCM from RIFF AVI files.
+P: audio - RAW (pass-through) PCM, video - RAW (pass-through) RGB YUV YUV420
+
+M: import_bktr.c
+D: (video) bktr
+C: none
+R: none
+S: +
+I: grabs video frames from bktr(4) devices on BSD systems
+P: audio - none, video - RGB YUV YUV420
+
+M: import_dv.c
+D: (video) DV | (audio) PCM
+C: none
+R: none
+S: +
+I: Digital Video and PCM audio from RIFF AVI-files or raw streams.
+P: audio - PCM, video - RAW (pass-through) RGB YUV DV YUV420
+
+M: import_dvd.c
+D: (video) DVD | (audio) MPEG/AC3/PCM
+C: libdvdread
+R: none
+S: +
+I: on-the-fly DVD transcoding.
+P: audio - PCM AC3, video - RGB YUV
+
+M: import_ffmpeg.c
+D: (video) FFmpeg: MSMPEG/MPEG/MJPEG
+C: none
+R: none
+S: +
+I: interface to ffmpeg library supported video codecs and file formats
+P: audio - none, video - RAW (pass-through) RGB YUV
+
+M: import_im.c
+D: (video) RGB
+C: ImageMagick
+R: ImageMagick
+S: o
+I: interface to ImageMagick library supported picture codecs and file formats for making animations. Reads images with a counter pattern.
+P: audio - none, video - RAW (pass-through) RGB
+
+M: import_imlist.c
+D: (video) RGB
+C: ImageMagick
+R: ImageMagick
+S: o
+I: interface to ImageMagick library supported picture codecs and file formats for making animations. Reads images from a list.
+P: audio - RAW (pass-through), video - RAW (pass-through) RGB
+
+M: import_lve.c
+D: (video/audio) MPEG/VOB/LVE
+C: liblve
+R: none
+S: o
+I: imports video from an LVE edit list
+P: audio - PCM, video - YUV
+
+M: import_lzo.c
+D: (video) LZO
+C: lzo
+R: none
+S: +
+I: imports AVI-files with LZO loss-less compression for video.
+P: audio - RAW (pass-through) PCM, video - RAW (pass-through) RGB YUV
+
+M: import_mov.c
+D: (video) * | (audio) *
+C: libquicktime
+R: none
+S: +
+I: Quicktime file format, audio/video codecs supported by quicktime4linux.
+P: audio - PCM, video - RAW (pass-through) RGB YUV
+
+M: import_mp3.c
+D: (audio) MPEG
+C: none
+R: none
+S: +
+I: MPEG audio from program streams or raw streams.
+P: audio - PCM, video - none
+
+M: import_mpeg2.c
+D: (video) MPEG2
+C: none
+R: none
+S: +
+I: video track from MPEG program streams or raw streams, extracted and decoded by mpeg2dec.
+P: audio - none, video - RAW (pass-through) RGB YUV
+
+M: import_mplayer.c
+D: (video) rendered by mplayer | (audio) rendered by mplayer
+C: none
+R: mplayer
+S: o
+I: interface to Mplayer for decoding unsupported codecs, exotic file formats or more ore less broken sources.
+P: audio - PCM, video - RAW (pass-through) RGB YUV
+
+M: import_null.c
+D: (video) null | (audio) null
+C: none
+R: none
+S: o
+I: dummy module, reads from /dev/zero.
+P: audio - none, video - none
+
+M: import_nuv.c
+D: (video) YUV | (audio) PCM
+C: liblzo
+R: none
+S: o
+I: interface to NuppelVideo file format.
+P: audio - PCM, video - YUV
+
+M: import_ogg.c
+D: (video) all | (audio) Ogg Vorbis
+C: none
+R: none
+S: +
+I: decodes Ogg Vorbis audio streams.
+P: audio - RAW (pass-through) PCM, video - RAW (pass-through) RGB YUV
+
+M: import_raw.c
+D: (video) RGB/YUV | (audio) PCM
+C: none
+R: none
+S: o
+I: RGB/PCM from RIFF AVI/WAVE files or raw streams.
+P: audio - PCM, video - RGB YUV YUV420
+
+M: import_sunau.c
+D: (audio) pcm
+C: none
+R: none
+S: +
+I: grabs raw PCM audio from audio(4) devices on some BSD systems
+P: audio - PCM, video - none
+
+M: import_v4l.c
+D: (video) v4l | (audio) PCM
+C: none
+R: none
+S: o
+I: interface for grabbing sound/video from v4l devices on linux systems.
+P: audio - PCM, video - RGB YUV
+
+M: import_v4l2.c
+D: (video) v4l2 | (audio) pcm
+C: none
+R: none
+S: +
+I: interface for grabbing sound/video from v4l2 devices on linux systems. prefered over import_v4l.
+P: audio - PCM, video - RGB YUV YUV420
+
+M: import_vnc.c
+D: (video) VNC
+C: none
+R: vncrec
+S: o
+I: imports video from the vncrec program.
+P: audio - none, video - RAW (pass-through) RGB YUV
+
+M: import_vob.c
+D: (video) MPEG-2 | (audio) MPEG/AC3/PCM | (subtitle)
+C: none
+R: none
+S: +
+I: MPEG/AC3 program streams in VOB files (found on unencrypted/ripped DVDs).
+P: audio - PCM AC3, video - RAW (pass-through) RGB YUV
+
+M: import_xml.c
+D: (video) * | (audio) *
+C: libxml2
+R: libxml2
+S: o
+I: interface to XML files with file listing and frame range produced by kino.
+P: audio - RAW (pass-through) PCM, video - RAW (pass-through) RGB YUV DV
+
+M: import_yuv4mpeg.c
+D: (video) YUV4MPEGx | (audio) WAVE
+C: none
+R: none
+S: +
+I: YUV from video streams produced by mjpegtools (YUV4MPEG) and RIFF WAVE pcm audio.
+P: audio - PCM, video - RGB YUV

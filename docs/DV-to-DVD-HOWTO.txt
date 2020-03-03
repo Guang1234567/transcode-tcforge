@@ -1,0 +1,318 @@
+
+    +-----------------+
+    | DV-to-DVD-HOWTO |
+    +-----------------+
+
+    v1.0, 2004/01/05, Florin Andrei <florin@andrei.myip.org>
+
+
+Here are some suggestions on how to convert Digital Video material (DV) to
+DVD. This document is focused on material that's shot with DV camcorders. See
+the end of the document for helper scripts.
+
+1. About DV
+Digital Video is a format used by most of the modern digital camcorders, both
+in the proffesional arena and in the amateur range. The compression used is
+kinda similar to MJPEG; each image is compressed independently of the others
+(unlike MPEG1/2/4) so DV is "editing-friendly".
+Usually, NTSC DV has a resolution of 720x480 and the pixels are non-square;
+the aspect ratio is usually either 4:3 or 16:9; the framerate is 29.97 fps
+and the image is interlaced, with the bottom field first. PAL is similar, but
+the resolution is 720x576 and the framerate is 25 fps. Variations are
+possible on non-standard and/or expensive equipment (24 fps, progressive,
+etc.) but are rare.
+At the normal parameters above, 60 minutes of movie get compressed by normal
+DV gear at approx. 10...15 GB of video files.
+
+2. About DVD
+Very popular digital media, it's using MPEG2 encoding for video and a variety
+of encodings for sound (MP2, AC3, DTS, PCM). There are several resolutions
+permitted by the standard, 720x480 (NTSC) and 720x576 (PAL) being the most
+popular.
+The sum of the bitrates of the video track and of the current audio track
+must not be higher than 10.08 Mbit/s, not even for a fraction of a second;
+failure to comply generates DVDs that are unplayable on most standalone DVD
+players. Usually, proffesional DVDs have their video tracks encoded at a peak
+bitrate of 9800 kbps, hence leaving some room for an audio track. The average
+video bitrate varies greatly, but it's usually between 2000...7000 kbps.
+
+3. Capturing DV
+You need a FireWire card and dvgrab version 1.4 or newer.
+Run the "grab" script, then start the camcorder. "grab" is designed so that
+it will create a new file for each new scene on the tape (a new scene begins
+whenever you paused or stopped the camcorder when shooting). If the entire
+tape was shot in one big scene, only one file will be created.
+dvgrab can create OpenDML AVI files, so don't worry about file size, OpenDML
+stuff can be as big as necessary.
+At the end, stop the camcorder if it doesn't stop by itself, then CTRL-C the
+script.
+The order of the operations is important. Follow this document carefully.
+
+4. Optional processing
+You can preview the captured DV/AVI files with a media player. Currently,
+Xine seems to be the only one supporting OpenDML.
+If you don't want a scene, you can simply delete the corresponding file.
+If you wanna make changes inside a scene, you must use a video editor that
+understands DV and OpenDML; Kino seems to be working fine.
+
+5. Transcoding to DVD
+You need a recent transcode version, such as 0.6.11. You need a new
+mjpegtools version as well, at least 1.6.1.92 (plain 1.6.1 won't work), or
+1.6.2 when it will get released. You also need a fairly recent dvdauthor
+version, such as 0.6.8.
+The script that does the job is "conv-dvd". It is designed to work with a
+capture project directory created by the "grab" script.
+Let's discuss the script:
+
+The $flags variable contains the parameters passed to mpeg2enc. You have to
+choose one version and uncomment it; the first two are for high-quality
+encoding, the last two are for efficient file size. Explanation of the
+parameters:
+
+-c means "all GOPs are closed"; this generates an MPEG2 stream that's more
+compatible with various apps and players
+
+-q sets the quantization factor; 6 is a reasonable value for DV material
+converted to DVD; decrease it for higher quality, but be aware that you might
+create video tracks that are not accepted by the multiplexer; increase it for
+smaller file sizes at the expense of image quality
+
+-4 2 -2 1 controls the motion estimation; an even better (quality-wise) value
+would be "-4 1" but the quality increase is almost imperceptible while the
+encoding speed decreases a lot; just leave it like it is
+
+-K defines the encoder matrix; this script uses a matrix devised by Steven
+Schultz to maximize the image quality, or the tmpgenc matrix for a more
+efficient compression (at the expense of image quality)
+
+-N is a very gentle low-pass filter that reduces the bitrate usage
+tremenduosly while not affecting the image too much
+
+-E tells the encoder to simply discard bits that are hard to encode yet do
+not contribute to the image too much
+
+-R controls the B frames; encoding with 0 B frames is unusual and some truly
+broken players may get upset, although it is perfectly legal from the DVD
+standard p.o.v.; encoding with 2 B frames is normal for proffesional DVDs but
+it slows down encoding a lot (by 60%) and it makes the compression slightly
+less efficient for amateur DV stuff (material that's less than _perfect_).
+If you're like me and don't care about encoding speed (i let the script run
+overnight), then encode with 2 B-frames; if you're in a rush or want to
+obtain better compression (your space on the DVD is limited) then encode with
+0 B-frames, but be aware of the broken players.
+
+The $asr variable controls the aspect ratio. Uncomment the appropriate value,
+depending on how your camcorder was configured. 4:3 is normal TV screen, 16:9
+is HDTV. You cannot use one of them if your camcorder was configured with the
+other.
+
+The $bitr variable controls the MPEG2 bitrate used for the DVD.
+WARNING: Do not increase it above 8500 regardless of what you've been told. I
+know that proffesional DVDs are encoded at a peak value of 9800 kbps, i know
+that various pieces of documentation recommend 9800 as One Value To Rule Them
+All. Just ignore them. Trust me. If you do otherwise, sooner or later you'll
+create a DVD that will not be playable on some standalone players. I learned
+that the hard way. You have been warned.
+Moreover, you don't truly need very high values. I did many evaluations, and
+the results are pretty surprising: many scenes that i shot do not take the
+peak bitrate above 7000 kbps, and the average is at 2000 or something! Only
+very rarely you'll need such high bitrates.
+
+Down below in the script you'll find the transcode command. Let's discuss
+some command-line parameters:
+
+-x ffmpeg tells transcode to use ffmpeg as the DV decoder instead of the
+default Quasar codec. This way you'll obtain a compression better by 10% or
+so.
+
+--encode_fields b tells transcode that the DV material is "bottom field
+first". For some reason, that's true for any DV camcorder in the world.
+
+Commented out in the script you'll find some parameters for generating AC3
+sound for your DVD instead of MP2. While AC3 is more popular, for some reason
+there are audio/video sync issues if you use it. I'm still investigating the
+bug, meanwhile MP2 should be perfectly fine, you can use it with no problems.
+
+After transcoding, the script will multiplex the audio and video files using
+mplex. The results are a bunch of VOB files. You can test each one of them
+individually with a media player, since they're essentially MPEG2 files on
+steroids.
+
+After multiplexing everything, the VOBs are transformed in a DVD image on the
+hard-drive with the help of dvdauthor.
+The DVD is created so that each scene on the DV tape is translated into a
+chapter on the DVD. I believe this makes a lot of sense and allows for a
+simple way to jump to various scenes while playing the DVD.
+This whole chapter affair is accomplished through the XML file that's built
+while transcoding, which instructs dvdauthor to set chapter marks at the
+beginning of each scene.
+Of course, you can change all that, see dvdauthor documentation.
+
+At the end, there are a few chown/chmod commands, to normalize file ownership
+and permissions. I am not sure if this is really required, i just put them
+there just in case. Remove them if they annoy you.
+
+6. Test the DVD image
+You can test the newly created DVD image with xine like this:
+
+xine dvd:///full/path/to/the/dvd/image/
+
+The trailing slash is important. xine will play the image just like it were a
+true DVD, with chapters and all.
+
+7. Burn the DVD
+You need a fairly new version of dvd+rw-tools.
+
+growisofs -speed=4 -Z /dev/scd0 -V "$label" -dvd-video $dvd-image
+
+$label is the ISO label you desire. Usually, labels are all caps and do not
+contain spaces. Example: MY_COOL_MOVIE
+
+$dvd-image is the directory containing the DVD image.
+
+Of course, you can change the speed and the DVD-Writer device to suit your
+existing hardware.
+
+    +--------------------------+
+    | Appendix A - conf-dvd.sh |
+    +--------------------------+
+
+----------------snip----------------
+#!/bin/sh
+
+if [ $# -ne "1" ]; then
+  echo "Usage: $0 dirname"
+  exit
+fi
+
+name=$1
+pushd $name
+
+# high quality, 80 min / DVD
+# fast encoding, slightly unusual MPEG2 (no B frames)
+flags="-c -q 6 -4 2 -2 1 -K file=matrix.txt -R 0"
+# slower encoding, classic MPEG2
+#flags="-c -q 6 -4 2 -2 1 -K file=matrix.txt -R 2"
+#
+# ok quality, 120 min / DVD
+# fast encoding, slightly unusual MPEG2 (no B frames)
+#flags="-c -q 6 -4 2 -2 1 -N 0.5 -E -10 -K tmpgenc -R 0"
+# slower encoding, classic MPEG2
+#flags="-c -q 6 -4 2 -2 1 -N 0.5 -E -10 -K tmpgenc -R 2"
+
+# Aspect ratio of the original DV tape
+# 4:3
+asr="--export_asr 2"
+# 16:9
+#asr="--export_asr 3"
+
+bitr="8500"
+xmlf="dvdauthor.xml"
+
+# Steven Schultz's combined HQ matrix
+cat - > matrix.txt << MATRIX
+# High resolution INTRA table
+8,16,18,20,24,25,26,30
+16,16,20,23,25,26,30,30
+18,20,22,24,26,28,29,31
+20,21,23,24,26,28,31,31
+21,23,24,25,28,30,30,33
+23,24,25,28,30,30,33,36
+24,25,26,29,29,31,34,38
+25,26,28,29,31,34,38,42
+# TMPEGEnc NON-INTRA table
+16,17,18,19,20,21,22,23
+17,18,19,20,21,22,23,24
+18,19,20,21,22,23,24,25
+19,20,21,22,23,24,26,27
+20,21,22,23,25,26,27,28
+21,22,23,24,26,27,28,30
+22,23,24,26,27,28,30,31
+23,24,25,27,28,30,31,33
+MATRIX
+
+rm -f $xmlf
+# dvdauthor XML config head
+cat - >> $xmlf << XMLHEAD
+<dvdauthor>
+<vmgm />
+<titleset>
+<titles>
+<pgc>
+XMLHEAD
+
+for inp in `ls dv`; do
+out=`basename $inp .avi`
+transcode -i dv/$inp -x ffmpeg \
+	-V -w $bitr \
+	--encode_fields b \
+	${asr} \
+	-F 8,"${flags}" \
+	-y mpeg2enc,mp2enc -b 224 -m $out \
+	-o $out \
+	--print_status 10
+##################################################
+# stuff to copy/paste in the transcode parameters
+##################################################
+# use this if DV sound is not sampled at 48kHz
+# (it almost ALWAYS is 48kHz!)
+#	-E 48000,16,2 -J resample \
+#
+# AC3 sound
+# (has A/V sync bugs, don't use it yet, still investigating...)
+#	-y mpeg2enc,raw -N 0x2000 -b 192 -m $out.ac3 \
+#
+# MP2 sound
+#	-y mpeg2enc,mp2enc -b 224 -m $out \
+##################################################
+
+# use this with MP2
+mplex -r 10000 -f 8 -S 4400 $out.m2v $out.mpa -o $out.vob
+# use this with AC3
+#mplex -r 10000 -f 8 -S 4400 $out.m2v $out.ac3 -o $out.vob
+echo "<vob file=\"$out.vob\" />" >> $xmlf
+done
+
+# dvdauthor XML config tail
+cat - >> $xmlf << XMLTAIL
+</pgc>
+</titles>
+</titleset>
+</dvdauthor>
+XMLTAIL
+
+dvdauthor -o $name -x $xmlf
+
+# the next commands require the following line in visudo:
+# yourusername ALL = NOPASSWD: ALL
+sudo chown -R root:root $name
+sudo chmod -R 0755 $name
+sudo chmod 0644 $name/*_TS/*
+sync
+popd
+----------------snip----------------
+
+
+    +----------------------+
+    | Appendix B - grab.sh |
+    +----------------------+
+
+----------------snip----------------
+#!/bin/sh
+
+if [ ! $1 ]; then
+  echo "Usage: $0 dirname"
+  exit
+fi
+name=$1
+
+mkdir -v ${name} || exit
+pushd ${name}
+mkdir -v dv || exit
+pushd dv
+
+dvgrab --autosplit --size 0 --format dv2 --opendml \
+  --noavc --buffers 200 ${name}-
+popd
+popd
+----------------snip----------------

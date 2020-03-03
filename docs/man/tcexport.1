@@ -1,0 +1,228 @@
+.TH tcexport 1 "9 April 2006" "tcexport(1)"
+
+.SH NAME
+tcexport \- Simple frontend to transcode's encoding subsystem
+
+.SH SYNOPSIS
+.na
+.B tcexport
+[
+.B -i
+.I video_file
+] [
+.B -p
+.I audio_file
+] [
+.B -o
+.I output_file
+] [
+.B -c
+.I f1-f2[,f3-f4[,...]]
+] [
+.B -N
+.I fmt,fmt
+] [
+.B -R
+.I n[,video_log[,audio_log]]
+] [
+.B -P
+.I profile[,profile]
+] [
+.B -y
+.I video_mod,audio_mod,mplex_mod
+] [
+.B -w
+.I bitrate[,keyint[,crisp]]
+] [
+.B -b
+.I bitrate[,vbr[,quality[,mode]]]
+] [
+.B -D
+] [
+.B -d
+.I verbosity
+] [
+.B -m
+.I path
+] [
+.B -v
+]
+
+.SH COPYRIGHT
+\fBtcexport\fP is Copyright (C) by Francesco Romani
+
+.SH DESCRIPTION
+.B tcexport
+was designed as a debug tool for transcode's encoding code: it fits
+in a very limited range of usage cases; however, it can also be used
+independently if you like.
+.br
+tcexport encodes and multiplexes a raw YUV4MPEG2/WAV V/A stream using given
+parameters and transcode encoder components. tecexport provides direct and complete
+access to transcode's encoding features and modules, but hasn't any of transcode
+import/extracting/decoding/filtering capabilities. Use some other tc* tool
+if you need those facilities.
+.br
+tcexport's options are intentionally made similar, or identical if feasible,
+to corresponding transcode's encoding options.
+
+.SH OPTIONS
+.TP
+\fB-i\fP \fIvideo_file\fP
+Specify the path of video source.  Only regular files on filesystem are supported.
+\fIvideo_file\fP must be a YUV4MPEG2 stream, nothing else is supported.
+.TP
+\fB-p\fP \fIaudio_file\fP
+Specify the path of audio source.  Only regular files on filesystem are supported.
+\fIaudio_file\fP must be a WAVE stream, nothing else is supported.
+.TP
+\fB-o\fP \fIoutput_file\fP
+Specify the (base)path of output file. Some multiplexors (es: raw multiplexor)
+uses value of this option as an hint to make the final  output file(s) (i.e.
+appending different extensions for A/V streams).
+.TP
+.B \-c \fIf1\fP\-\fIf2\fP[,\fIf3\fP\-\fIf4\fP[, ... ] ]
+encode only frames \fIf1\-f2\fP [and \fIf3\-f4\fP and so on].
+Default is to encode all available frames.  Use this and you will get statistics
+about remaining encoding time.
+The \fIf[N]\fP parameters may also be timecodes in the HH:MM:SS.FRAME format. Example:
+.RS
+.nf
+\-c 500\-0:5:01,:10:20\-1:18:02.1
+.fi
+.IP
+Will encode only from frame 500 to 5 minutes and 1 second and from 10 min,
+20 sec to 1 hour, 18 min, 2 sec and one frame.
+.RE
+.IP
+Note that tcexport, ad well as transcode, starts counting frames at \fI0\fP and
+excludes the last frame specified.
+That means that "-c 0-100" will encoded 100 frames starting at frame \fI0\fP up
+to frame \fI99\fP
+.TP
+\fB-N\fP \fIV=video_format,A=audio_format\fP
+Setup the desired \fIencoded\fP video and audio format respectively. You \fImust\fP
+always use this option since there is some encoder modules (notably encode_ffmpeg)
+that support a lot of codecs, and tcexport nor modules can automatically choose a
+sane one not have defaults (yet).
+The order of the arguments is not important. tcexport determine the format to
+use for the stream thanks to the `A= ' or `V=' prefix. The prefix is case sensitive,
+and must NOT contain whitespaces (`A = xxx' or `A =xxx' or `A= xxx' will lead to
+undefined behaviour).
+.TP
+.B \-R \fIn\fP[\fI,video_log\fP[\fI,audio_log\fP]]
+enable multi-pass encoding (0-3) [0,divx4.log,pcm.log].
+.RS
+.TP 4
+.I 0\fR Constant bitrate (CBR) encoding. [default]
+The codec tries to achieve constant bitrate output. This means, each encoded
+frame is mostly the same size. This type of encoding can help in maintaining
+constant filling of hardware buffer on set top players or smooth streaming
+over networks. By the way, Constant bitrate is often obtained sacrifying
+quality during high motion scenes.
+.TP
+.I 1\fR Variable bitrate encoding: First pass.
+In this mode, the codec analyses the complete sequence in order to collect
+data that can improve the distribution of bits in a second VBR pass. The
+collected data is written to second sub argument (default: divx4.log). This
+data is codec dependant and cannot be used across codecs. It is strongly
+advised to use the same codec settings for the VBR analysis pass and the
+VBR encoding pass if you want predictable results.
+.IP
+The video output of the first pass is not of much use and can grow very large.
+It's a good idea to not save the video output to a file but directly to /dev/null.
+Usually the bitrate is ignored during first pass.
+Disabling audio export makes sense too, so use -y.
+.TP
+.I 2\fR Variable bitrate encoding: Second pass.
+The first pass allowed the codec collecting data about the complete sequence.
+During the second pass, the codec will use that data in order to find an
+efficient bit distribution that respects both the desired bitrate and the
+natural bitrate curve shape. This ensures a good compromise between quality
+and desired bitrate.
+.TP
+.I 3\fR Constant quantizer encoding.
+The quantizer is the "compression level" of the picture. The lower the
+quantizer is, the higher is the quality of the picture. This mode can help
+in making sure the sequence is encoded at constant quality, but no prediction
+can be made on the final bitrate. When using this mode, the \fB-w\fP option
+changes its meaning, it now takes the quantizer ranging from 1 to 31. Note
+that constant quantizer encoding is not supported with some codecs (notably
+mpeg1/2/4 with -y ffmpeg).
+.RE
+.TP
+.B \-P \fIprofile\fP[,\fIprofile\fP]
+select export profile(s) to load. An export profile it's just a different,
+already tuned, set of basic values for tcexport's options. Even if isn't recomended,
+an user can always overwrite profile settings just using standard options.
+export profiles are stackable, just requesting to load multiple profiles
+separated by commas; if some options are set by more than one profile, the last
+profile determine their value.
+.TP
+.B \-y \fIV=video_mod\fP,\fIA=audio_mod\fP,\fIM=mplex_mod\fP
+Select export modules: video and audio encoders, and multiplexor module.
+Use this option to override the modules automatically chosen from the argument
+of the -N option.
+The order of the arguments is not important. tcexport determine the format to
+use for the stream thanks to the `A= ', `V=' or `M=' prefix. The prefix is case sensitive,
+and must NOT contain whitespaces (`A = xxx' or `A =xxx' or `A= xxx' will lead to
+undefined behaviour).
+.TP
+.B \-w \fIbitrate\fP[,\fIkeyint\fP[,\fIcrisp\fP]]
+encoder bitrate[,keyframes[,crispness]] [(6000 for MPEG 1/2, 1800 for others),250,100].
+.TP
+.B \-b \fIbitrate\fP[,\fIvbr\fP[,\fIquality\fP[,\fImode\fP]]]
+audio encoder bitrate kBits/s[,vbr[,quality[,mode]]] [128,0,5,0]
+.TP
+\fB-D\fP
+Select dry run mode: tcexport will probe stream, load selected modules then exit,
+without doing anything else.
+.TP
+\fB-d\fP \fIverbosity\fP
+Select the verbosity of program, support code and modules. See transcode's
+manpage to see supported verbosity levels. Please note that higher verbosity
+levels include lower ones, so if You select i.e. TC_DEBUG level you will get
+TC_DEBUG messages \fIand\fP TC_INFO messages. Please also note that high verbosity
+levels will output \fIa lot\fP of messages.
+.TP
+\fB-m\fP \fIpath\fP
+Look in \fIPath\fP instead of the compiled-in module path for a module.
+.TP
+.B -v
+Print version information and exit.
+
+.SH RETURN VALUES
+.B tcexport
+uses the following return values:
+.br
+ 0  successfull
+.br
+ 1  bad parameter or command line option
+.br
+ 2  error while reading/writing from/to a file
+.br
+ 3  requested an inexistent (or unreadable) module
+.br
+ 4  a module raised an internal error
+.br
+ 5  error while probing input file(s). Make sure they are of right format.
+.br
+64  internal error. Please provide a report of what's happened on transcode-devel mailing list
+.br
+
+
+.SH AUTHORS
+.B tcexport
+was written by Francesco Romani
+.br
+<fromani@gmail.com> with contributions from the Transcode Team and
+many others.  See AUTHORS for details.
+
+.SH SEE ALSO
+.BR tccat (1),
+.BR tcdecode (1),
+.BR tcdemux (1),
+.BR tcextract (1),
+.BR tcprobe (1),
+.BR transcode (1)
+.BR tcmodinfo (1)

@@ -1,0 +1,100 @@
+
+Audio capture with transcode using ALSA
+======================================================================
+            Francesco Romani <fromani at gmail dot com> 12 May 2007
+
+
+*********************************************************************
+***                          WARNING:                             ***
+***         import_alsa module is still EXPERIMENTAL!             ***
+***  It may DON'T work for you or it can deliver BROKEN samples!  ***
+***  If you experiences strange (= not explained here) behaviour, ***
+***   PLEASE drop a note on transcode-devel@exit1.org explaining  ***
+***                     your issue. Thanks!                       ***
+*********************************************************************
+
+1. What is this?
+----------------
+
+This module allow the user to capture audio streams from an ALSA
+device, that is the new default sound architecture for Linux 2.6.x
+and beyond. Former OSS API is officially deprecated.
+While ALSA API/drivers generally offers some OSS API emulation,
+is generally preferable to stay on touch with state of the art and
+use the new API directly.
+
+Audio capture is useful for doing screencasts (see import_x11 or 
+import_vnc modules), or to analog video capture (see import_v4l(2)),
+or to record separate audio tracks, or to do whatever you want.
+
+
+2. Basic usage (gotchas, quirks, limitations)
+---------------------------------------------
+
+From an user point of view, usage of import_alsa should be
+straightforwarded compared with import_oss. Just select the import
+module (-x SOMETHING,alsa) setup import audio stream parameters using
+-e and have fun.
+
+A tricky step can be selecting the appropriate audio device to capture.
+import_alsa by default reads audio from "default" ALSA card (see ALSA
+documentation and/or your local configuration).
+
+You can specify the card to use using the "device" option of import_alsa:
+
+$ transcode -x SOMETHING,alsa=device=DEVICE
+
+You can use the `arecord' program from alsa-utils to list the recognized
+capture devices:
+
+$ arecord -l
+
+ALSA API strongly encourages applications to access audio through alsalib,
+not accessing the device directly. Usage of device file is not really
+supported (AFAIK), so import_alsa DOES NOT honours -i nor -p transcode
+options. Those values are just ignored, so the only way to change
+capture card is to use `device' option as outlined above.
+
+
+3. Known issues
+---------------
+
+* first and foremost, PLEASE NOTE that some audio capture device DOES NOT
+  properly report the supported sample rate (and maybe others audio parameters
+  too). They simply accept everything but without be able to fullfill
+  the effective requests. SAA7134 devices is a known example of this
+  behaviour, not being able to deliver sampling rate > 32000Hz.
+
+  This is not a limitation of transcode, nor an easy way exists to
+  recognize those situations. Please pay attention to this and try
+  some different audio stream settings.
+
+* ALSA transparent resampling is not yet supported.
+
+* probing of audio device is not yet supported
+  (require transcode core changes).
+
+* subdevice specification is not yet supported due to a transcode core
+  limitation.
+
+* audio resync is still primitive.
+
+* almost no optimizations (see module version number :) )
+
+
+4. Internals
+------------
+
+See technical documentation in docs/tech/html/* and/or the comments
+on source code for details.
+
+
+5. Future plans
+---------------
+
+import_oss will NOT be deprecated in any foreseeable future.
+import_alsa will be improved in further versions to address
+all known issues above issues.
+During next releases, import_alsa will be pushed as preferred
+audio capture module over import_oss on Linux platforms.
+

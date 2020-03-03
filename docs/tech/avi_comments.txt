@@ -1,0 +1,117 @@
+# INFO
+#
+# The AVI file format supports so-called tomb-stone data. It can be
+# used to write annotations into the AVI file.
+#
+# You can use this file as the argument to the transcode option
+# --avi_comments. When the file is read, empty lines and lines
+# starting with '#' are ignored.
+# The syntax is: "TAG<space>STRING". The order of the tags does not
+# matter. If a tag has no string following it, it is ignored. That
+# means, you can use this file as input and only fill out the fields
+# you want.
+#
+# A very simple example is:
+#  ----------------snip----------------
+#  INAM My 1st Birthday
+#  ISBJ My first steps!
+#  IART My proud family
+#  ----------------snip----------------
+#
+# Keep in mind that there is no endless space in the AVI header,
+# most likely its around 1000 bytes.
+
+
+# INAM - Stores the title of the subject of the file, such as
+# "Seattle from Above."
+INAM
+
+# ISBJ - Describes the contents of the file, such as
+# "Aerial view of Seattle."
+ISBJ
+
+# Lists the artist of the original subject of the file;
+# for example, "Michaelangelo."
+IART
+
+# Records the copyright information for the file; for example,
+# "Copyright Encyclopedia International 1991." If there are multiple
+# copyrights, separate them by semicolon followed by a space.
+ICOP
+
+# Lists the name of the person or organization that commissioned
+# the subject of the file; for example "Pope Julian II."
+ICMS
+
+# Provides general comments about the file or the subject
+# of the file. If the comment is several sentences long, end each
+# sentence with a period. Do not include new-line characters.
+ICMT
+
+# Indicates where the subject of the file is archived
+IARL
+
+# Creation date. Specifies the date the subject of the file was created. List
+# dates in year-month-day format, padding one-digit months and days with
+# a zero on the left; for example, "1553-05-03" for May 3, 1553.
+ICRD
+
+# Describes whether an image has been cropped and, if so, how it
+# was cropped; for example, "lower-right corner."
+ICRP
+
+# Specifies the size of the original subject of the file; for
+# example, "8.5 in h, 11 in w."
+IDIM
+
+# Stores dots per inch setting of the digitizer used to
+# produce the file, such as "300."
+IDPI
+
+# Stores the of the engineer who worked on the file. If there are
+# multiple engineers, separate the names by a semicolon and a blank;
+# for example, "Smith, John; Adams, Joe."
+IENG
+
+# Describes the original work, such as "landscape,", "portrait,"
+# "still liefe," etc.
+IGNR
+
+# Provides a list of keywords that refer to the file or subject of the
+# file. Separate multiple keywords with a semicolon and a blank;
+# for example, "Seattle, aerial view; scenery."
+IKEY
+
+# ILGT - Describes the changes in the lightness settings on the digitizer
+# required to produce the file. Note that the format of this information
+# depends on the hardware used.
+ILGT
+
+# IMED - Decribes the original subject of the file, such as
+# "computer image," "drawing," "lithograph," and so on.
+IMED
+
+# IPLT - Specifies the number of colors requested when digitizing
+# an image, such as "256."
+IPLT
+
+# IPRD - Specifies the name of title the file was originally intended
+# for, such as "Encyclopedia of Pacific Northwest Geography."
+IPRD
+
+# ISHP - Identifies the change in sharpness for the digitizer
+# required to produce the file (the format depends on the hardware used).
+ISHP
+
+# ISRC - Identifies the name of the person or organization who
+# suplied the original subject of the file; for example, "Try Research."
+ISRC
+
+# ISRF - Identifies the original form of the material that was digitized,
+# such as "slide," "paper," "map," and so on. This is not necessarily
+# the same as IMED
+ISRF
+
+# ITCH - Identifies the technician who digitized the subject file;
+# for example, "Smith, John."
+ITCH

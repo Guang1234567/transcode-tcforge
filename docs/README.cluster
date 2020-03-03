@@ -1,0 +1,88 @@
+-------------------------------------------------------------
+5 step guide for cluster batch encoding with transcode 0.6.x:
+-------------------------------------------------------------
+
+Note: this feature is only available for transcode-0.6.0pre2 and higher!
+
+pre-processing:
+===============
+
+(1) we first rip the desired DVD title into a work directory, containing
+    only the VOB chunks for transcode's directory mode. This
+    directory should be accessable for all nodes via NFS.
+
+    example:
+    ========
+
+    tccat -i /dev/dvd -T 1,-1 | split -b 1024m - dvd_title/part-
+
+(2) next we need to create a navigation file to access all the
+    VOB chunks with frame accurate navigation.
+
+    example:
+    ========
+
+    tccat -i dvd_title/ | tcdemux -W >nav_file
+
+distributed encoding:
+=====================
+
+(3) we need to decide, how many chunks we want to create for
+    distributed encoding. This number should not be too high, in case
+    you prefer 2-pass encoding. Otherwise, it may depend on the nodes
+    in our cluster. Assume we want 8 chunks with approx.
+    25k frames.
+
+    For each chunk, switch to a node and invoke transcode with your
+    favorite options. In addition, use the new -W option:
+
+    example:
+    ========
+
+    transcode -i dvd_title/ -W X,8,nav_file -o part-X.avi (.....)
+
+    and repeat this for X=0,1,2,...,7.
+    Note, this will transcode the video only. Audio is done for the
+    entire stream in the last step with X=8. Repeat this step in case of
+    2-pass encoding. However, in this case we need to specify different
+    filenames for multi-pass encoding logfile with option -R.
+
+post-processing:
+================
+
+(4) merge the resulting files
+
+    example:
+    ========
+
+    avimerge -o tmp_movie.avi -i dvd_title/part-*
+
+(5) finally, the audio has to be encoded separately and multiplexed in one
+    step
+
+    example:
+    ========
+
+    transcode -p dvd_title/ -W 8,8,nav_file -i tmp_movie.avi -P 1
+	      -x avi,vob -y raw -o movie.avi -u 50
+
+    This command will pass-through the video, extract the audio track
+    and multiplex both into movie.avi. Increasing the number of buffer
+    for audio processing only will boost the performance.
+    To tell transcode to process all chunks, the first parameter to -W is
+    identical to the number of chunks.
+
+----------------------------------------------------------------------------
+Q: Why not use -c 0-25000, ... with 0.5.x?
+A: Well, the problem is seeking to large frame numbers requires decoding
+   all previous frames, which takes way too long.
+
+Q: Why not transcoding the audio with step (3)?
+A: This may lead to AV out of sync on chunk boundaries, since a
+   MP3 frame requires a certain amount of PCM data and the encoder runs
+   on different nodes. If you need it, use PCM, this will work fine.
+
+Q: Will it work for NTSC?
+A: Not tested very well. It may or may not work.
+----------------------------------------------------------------------------
+

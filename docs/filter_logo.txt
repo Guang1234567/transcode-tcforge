@@ -1,0 +1,52 @@
+Filter_logo Documentation
+
+This filter allows you to put an image into the video.
+Every image format Image Magick can read ist supported and
+ImageMagick can read a lot of different formats.
+
+So you need ImageMagick installed on your system and enabled
+during compile time of transcode
+
+The transparency information (if the image has one) is handled
+correctly. This is very nice if you use PNG or GIF.
+
+The position of the image can be specified using the `posx' resp.
+`posy' parameters. There are 5 predefined positions for your
+convenience which are "Top Left, Top Right, Bottom Left, Bottom
+Right and Center" available through `posdef'. Origin of the image is
+at the very top left.
+
+Support parameters:
+
+  - help
+    Display a short description of the filter and its arguments.
+  - file=$FILENAME [required]
+    The image file you want to use.
+  - pos=$X_POSITIONx$Y_POSITION
+    Offset from the origin of the frame (in pixels)
+  - posdef=$arg
+    Predefined position
+      arg=1: Top Left
+      arg=2: Top Right
+      arg=3: Bottom Left
+      arg=4: Bottom Right
+      arg=5: Center
+  - range=$START_FRAME-$END_FRAME
+    defines a frame range in which the image should appear in the
+    video
+
+Usage Examples:
+
+$ transcode ... -J logo=file=mylogo.png:posdef=2
+  Displays the image `mylogo.png' at the top left of the video/
+
+$ transcode ... -J logo=file=mylogo.png:range=0-100:posdef=5
+  Displays the image `mylogo.png' for the first 4 seconds in the
+  center of the screen.
+
+$ transcode ... -J logo=file=mylogo.gif:pos=200x100
+  Displays the image `mylogo.gif' at position 200x100 on the
+  screen
+
+
+04/2002 Tilmann Bitterberg <transcode@tibit.org>

@@ -1,0 +1,141 @@
+.TH tcextract 1 "26th November 2002" "tcextract(1)"
+.SH NAME
+tcextract \- read multimedia file from medium, extract or demultiplex requested stream and print to standard output
+.SH SYNOPSIS
+.TP
+.B tcextract
+.B -i
+.I name
+[
+.B -x
+.I codec
+] [
+.B -t
+.I magic
+] [
+.B -a
+.I track
+] [
+.B -C
+.I s-e
+] [
+.B -d
+.I verbosity
+] [
+.B -v
+]
+.SH COPYRIGHT
+\fBtcextract\fP is Copyright (C) by Thomas Oestreich.
+.SH DESCRIPTION
+.B tcextract
+is part of and usually called by \fBtranscode\fP.
+.br
+However, it can also be used independently.
+.br
+\fBtcextract\fP reads source (from stdin if not explicitely defined) and
+prints on the standard output.
+.SH OPTIONS
+.IP "\fB-i \fIname\fP"
+Specify input source.  If ommited, \fIstdin\fP is assumed.
+\fBtcextract\fP reads streams from file or from stdin.
+
+.IP "\fB-C \fIs-e\fP"
+extract and print out only this frame interval (video) or bytes (audio) [all]. This option is only supported if the source contains proper information to perform a selective extraction.
+
+.IP "\fB-t \fImagic\fP"
+source file magic. This option is used to identify the source file format if reading is performed from stdin or \fItcextract\fP fails to identify the source
+file format. Supported formats are labeled with \fImagic\fP:
+
+avi		RIFF AVI-file
+
+vob		MPEG program streams
+
+m2v		MPEG elementary video stream
+
+vdr		MPEG digital video recording
+
+raw		raw bitstream
+
+wav		RIFF WAVE audio
+
+yuv4mpeg	mjpeg-tools stream header format
+
+.IP "\fB-x \fIcodec\fP"
+source pdeudo-codec, if not detected when reading from stdin. Currently, supported parameter for \fIcodec\fP are
+
+mp3		MPEG audio
+
+ac3		AC3 audio
+
+a52		A52 audio
+
+dv		Digital Video DV
+
+mpeg2		MPEG video
+
+yv12		Y'CbCr YUV
+
+rgb		RGB 24-bit
+
+ps1		MPEG private stream (subtitles)
+
+pcm		raw audio stream
+
+.IP "\fB-a \fItrack\fP"
+extract selected audio or video track from source.
+
+.IP "\fB-d\fP \fIlevel\fP"
+With this option you can specify a bitmask to enable different levels
+of verbosity (if supported).  You can combine several levels by adding the
+corresponding values:
+
+QUIET         0
+
+INFO          1
+
+DEBUG         2
+
+STATS         4
+
+WATCH         8
+
+FLIST        16
+
+VIDCORE      32
+
+SYNC         64
+
+COUNTER     128
+
+PRIVATE     256
+.IP "\fB-v\fP"
+Print version information and exit.
+
+
+.SH NOTES
+\fBtcextract\fP is a front end for extracting various raw or encoded audio/video tracks from a source and is used in \fBtranscode\fP's import pipeline.
+
+.SH EXAMPLES
+The command
+.B tcextract -i foo.avi -x mp3 -a 3
+extracts MPEG audio track 3 from the AVI-file foo.avi and prints the bitstream to stdout.
+
+.PP
+.SH AUTHORS
+.B tcextract
+was written by Thomas Oestreich
+.br
+<ostreich@theorie.physik.uni-goettingen.de> with contributions from
+many others.  See AUTHORS for details.
+.SH SEE ALSO
+.BR avifix (1),
+.BR avisync (1),
+.BR avimerge (1),
+.BR avisplit (1),
+.BR tcprobe (1),
+.BR tcscan (1),
+.BR tccat (1),
+.BR tcdemux (1),
+.BR tcextract (1),
+.BR tcdecode (1),
+.BR transcode (1)

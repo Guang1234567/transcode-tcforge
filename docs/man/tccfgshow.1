@@ -1,0 +1,66 @@
+.TH tccfgshow 1 "21th January 2003" "tcmodinfo(1)"
+.SH NAME
+tccfgshow \- Inspect the transcode builtin settings chosen at compile time
+.SH SYNOPSIS
+.na
+.B tccfgshow
+[
+.B -C
+] [
+.B -F
+] [
+.B -M
+] [
+.B -P
+] [
+.B -R
+] [
+.B -v
+]
+.SH COPYRIGHT
+\fBtccfgshow\fP is Copyright (C) by Transcode Team
+.SH DESCRIPTION
+.B tccfgshow
+allow to inspect the range of transcode settings that are builtin into
+the program(s). Some of those settings are chosen at compile time, the others
+are hardcoded into the code.
+.SH OPTIONS
+.TP
+.B -C
+Print the list of the codecs/image formats known by transcode program(s).
+.TP
+.B -F
+Print the list of the file formats known by transcode program(s).
+.TP
+.B -M
+Print the compiled-in default module path.
+.TP
+.B -P
+Print the compiled-in default profile data path.
+.TP
+.B -R
+Print the compiled-in default module registry path.
+.TP
+.B -v
+Print version information and exit.
+
+.SH RETURN VALUES
+.B tccfgshow
+uses the following return values:
+.br
+ 0  successfull
+.br
+ 1  bad parameter or command line option
+
+
+.SH AUTHORS
+.B tccfgshow
+was written by Francesco Romani
+.br
+<fromani@gmail.com> with contributions from the Transcode Team and
+many others.  See AUTHORS for details.
+
+.SH SEE ALSO
+.BR tcmodinfo (1),
+.BR tcmodchain (1)
+

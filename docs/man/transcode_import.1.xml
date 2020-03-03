@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+ "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id='transcode_import'>
+
+    <refentryinfo>
+        <date>14th July 2008</date>
+    </refentryinfo>
+
+    <refmeta>
+        <refentrytitle>transcode_import</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class='date'>15th April 2008</refmiscinfo>
+        <refmiscinfo class='source'>transcode_import(1)</refmiscinfo>
+    </refmeta>
+    
+    <refnamediv id='name'>
+        <refname>transcode_import</refname>
+        <refpurpose>transcode import modules collection</refpurpose>
+    </refnamediv>
+ 
+    <!-- body begins here -->
+    <refsynopsisdiv id='synopsis'>
+        <cmdsynopsis>
+            <command>transcode</command>    
+            <arg choice='plain'>
+                -x <replaceable>name</replaceable>
+                <arg choice='opt'>
+                    <arg choice='plain'>
+                        <replaceable>,name</replaceable>
+                    </arg>
+                </arg>
+            </arg>
+            <arg choice='opt'>
+                <replaceable>other options</replaceable>
+            </arg>
+        </cmdsynopsis>
+    </refsynopsisdiv>
+    
+    <refsect1 id='copyright'>
+        <title>Copyright</title>
+        <para>
+	    <command>transcode</command> is Copyright (C) 2001-2003 by Thomas Oestreich, 2003-2004 Tilmann Bitterberg, 2004-2010 Transcode Team
+        </para>
+    </refsect1>
+
+    <refsect1 id="import_modules">
+        <title>import modules</title>
+	<para>
+	    If no module is specified through the -x option, <command>transcode</command> will autodetect them using internal probing code.
+	    If just one import module is specified, it is used both for video and audio import; if both modules are specified, the first
+	    is used for video import, the second for audio import.
+            To see what import modules are avalaible for your transcode installation, do a
+
+           <literallayout>
+           $ ls -1 $( tcmodinfo -p )/import*.so
+           </literallayout>
+
+           A complete transcode installation has the following import modules.
+        </para>
+	<variablelist>
+
+<!-- begin module list -->
+<!-- import_ac3.c -->
+<!-- import_alsa.c -->
+            <varlistentry>
+                <term>
+                    <option>alsa</option>
+                    <emphasis>[audio]</emphasis>
+                </term>
+                <listitem>
+                    <para>This module reads audio samples from an ALSA device using libalsa.</para>
+<para>This module accepts the following options:</para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>device (string)</literal>
+                            </term>
+                            <listitem>
+                                <para>selects ALSA device to use for capturing audio.</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+<!-- import_avi.c -->
+<!-- import_bktr.c -->
+            <varlistentry>
+                <term>
+                    <option>bktr</option>
+                    <emphasis>[video]</emphasis>
+                </term>
+                <listitem>
+                    <para>This module reads video frames from an capture device using bktr module. This module is designed to work on *BSD. For linux, use the v4l module.</para>
+<para>This module accepts the following options:</para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>tunerdev (string)</literal>
+                            </term>
+                            <listitem>
+                                <para>help: selects tuner devince.</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>vsource (string)</literal>
+                            </term>
+                            <listitem>
+                                <para>selects video source (device dependant input).</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>format (string)</literal>
+                            </term>
+                            <listitem>
+                                <para>selects video normalization.</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>asource (string)</literal>
+                            </term>
+                            <listitem>
+                                <para>selects audio source (device dependant input).</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+<!-- import_bsdav.c -->
+<!-- import_dv.c -->
+<!-- import_dvd.c -->
+            <varlistentry>
+                <term>
+                    <option>dvd</option>
+                    <emphasis>[video, audio, extra]</emphasis>
+                </term>
+                <listitem>
+                    <para>This module provides access to DVD content using libdvdread, directly from DVD device. (e.g. on-the-fly operation, no intermediate disk storage needed).</para>
+                    <para>At run time, this module requires: libdvdread >= 0.9.3</para>
+<para>This module accepts the following options:</para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>delay (integer)</literal>
+                            </term>
+                            <listitem>
+                                <para>set device access delay (seconds).</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+<!-- import_ffmpeg.c -->
+<!-- import_im.c -->
+            <varlistentry>
+                <term>
+                    <option>im</option>
+                    <emphasis>[video]</emphasis>
+                </term>
+                <listitem>
+                    <para>This module reads single images from disk using ImageMagick; a stream of correlated images can be automatically read if their filenames contains a common prefix and a serial number. All formats supported by ImageMagick are supported as well.</para>
+                    <para>At run time, this module requires: libMagick >= 6.2.4.0</para>
+<para>This module accepts the following options:</para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>noseq (flag)</literal>
+                            </term>
+                            <listitem>
+                                <para>disable internal auto loading of images with similar names.</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+<!-- import_imlist.c -->
+<!-- import_lzo.c -->
+<!-- import_mov.c -->
+<!-- import_mp3.c -->
+<!-- import_mpeg2.c -->
+<!-- import_mplayer.c -->
+<!-- import_null.c -->
+<!-- import_ogg.c -->
+<!-- import_oss.c -->
+<!-- import_pv3.c -->
+            <varlistentry>
+                <term>
+                    <option>pv3</option>
+                    <emphasis>[video, audio]</emphasis>
+                </term>
+                <listitem>
+                    <para>This module provides access to Earth Soft PV3 audio/video streams using win32 binary codecs and an internal win32 emulation layer (NO wine needed).</para>
+                    <para>At run time, this module requires: PV3 win32 dlls.</para>
+<para>This module accepts the following options:</para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>dllpath (string)</literal>
+                            </term>
+                            <listitem>
+                                <para>set path/filename to load dv.dll from</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+<!-- import_pvn.c -->
+<!-- import_raw.c -->
+<!-- import_sunau.c -->
+<!-- import_vag.c -->
+            <varlistentry>
+                <term>
+                    <option>vag</option>
+                    <emphasis>[audio]</emphasis>
+                </term>
+                <listitem>
+                    <para>This module decodes VAG-format audio (from PlayStation).</para>
+<para>This module accepts the following options:</para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>blocksize (integer)</literal>
+                            </term>
+                            <listitem>
+                                <para>stereo blocking size.</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+<!-- import_vnc.c -->
+<!-- import_vob.c -->
+            <varlistentry>
+                <term>
+                    <option>vob</option>
+                    <emphasis>[video, audio]</emphasis>
+                </term>
+                <listitem>
+                    <para>This module imports audio/video from VOB files. If you need direct DVD access, use import_dvd module.</para>
+<para>This module accepts the following options:</para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>nodemux (flag)</literal>
+                            </term>
+                            <listitem>
+                                <para>skip demuxing processing stage. This sometimes improves A/V sync.</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+<!-- import_x11.c -->
+            <varlistentry>
+                <term>
+                    <option>x11</option>
+                    <emphasis>[video]</emphasis>
+                </term>
+                <listitem>
+                    <para>This module captures video frames from X window system using libX11.</para>
+                    <para>At run time, this module requires: libcx11-6 >= 1.0.0</para>
+<para>This module accepts the following options:</para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>skew_limit (integer)</literal>
+                            </term>
+                            <listitem>
+                                <para>maximum frame A/V skew (ms) before correction attempt</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+<!-- import_xml.c -->
+<!-- import_xvid.c -->
+<!-- import_yuv4mpeg.c -->
+<!-- import_nuv.c -->
+<!-- import_v4l.c -->
+<!-- import_v4l2.c -->
+            <varlistentry>
+                <term>
+                    <option>v4l2</option>
+                    <emphasis>[video, audio]</emphasis>
+                </term>
+                <listitem>
+                    <para>This module allow to capture video frames through a V4L2 (V4L api version 2) device. While audio capturing is possible, this kind of usage is discouraged in favour of OSS or ALSA import modules.</para>
+<para>This module accepts the following options:</para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>overrun_guard (integer)</literal>
+                            </term>
+                            <listitem>
+                                <para>flag (default off). Toggles the buffer overrun guard, that prevents crash when capture buffers are full.</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>resync_margin (integer)</literal>
+                            </term>
+                            <listitem>
+                                <para>threshold audio/video desync (in frames) that triggers resync once reached.</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>crop (string)</literal>
+                            </term>
+                            <listitem>
+                                <para>forces cropping into selected window (format: WIDTHxHEIGHT+LEFTxTOP)</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>input (string)</literal>
+                            </term>
+                            <listitem>
+                                <para>select the V4L input source. V4L cards have often have more than an input source like, say, a tv tuner and a composite source. Use "list" parameter to get a list of supported input sources.</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>format (string)</literal>
+                            </term>
+                            <listitem>
+                                <para>forces output format to given one; use "list" to get a list of supported formats.</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>resync_interval (integer)</literal>
+                            </term>
+                            <listitem>
+                                <para>checks the resync_margin every given amount of frames.</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>format (integer)</literal>
+                            </term>
+                            <listitem>
+                                <para>forces video frames convertion by using index; use -1 to get a list of supported conversions.</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>ignore_mute (boolean)</literal>
+                            </term>
+                            <listitem>
+                                <para>disable the device audio muting during the operation.</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>channel (string)</literal>
+                            </term>
+                            <listitem>
+                                <para>synthonize the V4L tuner to selected TV channel. The channel frequencies are taken by the module configuration file, and they must be expressed in KHz.</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>convert (integer)</literal>
+                            </term>
+                            <listitem>
+                                <para>forces video frames convertion by using index; use the special value "list" to get a list of supported conversions.</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+<!-- end module list -->
+
+
+
+        </variablelist>
+    </refsect1>
+ 
+    <refsect1 id='authors'>
+        <title>Authors</title>
+        <para>
+            Written by Thomas Oestreich &lt;ostreich@theorie.physik.uni-goettingen.de&gt;, 
+            Tilmann Bitterberg and the Transcode-Team
+        </para>
+        <para>
+            See the <emphasis>AUTHORS</emphasis> file for details.
+        </para>
+    </refsect1>
+    
+    <refsect1 id='see_also'>
+        <title>See Also</title>
+        <para>
+             <citerefentry>
+                <refentrytitle>transcode</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+            ,
+            <citerefentry>
+                <refentrytitle>tcmodinfo</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+            ,
+            <citerefentry>
+                <refentrytitle>transcode_filter</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+            ,
+            <citerefentry>
+                <refentrytitle>transcode_export</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+        </para>
+        <!-- .br -->
+    </refsect1>
+    
+</refentry>

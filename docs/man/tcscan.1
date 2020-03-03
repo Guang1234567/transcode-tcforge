@@ -1,0 +1,107 @@
+.TH tcscan 1 "23th September 2002" "tcscan(1)"
+.SH NAME
+tcscan \- scan multimedia streams from medium and print information on the
+standard output
+.SH SYNOPSIS
+.TP
+.B tcscan
+.B -i
+.I name
+[
+.B -x
+.I codec
+] [
+.B -e
+.I r[,b[,c]]
+] [
+.B -b
+.I bitrate
+] [
+.B -w
+.I num
+] [
+.B -f
+.I rate
+] [
+.B -d
+.I verbosity
+] [
+.B -v
+]
+.SH COPYRIGHT
+\fBtcscan\fP is Copyright (C) by Thomas Oestreich.
+.SH DESCRIPTION
+.B tcscan
+is part of and usually called by \fBtranscode\fP.
+.br
+However, it can also be used independently.
+.br
+\fBtcscan\fP reads source (from stdin if not explicitely defined) and
+prints on the standard output.
+.SH OPTIONS
+.IP "\fB-i \fIname\fP"
+Specify input source.  If ommited, \fIstdin\fP is assumed.
+.br
+You can specify a file, directory, device, mountpoint or host address
+as input source.  \fBtcscan\fP usually handles the different types
+correctly.
+.IP "\fB-d\fP \fIlevel\fP"
+With this option you can specify a bitmask to enable different levels
+of verbosity (if supported).  You can combine several levels by adding the
+corresponding values:
+
+QUIET         0
+
+INFO          1
+
+DEBUG         2
+
+STATS         4
+
+WATCH         8
+
+FLIST        16
+
+VIDCORE      32
+
+SYNC         64
+
+COUNTER     128
+
+PRIVATE     256
+.IP "\fB-v\fP"
+Print version information and exit.
+.SH NOTES
+\fBtcscan\fP is a front end for scaning various source types and is used in \fBtranscode\fP's import modules.
+\fBtcscan\fP does a complete scan of the source to gather information.
+.SH EXAMPLES
+The command
+.B tcscan -i foo.avi
+prints header information about the AVI-file itself and lists details on the video and audio content, e.g., keyframes, chunk structure.
+
+The command
+.B cat audio.pcm | tcscan -x pcm -e 48000,16,2
+simply determines the playtime lenghth of the raw audio stream.
+
+The command
+.B tcscan -x mp3 -i input.mp3
+will print the number of chunks in the MP3 file and the average bitrate.
+.PP
+.SH AUTHORS
+.B tcscan
+was written by Thomas Oestreich
+.br
+<ostreich@theorie.physik.uni-goettingen.de> with contributions from
+many others.  See AUTHORS for details.
+.SH SEE ALSO
+.BR avifix (1),
+.BR avisync (1),
+.BR avimerge (1),
+.BR avisplit (1),
+.BR tcprobe (1),
+.BR tcscan (1),
+.BR tccat (1),
+.BR tcdemux (1),
+.BR tcextract (1),
+.BR tcdecode (1),
+.BR transcode (1)

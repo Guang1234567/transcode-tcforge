@@ -1,0 +1,68 @@
+User-visible changes betwwen transcode 1.0.0 and transcode 1.1.0
+================================================================
+(Revision 1)
+
+Introduction
+------------
+
+This document outlines the user-visible changes between transcode
+1.0.x and transcode 1.1.0. If you find a difference that isn't
+documented here, please file a bug on tcforge.berlios.de and/or
+write us on transcode-devel@exit1.org.
+
+
+Command line options:
+---------------------
+
+* -i [changed]
+  is now mandatory. You have to specifiy the input file explicitely.
+
+* --ext [removed]
+  is gone (deprecated). Just fully qualify the extension (if needed) using -o.
+
+* --use_rgb [removed]
+  is gone. Use `-V rgb24' instead.
+
+* --uyvy [removed]
+  is gone. UYVY colorspace is no longer supported for internal processing.
+  I/O modules (e.g. import_raw, export_raw et. al.) now handles UYVY colorspace
+  internally; refer to the documentation of specific modules.
+
+* -V [changed]
+  now requires an argument (colorspace):
+  yuv420p (default)
+  yuv422p (YUV 4:2:2 PLANAR)
+  rgb24
+
+* -N [changed]
+  now accepts also string(s) as argument(s).
+  That's only useful if you use the new experimental export module set.
+
+* -y [changed]
+  now accepts an additional comma-separated argument for
+  new-style multiplexor module to use.
+  That's only useful if you use the new experimental export module set.
+
+* --dir_mode [removed]
+  is gone, replaced by --multi_input. Using --multi_input, you can use a standard
+  POSIX globbing pattern as input file. Transcode will automatically expand the
+  expression, join the sequence and read the whole stream seamlessly (except for bugs).
+  See manpage for details.
+
+* --import_v4l [removed]
+  is gone (obsolete, deprecated).
+
+* --print_status --progress_off [removed]
+  are gone, replaced by --progress_meter and --progress_rate
+  (see manpage for details).
+
+* --color [removed]
+  is gone, replaced by --log_no_color.
+
+
+Program Output:
+---------------
+
+Transcode now uses ANSI color sequences much more than 1.0.x.
+
+

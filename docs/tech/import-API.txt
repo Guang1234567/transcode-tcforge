@@ -1,0 +1,95 @@
+		IMPORT MODULE WRITING HOWTO
+		---------------------------
+
+Some very short documentation on writing import modules for transcode
+
+include this file:
+------------------
+
+#include "transcode.h"       // definition of vob_t and transfer_t structures
+
+
+data exchange structures for modules:
+-----------------------------------
+
+typedef struct _vob_t {
+// see transcode.h for details
+} vob_t;
+
+typedef struct _transfer_t {
+
+  int flag;		// specifies context: TC_VIDEO for video
+					      TC_AUDIO for audio
+		        // or passes an integer to the module
+
+  FILE *fd;             // file handle for input stream
+			// NULL if import module performs reading
+
+  int size;             // total amount of bytes in the buffer
+
+  char *buffer;         // pointer to data array with frame data
+  char *buffer2;
+
+  int attributes;
+
+} transfer_t;
+
+
+single function interface:
+--------------------------
+
+int tc_import(int opt, void *para1, void *para2);
+
+exit codes: all handled by transcode
+TC_IMPORT_UNKNOWN option not supported
+TC_IMPORT_OK      no error, hopefully the default
+TC_IMPORT_ERROR   a critical error occurred
+
+input parameter:
+opt contains the requested action id
+para1/2 its actually meaning depends on option
+
+requested method:
+
+transcode calls the following routines in this order
+for both import modules, i.e., first for video and subsequent with the
+audio context flag set.
+
+[1]
+opt=TC_IMPORT_NAME
+para1=_transfer_t
+para2=NULL
+requested action: print out some general module infos to stderr
+		  and inherit transcode verbosity flag
+		  (optional return capability flag)
+
+		  //>0.3.3 of transcode interpret flag returned
+		  //to read module capabilities for sanity checks
+status: optional
+
+[2]
+opt=TC_IMPORT_OPEN
+para1=_transfer_t
+para2=_vob_t
+requested action: return a file handle for reading from the pipe or
+                  return NULL if import modules handles data read
+status: required if following option is not implemented
+
+[3]
+opt=TC_IMPORT_DECODE
+para1=_transfer_t
+para2=_vob_t
+requested action: return a frame and the total amount of bytes read
+
+		  //>0.3.3 of transcode accepts import module returned amount
+		  //of bytes in buffer. Module does the error checks anyway.
+
+status: required if previous option is not implemented
+
+[4]
+opt=TC_IMPORT_CLOSE
+para1=_transfer_t
+para2=NULL
+requested action: close streams or any open files, free memory and prepare
+		  module removal
+status: required

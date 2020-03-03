@@ -1,0 +1,175 @@
+M=Nodule
+D=Description
+C=compile time dependend
+R=runtime dependend
+I=Info
+S=Status
+P=processing modes
+
+M: export_ac3.c
+D: (video) null | (audio) ac3
+C: none
+R: ffmpeg
+S: +
+I: Encodes audio (raw PCM) to AC3 via the ffmpeg binary.
+P: audio - PCM, video - none
+
+M: export_divx5.c
+D: (video) DivX 5.xx | (audio) MPEG/AC3/PCM
+C: libmp3lame (only for MPEG audio layer III)
+R: divx4linux (new), libdivxencore.so
+S: +
+I: Encodes MPEG4 video using the closed-source binaries from divx.com to an AVI container.
+P: audio - RAW (pass-through) PCM AC3, video - RGB YUV
+
+M: export_dv.c
+D: (video) Digital Video | (audio) MPEG/AC3/PCM
+C: libdv, libmp3lame (only for MPEG audio layer III)
+R: libdv
+S: +
+I: Encodes DV into an AVI container. DV is a codec developed by Sony and is often used in digital camcorders.
+P: audio - PCM AC3, video - RGB YUV
+
+M: export_dvraw.c
+D: (video) Digital Video | (audio) PCM
+C: libdv
+R: libdv
+S: +
+I: Encodes DV into a DV file. DV is a codec developed by Sony and is often used in digital camcorders. A raw DV file can be played back into the camcorder.
+P: audio - PCM, video - RAW (pass-through) RGB YUV YUV422
+
+M: export_ffmpeg.c
+D: (video) * | (audio) MPEG/AC3/PCM
+C: libmp3lame (only for MPEG audio layer III)
+R: none
+S: +
+I: Encodes many different formats to both AVI and raw. Supported are mpeg1video, mpeg2video, mpeg4, mjpeg, h263, h263p, wmv1, wmv2, rv10, msmpeg4, msmpeg4v2, huffyuv and dvvideo.
+P: audio RAW (pass-through) PCM AC3, video - RGB YUV YUV422
+
+M: export_im.c
+D: (video) * | (audio) MPEG/AC3/PCM
+C: libImageMagick
+R: none
+S: +
+I: Encodes image sequences by using the ImageMagick library. ImageMagick is able to handle a lot of different image formats such as png, jpg, miff, tiff, etc. Use -F to select the desired format.
+P: audio - RAW (pass-through) PCM, video - RGB YUV
+
+M: export_jpg.c
+D: (video) * | (audio) MPEG/AC3/PCM
+C: libjpeg
+R: none
+S: +
+I: Encodes jpg image sequences using libjpeg. Faster than ImageMagick. Use -F to select the compression quality.
+P: audio - RAW (pass-through) PCM, video - RGB YUV
+
+M: export_lame.c
+D: (audio) MPEG 1/2
+C: libmp3lame (only for MPEG audio layer III)
+R: lame, sox
+S: +
+I: An audio-only encoder which drives the lame binary. The tool sox is used to do resampling if required. Encodes to a MP3 file.
+P: audio - PCM, video - none
+
+M: export_lzo.c
+D: (video) LZO real-time compression | (audio) MPEG/AC3/PCM
+C: liblzo, libmp3lame (only for MPEG audio layer III)
+R: none
+S: +
+I: Encodes video using a loss-less real-time LZO codec. This codec is a homegrown invention of transcode and is intended as an intermediate storage format. MPlayer can playback LZO-based AVI files as well.
+P: audio - RAW (pass-through) PCM AC3, video - RAW (pass-through) RGB YUV DV
+
+M: export_mov.c
+D: (video) * | (audio) *
+C: libquicktime
+R: libquicktime
+S: o
+I: Interface to the quicktime library.
+P: audio - PCM, video - RAW (pass-through) RGB YUV YUV422 YUY2
+
+M: export_mp2.c
+D: (video) null | (audio) MPEG 1/2
+C: none
+R: ffmpeg, sox
+S: +
+I: Encodes audio (raw PCM) to MPEG 1 Layer 2 audio aka mp2. Additionaly it can change the speed of the audio stream by a factor you can specify. See docs/export_mp2.txt.
+P: audio - PCM, video - none
+
+M: export_mp2enc.c
+D: (audio) MPEG 1/2
+C: mjpegtools
+R: mp2enc
+S: +
+I: Drives the mp2enc binary and writes an MP2 (MPEG1-Layer2) file. Useful for when encoding to SVCD to be multiplexed with mplex after encoding.
+P: audio - PCM, video - none
+
+M: export_mpeg2enc.c
+D: (video) MPEG 1/2
+C: mjpegtools
+R: mpeg2enc
+S: +
+I: Drives the mpeg2enc binary. mpeg2enc is a very feature rich MPEG encoder, have a look at its manpage. Encodes generic mpeg1, VCD, SVCD, MPEG2 and DVD type video.
+P: audio - none, video - RGB YUV
+
+M: export_null.c
+D: (video) null | (audio) null
+C: none
+R: none
+S: +
+I: Data sink. Does nothing else than discarding data.
+P: audio - none, video - none
+
+M: export_ogg.c
+D: (video) null | (audio) ogg
+C: none
+R: oggenc
+S: +
+I: Drives the oggenc binary. Encodes an Ogg/Vorbis file. Resamples.
+P: audio - PCM, video - none
+
+M: export_ppm.c
+D: (video) PPM/PGM | (audio) MPEG/AC3/PCM
+C: none
+R: none
+S: +
+I: Writes an image sequence of PGM or PPM files. PPM is an old format and there are several tools around to manipulate such files.
+P: audio - RAW (pass-through) PCM AC3, video - RGB YUV
+
+M: export_raw.c
+D: (video) * | (audio) MPEG/AC3/PCM
+C: none
+R: none
+S: +
+I: Can write uncompressed streams to an AVI file as well as raw mpeg2 files in pass-through mode. The image format for uncompressed streams can be selected with -F (use -F help to see available formats).
+P: audio - RAW (pass-through) PCM AC3, video - RAW (pass-through) RGB YUV DV YUV422
+
+M: export_toolame.c
+D: (audio) MPEG 1/2
+C: none
+R: toolame, sox
+S: +
+I: Drives the toolame binary to create MP2 audio tracks. Sox is used for resampling if requested.
+P: audio - PCM, video - none
+
+M: export_wav.c
+D: (audio) WAVE PCM
+C: none
+R: none
+S: +
+I: Creates WAVE PCM files with interleaved audio for stereo.
+P: audio - PCM, video - RAW (pass-through) RGB YUV
+
+M: export_xvid4.c
+D: (video) XviD 1.0.x series (aka API 4.0) | (audio) MPEG/AC3/PCM
+C: libmp3lame (only for MPEG audio layer III)
+R: libxvidcore.so.4
+S: +
+I: Encodes MPEG4 video using the library available from xvid.org. Check out the library from xvidcvs using cvs -d :pserver:anonymous@cvs.xvid.org:/xvid co -rdev-api-4 xvidcore. There is also a tool available to create configuration files for this xvid version at http://zebra.fh-weingarten.de/transcode/xvid4conf. The output can either be an AVI file or a MPEG4 elementary stream (with -F raw).
+P: audio - RAW (pass-through) PCM AC3, video - RGB YUV YUV422
+
+M: export_yuv4mpeg.c
+D: (video) YUV4MPEG2 | (audio) MPEG/AC3/PCM
+C: mjpegtools
+R: none
+S: +
+I: Writes the uncompressed raw YUV data in a YUV4MPEG format as used by the lav* and mjpeg* tools.
+P: audio - RAW (pass-through) PCM AC3, video - RGB YUV

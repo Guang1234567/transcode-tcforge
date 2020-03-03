@@ -1,0 +1,57 @@
+How to get credits-mode working
+-------------------------------
+You have to adjust the information in 'xvid2.cfg' as this:
+
+Common information:
+
+# use credits at the beginning of the movie (0 = no, 1 = yes)
+credits_start = 1
+
+# set XXX/YYY to begin/end frame of the start credits
+credits_start_begin = XXX
+credits_start_end   = YYY
+
+# use credits at the end of the movie (0 = no, 1 = yes)
+credits_end = 1
+
+# set XXX/YYY to begin/end frame of the end credits
+credits_end_begin = XXX
+credits_end_end   = YYY
+
+The frame numbers are relative to your encoding range; so if you start
+encoding at frame 100 and your credits start at frame 150, you have to
+set 'credits_start_begin = 50' !
+
+Credits mode:
+
+Via 'credits_mode' you can select from several modes for credit
+handling, each using different values:
+
+VBR_CREDITS_MODE_QUANT:
+# Use a fixed quant for all credit frames
+
+# use this when doing VBR_MODE_FIXED_QUANT
+credits_fixed_quant = 20
+
+# use this in all other VBR_MODEs...
+# ...for I-frames
+credits_quant_i = 20
+# ...for P-frames
+credits_quant_p = 20
+
+Annotation: If and only if credits_quant_i does not equal
+credits_quant_p, then I-frames appear in credits. All other modes do not
+generate I-frames within credits. This conflicts with this comment:
+/* We only care about Keyframes when not in credits */
+Maybe this does also need to be fixed, but I did never try this combination.
+
+VBR_CREDITS_MODE_RATE:
+# Use only 'credits_quant_ratio' % of the full encoding rate as
+# encoding rate for credit frames, e.g. with encoding rate 700kpbs
+# this uses 140kps for the credits
+credits_quant_ratio = 20
+
+VBR_CREDITS_MODE_SIZE:
+# Use a fixed size XXX/YYY for all opening/ending credit frames together
+credits_start_size = XXX
+credits_end_size   = YYY

@@ -1,0 +1,152 @@
+.TH tcmodchain 1 "5 January 2006" "tcmodchain(1)"
+.SH NAME
+tcmodchain \- Query compatibily of transcode modules chains.
+.SH SYNOPSIS
+.na
+.B tcmodchain
+] [
+.B -A
+] [
+.B -V
+] [
+.B -m
+.I path
+] [
+.B -C
+] [
+.B -L
+] [
+.B -d
+.I verbosity
+] [
+.B -v
+] module1 module2
+.SH COPYRIGHT
+\fBtcmodchain\fP is Copyright (C) by Transcode Team
+.SH DESCRIPTION
+.B tcmodchain
+allow to inspect transcode(1) modules, as well as it's companion,
+tcmodinfo(1). While tcmodinfo(1) focus on single modules, tcmodchain
+is intended to help in exploring/experimenting module interactions.
+.SH OPTIONS
+.TP
+.B -A
+check the modules capabilities against the Audio pipeline.
+You need to specify either -A or -V.
+.TP
+.B -V
+check the modules capabilities against the Video pipeline.
+You need to specify either -A or -V.
+.TP
+\fB-m\fP \fIpath\fP
+Look in \fIPath\fP instead of the compiled-in module path while
+trying to load a module.
+.TP
+.B -C
+Enable \fIcheck\fP mode.
+.br
+In check mode tcmodchain expects exactly two
+module identifiers. tcmodchain will check compatibilty between two
+given modules. Result will be logged out or not depending of
+verbosity level. Anyway, if two modules are compatible, tcmodchain
+will exit succesfully; otherwise, tcmodchain will exit with error.
+.br
+see RETURN VALUES below.
+.TP
+.B -L
+Enable \fIlist\fP mode.
+.br
+In list mode tcmodchain expects exactly two
+module identifiers, exactly one of which containing a wildcard.
+tcmodchain will inspect all avalaible installed modules matching
+the wildcard and will print out module names that are compatible
+with the other given one. if at least one compatible module is found,
+tcmodchain will exit succesfully; otherwise, tcmodchain will exit
+with error.
+.br
+see RETURN VALUES below.
+
+.TP
+\fB-d\fP \fIverbosity\fP
+Specify the verbosiness level to use, like transcode does. Default value
+is 1 (TC_INFO verbosiness).
+.TP
+.B -v
+Print version information and exit.
+.SH MODULE IDENTIFIERS
+.B tcmodchain
+identifies modules using a
+\fItype:name\fP
+naming scheme. Currently, as in transcode 1.1.0, only \fIencode\fP and \fImultiplex\fP
+module \fItype\fPs are supported. \fIname\fP can refer to the name of any avalaible
+transcode modules, using the same rules of tcmodinfo(1) \fI-i\fP option.
+The wildcard character \fI*\fP is supported in the \fIname\fP section of module
+identifier. Wildcard meaning is `any of avalaible modules' and is honoured only
+when \fIlist\fP mode (-L option) is used. Using wildcard character for \fIboth\fP
+module identifiers will lead to an error.
+
+.SH EXAMPLES
+.PP
+.B $ tcmodchain -V -C encode:null multiplex:null -d 1
+.PP
+[encode_null.so] v0.0.3 (2005-06-05) null (fake) A/V encoder
+.br
+[multiplex_null.so] v0.0.2 (2005-12-29) discard each encoded frame
+.br
+[tcmodchain] encode:null | multiplex:null [OK]
+.br
+[tcmodchain] module chain OK type video
+
+.PP
+.B $ tcmodchain -V -L 'encode:*' multiplex:null
+.PP
+copy
+.br
+lzo
+.br
+null
+.br
+x264
+.br
+xvid
+
+\fBPLEASE NOTE\fP that output of this example may vary depending of your installation.
+.br
+At least \fInull\fP and \fIcopy\fP modules will be showed on your output.
+
+.PP
+.B $ tcmodchain -A -L encode:null 'multiplex:*'
+.PP
+avi
+.br
+null
+.br
+raw
+
+.SH RETURN VALUES
+.B tcmodchain
+uses the following return values:
+.br
+ 0  successfull
+.br
+ 1  bad parameter or command line option
+.br
+ 2  error while (un)loading a module
+.br
+ 3  given module pair isn't compatible
+.br
+ 4  error while looking for module(s)
+.br
+
+
+
+.SH AUTHORS
+.B tcmodchain
+was written by Francesco Romani
+.br
+<fromani@gmail.com> with contributions from
+many others.  See AUTHORS for details.
+.SH SEE ALSO
+.BR transcode (1)
+.BR tcmodinfo (1)
+

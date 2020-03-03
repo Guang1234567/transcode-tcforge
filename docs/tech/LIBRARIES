@@ -1,0 +1,62 @@
+TRANSCODE LIBRARIES ORGANIZATION
+================================
+
+(OBSOLETE SINCE 20070427, see html documentation for an up-to-date information)
+
+>>> Introduction
+
+As part of 1.1.0 development cycle, an huge internal reorganization
+effort has undergone. Reorganization isn't yet (as 1.1.0 released)
+complete, and will involve every component in transcode codebase.
+This document provide an overview of reorganized internal transcode
+libraries, internal dependencies and purposes.
+
+GENERAL WARNING:
+transcode libraries are quite carefully designed and implemented
+in order to be independent, self contained as much as is possible,
+but they *are not* intended to be easily separated by transcode
+codebase and to be used in external projects. We don't care too
+much about API/ABI stability yet, and we don't do testing on
+this direction. Help us to improve code, or use it at own risk :)
+
+
+>>> Overview
+
+Library: aclib
+Dependencies: None
+Purpose:
+  provides accleretad, machine-dependent, utility functions
+  like memcpy, colorspace conversion routines and so on.
+
+Library: avilib
+Dependencies: None
+Purpose:
+  provide I/O stream access to AVI files. Only multiplexing/demultiplexing,
+  no encoding/decoding.
+
+Library: libtc
+Dependencies: None
+Purpose:
+  utility/helpers collection. Provides memory allocation/disposal, string
+  manipulation, I/O helper functions. Also holds all low-level code
+  shared between modules.
+
+Library: libtcinput
+Dependencies: libtc
+Purpose:
+  input layer abstraction. Provide access to stream data from heterogeneous
+  media through a common layer. That's `tccat' program foundation.
+
+Library: libtcaudio
+Dependencies: None
+Purpose:
+  provides various audio manipulation functions used by transcode core
+  and modules.
+
+Library: libtcvideo
+Dependencies: aclib
+Purpose:
+  provides various video manipulation functions used by transcode core
+  and modules.
+
+

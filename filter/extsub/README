@@ -1,0 +1,42 @@
+ExtSub - A subtitle extractor for VOB files Version 1.00
+
+By Sham Gardner (risctaker@risctaker.de)
+
+Released under version 2 of the GNU General public license. See the file
+COPYING for details.
+The license text is also available from http://www.gnu.org/copyleft/gpl.txt
+
+
+This program is for extracting  subtitles from DVD VOB files. It does not
+descramble CSS-encrypted files. To compile simpy type "make". The command
+line parameters are as follows:
+
+infile=<filename>     The VOB file from which to extract subtitles.
+
+videofile=<filename>  A file to which to write MPEG 2 video stream data.
+                      (optional, highly experimental)
+
+subname=<filename>    The prefix of all subtitle files (see below for
+                      details on the individual files).
+
+convscript=<filename> An optional shell script, which will invoke
+                      ImageMajick's "convert" utility to turn raw subtitle
+                      image files into TIFF files.
+
+id=<number>           The optional ID of the subtitle stream to be extracted
+                      (default is 0). The specification allows IDs 0-31.
+
+
+Each subtitle caption in the source file generates 3 output files with the
+suffixes ".gray", ".sub" and ".info".
+
+The .gray file is a raw 8bpp bitmap image of the caption. DVD subtitles
+however are only 2bpp. in order to see anything with the naked eye using
+a program such as Imagemajick's "convert". it will probably be necessary
+to use the Enhance->Normalise function.
+
+The .info file is a text file containing information about the caption, such
+as its resolution and and alpha channel data.
+
+The .sub file is the raw data as extracted from the VOB source. Details of
+its syntax is available from http://sam.zoy.org/doc/dvd/subtitles/

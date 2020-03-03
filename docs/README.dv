@@ -1,0 +1,39 @@
+By Peter Chiocchetti <pch14 at myzel dot net>
+
+DV only supports two resolutions: 720x576 for PAL, and 720x480
+for NTSC. Possibly, there is also 1920x1080.
+
+transcode allows other frame sizes too; playing these back in
+other applications will show as split images, or rolling
+seemingly random colours.
+
+libdv can be compiled to use either YUY2 or YV12 modes for PAL
+video, but there is no function for libdv to tell you which
+one it's using... so transcode runs a test frame through the
+decoder and tries to guess based on the result. If it gets it
+wrong, you can use either --dv_yuy2_mode or --dv_yv12_mode to
+force one or the other. The libdv default is YUY2.
+
+If the bar is only some pixels wide, you should be able to
+crop the image, and uncrop it again, adding black borders,
+instead of green ones - be sure the frame stays at the above
+sizes. Such a bar may be the result of a sampling error in the
+capture card or even in signal transmission.
+
+If you want to display on TV, you need not care of few green
+pixels at the bottom at all, as about 0 - 10% of the image
+will be offscreen anyways - the region TV sets and beamers
+display is closer to 640x480 than to 720x576 for PAL systems
+- see eg. the title-safe region in editing software.
+
+Example:
+
+This line captures from a pal source to pal dv and crops 64
+pixels from the bottom and adds it again as solid black -
+obviously the clipping params are non-intuitively, shouldnt
+the sequence be t,l,b,r?
+
+	transcode -q 2 -x v4l2 -i /dev/video0 \
+		-p /dev/dsp -g 720x576 -j 64,0,0,0 \
+		-Y -64,0,0,0 -y dvraw="qno=2" -o rec.dv \
+		-H 0 -n 0x1 -N 0x1 --uyvy --print_status 25

@@ -1,0 +1,215 @@
+.TH aviindex 1 "29th February 2004" "aviindex(1)"
+.SH NAME
+aviindex \- Write and read text files describing the index of an AVI file
+.SH SYNOPSIS
+.B aviindex
+[
+.B -o
+.I ofile
+.B -i
+.I ifile
+.B -f
+.B -n
+.B -x
+.B -v
+.B -h
+]
+.SH COPYRIGHT
+\fBaviindex\fP is Copyright (C) 2003,2004 by Tilmann Bitterberg
+.SH DESCRIPTION
+.B aviindex
+writes a text file describing the index of an AVI file. It analyses the
+content or index if available of the AVI file and prints this information in a
+human readable form.
+.PP
+An AVI file can have an optional chunk called "idx1" which contains
+information about keyframes (syncpoints) and locations of video
+frames resp. audio chunks. Though larger AVI files (>2-4GB), so-called 
+OpenDML AVI or also AVI 2 files, have a more complicated indexing 
+system, which consists of a superindex referring to (possibly) 
+several "standard" indexes, the "indexing principle" is the same.
+Movie players use such indexes to seek in files.
+.PP
+\fBaviindex\fP reads the AVI file \fIifile\fP and writes the index
+into \fIofile\fP. This can either happen in "dumb" mode where
+\fBaviindex\fP looks for an existing index (and trusts this index!)
+in the file and dumps this index into a human readable form. The
+"dumb" mode is used, when \fI-n\fP is NOT specified or when the
+filesize of the input file is smaller than 2 GB.
+.PP
+In "smart" mode, \fBaviindex\fP scans through the complete AVI file
+and searches for chunks (may that video or audio) and reconstructs
+the index based on the information found. If an index chunk is found
+accidently, \fBaviindex\fP will use the information in this index to
+recover the keyframe information, which is important. \fBaviindex\fP
+will use smart mode, if given the \fI-n\fP option OR if the AVI file
+is larger than 2 GB. If the file is large, the index chunk cannot be
+found the usual way so one must use \fI-n\fP but it is possible that
+there is an index chunk in this file. Cross fingers.
+.PP
+Also in smart mode, \fBaviindex\fP analyzes the content of the video frame and
+tries to detect keyframes by looking at the data depending on the video codec.
+.PP
+The generated index file serves different purposes.
+.RS
+.TP
+*
+The library which handles AVI files in transcode(1) can read such
+index files and use this file to rebuild the index instead of
+scanning through the whole AVI file over and over again. Reading the
+index from the index file is
+.B much
+faster than scanning through the
+AVI.
+.TP
+*
+It can be used as a seeking file. When given to transcode via the
+--nav_seek switch, transcode will use the file to seek directly to
+the position you specified via -c. This also works for multiple -c
+ranges.
+.TP
+*
+Its nice to have for debugging.
+.RE
+.SH OPTIONS
+.TP
+\fB-o\fP \fIofile\fP
+Specify the name of the output file.
+.TP
+\fB-i\fP \fIifile\fP
+Specify the name of the input file.
+.TP
+\fB-f\fP
+force the use of the existing index.
+.TP
+\fB-n\fP
+force generating the index by scanning the file.
+.TP
+\fB-x\fP
+(implies -n) don't use any existing index to generate keyframes.
+.TP
+\fB-v\fP
+show version.
+.TP
+\fB-h\fP
+show help text.
+.SH MPLAYER
+.B aviindex
+can convert from and to mplayer-generated index files. Since mplayer-1.0pre3 mplayer has the ability to save the index via
+.I \-saveidx
+FILE
+and load it again through
+.I \-loadidx
+FILE.
+.B aviindex
+is able to convert an mplayer index file to a transcode index file and vice
+visa. It is not able to directly write an mplayer file, though. Example of a
+toolchain
+.nf
+  mplayer -frames 0 -saveidx mpidx broken.avi
+  aviindex -i mpidx -o tcindex
+  avimerge -x tcindex -i broken.avi -o fixed.avi
+.fi
+Or the other way round
+.nf
+  aviindex -i broken.avi -n -o broken.idx
+  aviindex -i broken.idx -o mpidx
+  mplayer -loadidx mpidx broken.avi
+.fi
+The major differences between the two index file formats is that the mplayer
+one is a binary format which is an exact copy of an index in the AVI file.
+.B aviindex
+\'s format is text based. See
+.B FORMAT
+for details.
+.SH EXAMPLES
+The command
+.PP
+.nf
+  aviindex -i 3GBfile.avi -o 3GB.index
+.fi
+.PP
+generates and index of the large file 3GBfile.avi. You can use the
+file 3GB.index to tell transcode to read the index from this file
+and not from the avi. This leads to much faster startup time.
+.PP
+Suppose 3GBfile.avi has DivX video and PCM sound and you want to
+encode several ranges.
+.PP
+.nf
+transcode -V -i 3GBfile.avi --nav_seek 3GB.index \\
+\	-x xvid,avi \\
+\	-c 5000-6000,0:20:00-0:21:00,100000-100001 \\
+\	-y xvid --lame_preset standard -o out.avi
+.fi
+.SH FORMAT
+The format of the index file. The first 7 bytes in this file are
+"AVIIDX1" for easy detection and a comment of who created the file.
+The second line is a comment and describes the fields. Do not delete
+it. Each line (except the first 2) consists of exactly 8 fields all
+seperated by one space and describing one particular chunk of the AVI
+file.
+.br
+Here is an example of an AVI file with two audio tracks.
+.RS
+
+.nf
+AVIIDX1 # Generated by aviindex (transcode-0.6.8)
+TAG TYPE CHUNK CHUNK/TYPE POS LEN KEY MS
+00db 1 0 0 2048 8335 1 0.00
+01wb 2 1 0 10392 847 1 0.00
+01wb 2 2 1 11248 847 1 0.00
+02wb 3 3 0 12104 847 1 0.00
+02wb 3 4 1 12960 847 1 0.00
+00db 1 5 1 13816 5263 0 0.00
+00db 1 6 2 19088 3435 0 0.00
+01wb 2 7 2 22532 834 1 0.00
+.fi
+
+.RE
+The field \fITAG\fP is the chunk descriptor. Its "00d*" for the video,
+"01wb" for the first audio track, "02wb" for the second audio track
+and so on.
+.PP
+The field \fITYPE\fP is the type of the chunk. This is redundant because
+the type is also embedded into the TAG field but its a convenient
+thing to have. Its 1 for video, 2 for first audio track and 3
+for second audio track.
+.PP
+The field \fICHUNK\fP is the absolute chunk number in the AVI file. If you
+read the CHUNK field in the last line of the index file, you know
+how many chunks this AVI file has.
+.PP
+The field \fICHUNK/TYPE\fP holds information about how many chunks
+of this type were previously found in the AVI file.
+.PP
+The field \fIPOS\fP is the absolute byte position in the AVI file
+where this chunk can be found. Note this field can hold really large
+numbers if you are dealing with large AVIs.
+.PP
+The field \fILEN\fP is the length of this chunk.
+.PP
+The field \fIKEY\fP holds information if this chunk is a keyframe.
+In the example above, all audio chunks are key-chunks, but only the
+first video frame is a key frame. This field is either 0 or 1.
+.PP
+The field \fIMS\fP holds information about how many milliseconds
+have passed. This field may be 0.00 if unknown.
+.SH AUTHORS
+.B aviindex
+was written by Tilmann Bitterberg <transcode at tibit.org>
+.br
+and is part of transcode.
+.SH SEE ALSO
+.BR avifix (1),
+.BR avisync (1),
+.BR avimerge (1),
+.BR avisplit (1),
+.BR tccat (1),
+.BR tcdecode (1),
+.BR tcdemux (1),
+.BR tcextract (1),
+.BR tcprobe (1),
+.BR tcscan (1),
+.BR transcode (1),
+.BR mplayer (1)

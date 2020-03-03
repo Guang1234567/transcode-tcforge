@@ -1,0 +1,74 @@
+User-visible changes betwwen transcode 1.1.0 and transcode 1.2.0
+================================================================
+(Revision 1)
+
+Introduction
+------------
+
+This document outlines the user-visible changes between transcode
+1.1.x and transcode 1.2.0. If you find a difference that isn't
+documented here, please file a bug on tcforge.berlios.de and/or
+write us on transcode-devel@exit1.org.
+
+Configuration
+-------------
+
+Formerly-mandatory packages:
+- libavcodec
+- libavformat
+- libmpeg2/libmpeg2convert
+are now optional.
+
+Command line options:
+---------------------
+
+* -t/--split [changed]
+  the long name is now `--split_time'
+  accepts now only an argument, being the size of each output chunk,
+  in megabytes. The basename is now implied by -o.
+
+* --avi_limit [changed]
+  renamed in `--split_size'. This option now applies to each supported
+  output format.
+
+* --export_prof [changed]
+  accepts now any string (being a profile name) as argument.
+
+* -y/--export_with [changed]
+  accepts now keyword arguments. A keyword argument has the key=value
+  form, meaning that the ordering of field is no longer significant.
+  (this also mean that you're no longer forced to re-specify the leftmost
+  fields if you changed a rightmost).
+  Recognizes a third and fourth field for the muxer and auxiliary muxer
+  (useful if you specify -m) too.
+  This option is NO LONGER mandatory. (see -N below).
+  Examples (1.1.0 -> 1.2.0)
+
+  change the video export module:
+  -y foo -> -y V=foo
+
+  change the video and the audio export module:
+  -y foo,bar -> y V=foo,A=bar (equivalent: -y A=bar,V=foo)
+
+  change the audio export module:
+  -y same_as_before,foo -> -y A=foo
+
+* -N/--export_codec [changed]
+  accepts now keyword arguments. A keyword argument has the key=value
+  form, meaning that the ordering of field is no longer significant.
+  (this also mean that you're no longer forced to re-specify the leftmost
+  fields if you changed a rightmost).
+  transcode can now autodetect the appropriate export modules given the
+  export format (for encoders) and the output filename (for the muxer).
+  This mean that option -y is no longer mandatory (see above).
+
+
+
+Program Output:
+---------------
+
+(TODO/WIP)
+
+V: accel -> H: accel
+added thread line
+

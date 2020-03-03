@@ -1,0 +1,214 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Linux (vers 12 April 2005), see www.w3.org" />
+
+  <title>transcode internals</title>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=us-ascii" />
+  <meta name="Author" content="Francesco Romani" />
+  <meta name="Keywords" content="transcode architecture internals import autoprobe codec container demux decode" />
+  <meta name="Generator" content="ViM 7.x" />
+  <link rel="StyleSheet" href="tc_basic.css" type="text/css" media=
+  "screen" />
+</head>
+
+<body>
+  <div id="title" class="title">
+    <h1>Transcode - extending the import layer</h1>
+  </div>
+
+  <div id="summary">
+    <h3>Summary</h3>
+    <p>
+    This document explain how to extend transcode to support a new format in import.
+    This process usually involves adding support for a new codec and/or a new container.
+    Import layer in transcode is a thick one, and involves several parts: input layer (reading the
+    bare data from a source, usually but not exclusively a file from a filesystem), demultiplexing
+    layer (extracting the stream data), decoding layer (transforming the encoded samples in raw data)
+    and the probing layer (properly recognizing an encoded stream).
+    </p>
+    <p>
+        This document uses as much as is possible a tutorial/walk through structure.
+    It is intended to be a guide for newcomers more than a quick reference for
+    experienced users; neverthless, I'll do my best to be schematic, concise and
+    direct in exposition.   The u-Law format is used as rolling example; please note
+    that all the code (and almost all examples) shown here is working and included
+    in transcode itself.
+    </p>
+    <p>
+    This document assumes some basic knowledge of how transcode is structured, how multimedia
+    processing works (colorspaces, storing data) and about the layout of transcode
+    core data structures. The involved concepts are briefly and quickly recalled when needed,
+    but full explanation and discussion is demanded to other, specific documents.
+    </p>
+  </div>
+
+  <hr />
+  
+  <div id="index">
+    <table>
+      <tr>
+        <td><a href="#how_im_works">How import layer works</a></td>
+    <td>
+    <p>This paragraph provides an eagle-way overview of how import
+    layer works in transcode. This will explain briefly who does what,
+    how, when and why, informing the reader about the framework he is
+    working within. For more detailed notes about how transcode works,
+    see the other technical documents.
+    </p>
+    </td>
+      </tr>
+      <tr>
+        <td><a href="#subdividing">Subdividing the code</a></td>
+    <td>
+    <p>This paragraph gives some hints and suggestions about how
+    to organize the new code that you're going to add in order to
+    integrate nicely with existing transcode codebase. However,
+    those are mostly hints and suggestions; <b>mandatory</b> requirements
+    will be clearly made visible.
+    </p>
+    </td>
+      </tr>
+      <tr>
+        <td><a href="#extending">Extending the core</a></td>
+    <td>
+    <p>This paragraph highlights the changes needed to transcode core
+    to make it fully aware of new code that you're going to add, in
+    order to integrate it nicely and let the goodies like module hinting
+    and autodetection work properly.
+    </p>
+    </td>
+      </tr>
+      <tr>
+        <td><a href="#writing">Writing the import code</a></td>
+    <td>
+    <p>This paragraph is dedicated to the real hard work, to write
+    the new import code itself. The paragraph is structured as a 
+    walkthrough. As much as (working) sample code is used as example.
+    </p>
+    </td>
+      </tr>
+      <tr>
+        <td><a href="#last_bits">Last bits</a></td>
+    <td>
+    <p>Some final words :)
+    </p></td>
+      </tr>
+    </table>
+    </table>
+  </div>
+
+  <hr />
+
+  <div id="how_im_works">
+    <a name="how_im_works"><h4>How import layer works</h4></a>
+    <h5>The way of importing</h5>
+    <p>In a nutshell, the import event sequence is the following:
+    <ul>
+      <li>
+          Import source path (or pseudo path for non-file source like ALSA or X11) is taken
+          from commandline. Since import source (pseudo)path is a mandatory option, this step
+          cannot fail.
+      </li>
+      <li>
+          If audio source file isn't specified, audio source is assumed to be the same as video source.
+      </li>
+      <li>
+          Both video and audio source are probed using two separate tcprobe processes (XXX). The tcprobe
+      binary used is the same one avalaible from the command line.<br/>
+      Please note that if video and audio source are the same file, this will be probed <strong>twice</strong>.<br/>
+      Please also note that both audio and video sources are effectively opened by transcode core <strong>and</strong>
+      by tcprobe process(es), even if this doesn't usually happens contemporary. This is known to be a potential
+      cause of troubles with streaming sources and non-file sources.
+      </li>
+      <li>
+           Using the informations provided by tcprobe, transcode core set ups internal data structure describing the import sources
+       and select the appropriate import modules to use. This step is called <em>module autodetection</em>.
+      </li>
+      <li>
+           If module autodetection fails, modules to load are taken from commandline.
+       If no audio module is specified, a separate istance of user-selected video module is used for audio importing too.
+       If no import module is specified at all, operation is aborted.
+      </li>
+      <li>
+           Selected (by autodetection or by user) import modules are loaded, audio module first, then video module (XXX).
+           Both audio and video input sources are opened.
+      </li>
+      <li>
+           Audio and video import thread are then started. They immediately run. Each thread does as follows, until input stream ends:
+           <ul>
+             <li>
+               Import thread request an empty frame buffer to core, and blocks until the frame buffer is avalaible
+             </li>
+             <li>
+               Import thread reads a new packet/frame from requested track in input stream and store it in a private buffer.
+               This is the <em>demultiplex</em> step.
+               Demultiplex data is stored in a private buffer for old-style import modules; new-style import modules, yet
+               unsupported by transcode core, will deliver demultiplexed frames in regular frame buffers.
+             </li>
+             <li>
+              Import thread decodes the read raw data. This is the <em>decoding</em> step.
+              In old-style import modules, every import module must take care of read but not decoded data.
+              This will likely be true even for new-style import modules, but design isn't yet finalized.
+           </li>
+           <li>
+             Import thread fill the frame buffer got in first step with decoded data, and push back it to transcode core.
+           </li>
+         </ul>
+      </li>
+      <li>
+           When input stream ends (this is usually detected by catching a read error in demultiplex step), import thread delivers
+           to core one more zero-sized frames with a special flag activate, to mark the end of stream.
+      </li>
+      <li>
+           When end of stream is notified, import thread ends.
+      </li>
+      <li>
+           Transcode core wait for termination of import threads, then grab their exit status. Please note that this is
+           a smart wait (well, almost...) and <strong>not</strong> is a busy wait.
+      </li>
+      <li>
+           Import modules are unloaded, and both audio and video input sources are closed.
+      </li>
+      <li>
+           That's all folks!
+      </li>
+    </ul>
+    </p>
+    <h5>The probing dilemma</h5>
+    <p>As highlighted in previous paragraph, probing subprocess is suboptimal for a number of reasons. First and foremost,
+    while probing theorically belongs to import layer, and the code itself resides in import/ subdirectory, probing is
+    <strong>not</strong> done in import modules, but by a separate process.
+    Having probing in a separate process causes in turn a few more problems: no (easy) caching of read data, and each probed
+    stream is open <em>at least</em> twice (some code paths can lead to <em>three</em> open()s). This is known to cause some
+    troubles with non-file import sources like V4L.
+    Those are known problems, mostly caused by legacy issues, and will be addressed in future releases.
+    </p>
+  </div>
+
+  <div id="subdividing">
+    <a name="subdividing"><h4>Subdividing the code</h4></a>
+    <p>body of paragraph 2</p>
+  </div>
+
+  <div id="extending">
+    <a name="extending"><h4>Extending the core</h4></a>
+    <p>body of paragraph 3</p>
+  </div>
+
+  <div id="writing">
+    <a name="writing"><h4>Writing the import code</h4></a>
+    <p>body of paragraph 4</p>
+  </div>
+
+  <div id="last_bits">
+    <a name="last_bits"><h4>Last bits</h4></a>
+    <p>body of paragraph 5</p>
+  </div>
+</body>
+</html>

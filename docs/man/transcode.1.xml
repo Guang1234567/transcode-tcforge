@@ -1,0 +1,2637 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+                   "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<refentry id='transcode'>
+    
+    <refentryinfo>
+        <date>14th July 2008</date>
+    </refentryinfo>
+    
+    <refmeta>
+        <refentrytitle>transcode</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class='date'>14th July 2008</refmiscinfo>
+        <refmiscinfo class='source'>transcode(1)</refmiscinfo>
+    </refmeta>
+    
+    <refnamediv id='name'>
+        <refname>transcode</refname>
+        <refpurpose>LINUX video stream processing tool</refpurpose>
+    </refnamediv>
+    
+    <!-- body begins here -->
+    <refsynopsisdiv id='synopsis'>
+        <cmdsynopsis>
+            <command>transcode</command>    
+            <arg choice='plain'>
+                -i <replaceable>name</replaceable>
+            </arg>
+            <arg choice='opt'>
+                -o <replaceable>name</replaceable>
+            </arg>
+            <arg choice='opt'>
+                -y <replaceable>vmod,amod</replaceable>
+            </arg>
+            <arg choice='opt'>
+                <arg choice='plain'>
+                    -w <replaceable>vbitrate</replaceable>
+                </arg>
+                <arg choice='opt'>
+                    <arg choice='plain'>
+                        <replaceable>,vkeyframes</replaceable>
+                    </arg>
+                    <arg choice='opt'>
+                        <replaceable>,vcrispness</replaceable>
+                    </arg>
+                </arg>
+            </arg>
+            <arg choice='opt'>
+                <arg choice='plain'>
+                    -a <replaceable>atrack</replaceable>
+                </arg>
+                <arg choice='opt'>
+                    <replaceable>,vtrack</replaceable>
+                </arg>
+            </arg>
+            <arg choice='opt'>
+                <arg choice='plain'>
+                    -b <replaceable>abitrate</replaceable>
+                </arg>
+                <arg choice='opt'>
+                    <arg choice='plain'>
+                        <replaceable>,is_vbr</replaceable>
+                    </arg>
+                    <arg choice='opt'>
+                        <arg choice='plain'>
+                            <replaceable>,quality</replaceable>
+                        </arg>
+                        <arg choice='opt'>
+                            <replaceable>,mode</replaceable>
+                        </arg>
+                    </arg>
+                </arg>
+            </arg>
+            <arg choice='opt'>
+                -M <replaceable>demuxer_mode</replaceable>
+            </arg>
+            <arg choice='opt'>
+                -F <replaceable>codec_string</replaceable>
+            </arg>
+            <arg choice='opt'>
+                <arg choice='plain'>
+                    <replaceable>other</replaceable>
+                </arg>
+                <arg choice='plain'>
+                    <replaceable>options</replaceable>
+                </arg>
+            </arg>
+        </cmdsynopsis>
+    </refsynopsisdiv>
+    
+    <refsect1 id='quick_summary'>
+        <title>Quick Summary</title>
+        <para>
+            <command>transcode</command> supports a huge range of options, as described in detail in further
+            section. Only one option is mandatory: <option>-i name</option>, for supplying the input main
+            (video) source. All other options are discretionary and they can be skipped.
+            Most commonly needed options are <option>-o</option>, <option>-y</option>, <option>-w</option>, <option>-a</option>, <option>-b</option>,
+            <option>-M</option>, <option>-F</option> and a fair number of transcode session needs a little more than
+            those. See section below for full description of all transcode options.
+            To inspect the properties of a module, such as their parameters or the help text, use the 'tcmodinfo' tool.
+        </para>
+    </refsect1>
+    
+    <refsect1 id='description'>
+        <title>Description</title>
+        <para>
+            <command>transcode</command> is a linux text-console utility for video stream
+            processing, running on a platform that supports shared libraries and
+            threads.
+        </para>
+        <para>
+            It supports a huge range of options, as described in detail in further
+            section. Only one option is mandatory: <option>-i name</option>, for supplying the input main
+            (video) source. All other options are discretionary and they can be skipped.
+            Most commonly needed options are <option>-o</option>, <option>-y</option>, <option>-w</option>, <option>-a</option>, <option>-b</option>,
+            <option>-M</option>, <option>-F</option> and a fair number of transcode session needs a little more than
+            those. See section below for full description of all transcode options.
+        </para>
+        <para>
+            Decoding and encoding is done by loading modules that are responsible
+            for feeding transcode with raw video/audio streams (import modules)
+            and encoding the frames (export modules).
+        </para>
+        <para>
+            It supports elementary video and audio frame transformations,
+            including de-interlacing or fast resizing of video frames and loading
+            of external filters.
+        </para>
+        <para>
+            A number of modules are included to enable import of DVDs on-the-fly,
+            MPEG elementary (ES) or program streams (VOB), MPEG video, Digital
+            Video (DV), YUV4MPEG streams, NuppelVideo file format, AVI
+            based codecs and raw or compressed (pass-through) video
+            frames and export modules for writing DivX;-), XviD, DivX
+            4.xx/5.xx or uncompressed AVI and raw files with MPEG, AC3
+            (pass-through) or PCM audio.
+        </para>
+        <para>
+            Additional export modules to write single frames (PPM) or YUV4MPEG
+            streams are available, as well as an interface import module to the
+            avifile library.
+        </para>
+        <para>
+            It's modular concept is intended to provide flexibility and easy user
+            extensibility to include other video/audio codecs or filetypes. A set
+            of tools is included to demux (tcdemux), extract (tcextract) and
+            decode (tcdecode) the sources into raw video/audio streams for import,
+            probing (tcprobe) and scanning (tcscan) your sources and to enable
+            post-processing of AVI files, fixing AVI file header information
+            (avifix), merging multiple files (avimerge), splitting large AVI
+            files (avisplit) to fit on a CD and avisync to correct
+            AV-offsyncs.
+        </para>
+    </refsect1>
+    
+    <refsect1 id='options'>
+        <title>Options</title>
+        <variablelist>
+            <varlistentry>
+                <term>
+                    <option>-A </option>
+                </term>
+                <listitem>
+                    <para>
+                        use AC3 as internal audio codec [off]. Only pass-through supported.
+                    </para>
+                    
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-B </option>
+                    <emphasis>n[,m[,M]]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        resize to height-<emphasis>n</emphasis>*<emphasis>M</emphasis> rows [,width-<emphasis>m</emphasis>*<emphasis>M</emphasis>] columns [off,32]. <emphasis>M</emphasis> must be one of 8, 16 or 32. It makes no difference which M you use. You might look at the <emphasis>fast</emphasis> flag of the <option>-Z</option> option if you don not want to calculate <emphasis>n</emphasis> and <emphasis>m</emphasis> yourself.
+                    </para>
+                    
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-C </option>
+                    <emphasis>mode</emphasis>
+                </term>
+                <listitem>
+                    <para>enable anti-aliasing mode (1-3) [off].</para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>1</literal>
+                            </term>
+                            <listitem>
+                                <para>de-interlace effects only</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>2</literal>
+                            </term>
+                            <listitem>
+                                <para>resize effects only</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>3</literal>
+                            </term>
+                            <listitem>
+                                <para>process full frame (slow)</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-D </option>
+                    <emphasis>num</emphasis>
+                </term>
+                <listitem>
+                    <para>sync video start with audio frame num [0].</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-E </option>
+                    <emphasis>r[,b[,c]]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        audio output samplerate [Hz], bits per sample and channels [as input]. The option "-J resample" must be provided for export modules not capable of re-sampling. Samplerate and bits per sample can be specified as 0 to mean "same as input"; this allows converting from stereo to mono while leaving the other parameters alone (-E 0,0,1).</para>
+                    
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-F </option>
+                    <emphasis>codec_string</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        encoder parameter strings [module dependent]. The -F parameter has different meanings for different export modules. Those meanings are documented in <emphasis>transcode_export(1)</emphasis> manual page.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-G </option>
+                    <emphasis>val</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        Gamma correction (0.0-10.0) [off]. A value of 1.0 does not change anything. A value lower than 1.0 will make the picture "brighter", a value above 1.0 will make it "darker".
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-H </option>
+                    <emphasis>n</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        auto-probe <emphasis>n</emphasis> MB of source (0=disable) default [1]. Use a higher value than the default to detect all subtitles in the VOB.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-I </option>
+                    <emphasis>mode</emphasis>
+                </term>
+                <listitem>
+                    <para>enable de-interlacing mode (1-5) [off].</para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>1</literal>
+                            </term>
+                            <listitem>
+                                <para>
+                                    <emphasis>"interpolate scanlines"</emphasis>
+                                    linear interpolation (takes the average of the surronding even rows to determine the odd rows), and copies the even rows as is.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>2</literal>
+                            </term>
+                            <listitem>
+                                <para>
+                                    <emphasis>"handled by encoder"</emphasis>
+                                    tells the encoding code to handle the fact that the frames are interlaced. Most codecs do not handle this.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>3</literal>
+                            </term>
+                            <listitem>
+                                <para>
+                                    <emphasis>"zoom to full frame"</emphasis>
+                                    drops to to half size, then zooms out. This can cause excessive blurring which is not always unwanted. On the other hand results are quite good.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>4</literal>
+                            </term>
+                            <listitem>
+                                <para>
+                                    <emphasis>"drop field / half height"</emphasis>
+                                    drop every other field and keep half height.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>5</literal>
+                            </term>
+                            <listitem>
+                                <para>
+                                    <emphasis>"interpolate scanlines / blend frames"</emphasis>
+                                    linear blend (similar to -vop pp=lb in mplayer) this, like linear blend calculates the odd rows as the average of the surrounding even rows, and also calculates the even rows as an average of the original even rows and also calculates the even rows as an average of the original odd rows and averages the calculated and original rows. Something like avg (avg(row1,row3), avg(row2, row4))
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-J </option>
+                    <emphasis>filter1[,filter2[,...]]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        apply external filter plugins [off]. The avalaible import modules and their options are documented into the <emphasis>transcode_filter(1)</emphasis> manual page. <emphasis>Note:</emphasis> You can specify more than one -J argument. The order of filter arguments specify in which order the filters are applied. Note also, for transcode internally it makes no difference whether you do "-J filter1 -J filter2" or "-J filter1,filter2". Use 'tcmodinfo -i <emphasis>NAME</emphasis>' to get more information about the filter_<emphasis>NAME</emphasis>. Not all filters support this but most of them do. Some of the filter plugins have additional documentation in the docs/ directory.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-L </option>
+                    <emphasis>n</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        seek to VOB stream offset <emphasis>n</emphasis>x2kB default [0]. This option is usually calculated automatically when giving --nav_seek and -c.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-K </option>
+                </term>
+                <listitem>
+                    <para>
+                        enable black/white by removing colors mode (grayscale) [off]. Please note this does not necessarily lead to a smaller image / better compression. For YUV mode, this is done by emptying the chroma planes, for RGB mode a weightend grayscale value is computed.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-M </option>
+                    <emphasis>mode</emphasis>
+                </term>
+                <listitem>
+                    <para>select AV synchronization mode (0-5) [1].</para>
+                    
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <emphasis>Overview</emphasis>
+                            </term>
+                            <listitem>
+                                <para>
+                                    The import code takes care that the right video frames go together with the right audio frame. This can sometimes be a complex task and transcode tries to aid you as much as possible. <emphasis>WARNING:</emphasis> It does make a difference if you (the user) specifies a demuxer to use or if transcode resp. tcprobe(1) chooses the one which it thinks is right for your material. This is done on purpose to avoid mystic side-effects. So think twice, wether you specify a demuxer or let transcode choose one or you might end up with an off-sync result.
+The modes 0-4 are the historical transcode ones. They deal only with MPEG-like material and they can sometimes be ineffective. Modes starting from 5 are the new ones using the new synchronizer
+infrastructure. Those modes can be used with any kind of source material. The only drawback is that they are still under development.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>0</literal>
+                            </term>
+                            <listitem>
+                                <para>
+                                    Pass-through. Do not mess with the stream, switch off any synchronization/demuxing process.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>1</literal>
+                            </term>
+                            <listitem>
+                                <para>
+                                    PTS only (default). Synchronize video and audio by inspecting PTS/DTS time stamps of audio and
+                                    video. Preferred mode for PAL VOB streams and DVDs.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>2</literal>
+                            </term>
+                            <listitem>
+                                <para>
+                                    NTSC VOB stream synchronization feature. This mode generates synchronization information for transcode by analyzing the frame display time.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>3</literal>
+                            </term>
+                            <listitem>
+                                <para>
+                                    (like -M 1): sync AV at initial PTS, but invokes "-D/--av_fine_ms" options internally based on "tcprobe" PTS analysis. PTS stands for Presentation Time Stamp.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>4</literal>
+                            </term>
+                            <listitem>
+                                <para>
+                                    (like -M 2): initial PTS / enforce frame rate, with additional frame rate enforcement (for NTSC).
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>5</literal>
+                            </term>
+                            <listitem>
+                                <para>
+                    Enforce A/V sync by cloning or dropping frames.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-N </option>
+                    <emphasis>format</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        select export format. Default is mp3 for audio, and module-dependant format for video. This option has two different behaviours and accepts two different set of options, as side-effect of ongoing export module transition. For old-style modules (current default, as found in 1.0.x series), argument is audio format ID has hexadecimal value: see below for a list of recognized IDs. Default id, so default format for audio exported track, is MP3 (0x55). If you are using, the transcode's the new-style encode/multiplex modules (still under development, see the encode and multiplex directories), argument is a comma-separated pair of export format names. Use tcmodinfo tool to check out what new-style export module support what formats.
+                    </para>
+                    <para>Available format for old-style behaviour are:</para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <emphasis>0x1</emphasis>
+                            </term>
+                            <listitem>
+                                <para>PCM uncompressed audio</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <emphasis>0x50</emphasis>
+                            </term>
+                            <listitem>
+                                <para>MPEG layer-2 aka MP2</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <emphasis>0x55</emphasis>
+                            </term>
+                            <listitem>
+                                <para>
+                                    MPEG layer-3 aka MP3. Also have a look at --lame_preset
+                                    if you intend to do VBR audio.</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <emphasis>0x2000</emphasis>
+                            </term>
+                            <listitem>
+                                <para>AC3 audio</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <emphasis>0xfffe</emphasis>
+                            </term>
+                            <listitem>
+                                <para>OGG/Vorbis audio</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-O </option>
+                </term>
+                <listitem>
+                    <para>skip flushing of buffers at encoder stop [off, do flushing at each stop].</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-P </option>
+                    <emphasis>flag</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        pass-through flag (0=off|1=V|2=A|3=A+V) [0]. Pass-through for <emphasis>flag</emphasis> != 1 is broken and not a trivial thing to fix.
+                    </para>
+                    <para>
+                        You can pass-through DV video, AVI files and MPEG2 video. When doing MPEG2 pass-through (together with the -y raw module), you can give a requantization factor by using -w (for example -w 1.5), this will make the MPEG2 stream smaller.
+                    </para>
+                    <para>
+                        The pass-through mode is useful for reconstruction of a broken index of an AVI file. The -x ffmpeg import-module analyzes the compressed bitstream and can detect a keyframe for DIV3, MPEG4 (DivX, XviD, ..) and other formats. It then sets an internal flag which the export module will respect when writing the frame out.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-Q </option>
+                    <emphasis>n[,m]</emphasis>
+                </term>
+                <listitem>
+                    <para>encoding[,decoding] quality (0=fastest-5=best) [5,5].</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-R </option>
+                    <emphasis>n[,f1[,f2]]</emphasis>
+                </term>
+                <listitem>
+                    <para>enable multi-pass encoding (0-3) [0,divx4.log,pcm.log].</para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>0</literal> Constant bitrate (CBR) encoding. [default]
+                            </term>
+                            <listitem>
+                                <para>
+                                    The codec tries to achieve constant bitrate output. This means, each encoded frame is mostly the same size. This type of encoding can help in maintaining constant filling of hardware buffer on set top players or smooth streaming over networks. By the way, Constant bitrate is often obtained sacrifying quality during high motion scenes.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>1</literal> Variable bitrate encoding: First pass.
+                            </term>
+                            <listitem>
+                                <para>
+                                    In this mode, the codec analyses the complete sequence in order to collect data that can improve the distribution of bits in a second VBR pass. The collected data is written to second sub argument (default: divx4.log). This data is codec dependant and cannot be used across codecs. It is strongly advised to use the same codec settings for the VBR analysis pass and the VBR encoding pass if you want predictable results.
+                                </para>
+                                <para>
+                                    The video output of the first pass is not of much use and can grow very large. It's a good idea to not save the video output to a file but directly to /dev/null. Usually the bitrate is ignored during first pass.
+                                </para>
+                                <para>
+                                    Disabling audio export makes sense too, so use -y codec,null. It is <emphasis>not</emphasis> recommended to disable the audio <emphasis>import</emphasis> because transcode might drop video frames to keep audio and video in sync. This is not possible when the audio import is disabled. It may lead to the fact that the codec will see a different sequence of frames which effectively renders the log file invalid.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>2</literal> Variable bitrate encoding: Second pass.
+                            </term>
+                            <listitem>
+                                <para>
+                                    The first pass allowed the codec collecting data about the complete sequence. During the second pass, the codec will use that data in order to find an efficient bit distribution that respects both the desired bitrate and the natural bitrate curve shape. This ensures a good compromise between quality and desired bitrate.
+                                </para>
+                                <para>
+                                    Make sure you activate both sound and video encoding during this pass.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>3</literal> Constant quantizer encoding.
+                            </term>
+                            <listitem>
+                                <para>
+                                    The quantizer is the "compression level" of the picture. The lower the quantizer is, the higher is the quality of the picture. This mode can help in making sure the sequence is encoded at constant quality, but no prediction can be made on the final bitrate. When using this mode, the <option>-w</option> option changes its meaning, it now takes the quantizer ranging from 1 to 31. Note that constant quantizer encoding is not supported with some codecs (notably mpeg1/2/4 with -y ffmpeg).
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-S </option>
+                    <emphasis>unit[,s1-s2]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        process program stream unit[,s1-s2] sequences [0,all]. This option is a bit redundant to --psu*. This option lets you specify which units you want to have decoded or skipped. At a program stream unit boundary, all (internal) mpeg timers are reset to 0. tcprobe will tell you how many units are in one file.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-T </option>
+                    <emphasis>t[,c[,a]]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        select DVD title[,chapter[,angle]] [1,1,1]. Only a single chapter is transcoded. Use <option>-T</option> 1,-1 to trancode all chapters in a row. You can even specify chapter ranges.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-U </option>
+                    <emphasis>base</emphasis>
+                </term>
+                <listitem>
+                    <para>process DVD in chapter mode to base-ch%02d.avi [off].</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-V </option>
+                    <emphasis>format</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        select video layout / colour space for internal processing. Possible values for this options are: yuv420p (default), yuv422p, rgb24
+                    </para>
+                    <para>
+                        yuv420p is default because it is most codecs' internal format so there is no need for conversions. Some modules may not support it though: use rgb in that case.
+                    </para>
+                    <para>
+                        rgb24 is the old (pre-0.6.13) transcode internal format. Most codecs do not support this format natively and have to convert it to/from YUV first, so only use this option if you're really sure or you want to use a module that doesn't support YUV.
+                    </para>
+                    <para>
+                        yuv422p is an experimental feature and a developers playground. Not many import, export and filter modules support this colorspace. A 4:2:2 colorspace offers much more quality than the consumer oriented 4:2:0 colorspaces like I420/YV12. Most equipment in film and video post-production uses YUV422. YUV422 doubles the precision for chroma (color difference) information in the image.
+                    </para>
+                    <para>
+                        All internal transformations are supported in YUV422 mode (clipping, flipping, zooming, etc).
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-W </option>
+                    <emphasis>n,m[,nav_file]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        autosplit and process part <emphasis>n</emphasis> of <emphasis>m</emphasis> (VOB only) [off]
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-X </option>
+                    <emphasis>n[,m,[M]]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        resize to height+<emphasis>n</emphasis>*<emphasis>M</emphasis> rows [,width+<emphasis>m</emphasis>*<emphasis>M</emphasis>] columns [off,32]. M must be one of 8, 16 or 32. It makes no difference which M you use. You might look at the <emphasis>fast</emphasis> flag of the <option>-Z</option> option if you do not want to calculate <emphasis>n</emphasis> and <emphasis>m</emphasis> yourself.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-Y </option>
+                    <emphasis>top[,left[,bottom[,right]]]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        select (encoder) frame region by clipping border. Negative values add a border [off].
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-Z </option>
+                    <emphasis>widthxheight[,fast|interlaced]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        resize to <emphasis>width</emphasis> columns, <emphasis>height</emphasis> rows with filtering [off,notfast,notinterlaced]. If <emphasis>fast</emphasis> is given, transcode will calculate the parameters for <option>-X</option> and/or <option>-B</option>. The file <option>fast</option> can only be used when the import and export geometry of an image is a multiple of 8.
+                    </para>
+                    <para>
+                        In fast mode, a faster but less precise resizing algorithm will be used resulting in a slightly less good quality. Beside this (small) drawback, it is worth a try.
+                    </para>
+                    <para>
+                        If <emphasis>interlaced</emphasis> is given, transcode will assume the frame is interlaced when resizing, and resize each field independently. This will give better results on interlaced video, but is incompatible with fast mode. Also, the height (both old and new) must be a multiple of 4.
+                    </para>
+                    <para>
+                        It is also possible to omit <emphasis>width</emphasis> OR <emphasis>height</emphasis>. In this case, transcode will calculate the missing value using the import aspect ratio. The new value will be aligned to be a multiple of 8. Using an additional <emphasis>fast</emphasis> or <emphasis>interlaced</emphasis> is also possible.
+                    </para>
+                    <para>Examples (assume input is a 16:9 coded file at 720x576):</para>
+                    <literallayout>
+                        -Z 576x328           uses filtered zoom.
+                        -Z 576x328,fast      uses fast zoom.
+                        -Z 576x,fast         guess 328 and do fast zoom.
+                        -Z x328,interlaced   guess 576 and do interlaced zoom.
+                    </literallayout>
+                    <para>
+                        If you also set <option>--export_prof</option>, you can use just "fast" to indicate that fast resizing is wanted (likewise with "interlaced").
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-a </option>
+                    <emphasis>ach[,vch]</emphasis>
+                </term>
+                <listitem>
+                    <para>extract audio[,video] track for encoding.</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-b </option>
+                    <emphasis>b[,v,[q,[m]]]</emphasis>
+                </term>
+                <listitem>
+                    <para>audio encoder bitrate kBits/s[,vbr[,quality[,mode]]] [128,0,5,0]</para>
+                    <para>
+                        The <emphasis>mode</emphasis> parameter specifies which modus lame should use for encoding. Available modes are:
+                    </para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>0</literal>
+                            </term>
+                            <listitem>
+                                <para>Joint Stereo (default)</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>1</literal>
+                            </term>
+                            <listitem>
+                                <para>Full stereo</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>2</literal>
+                            </term>
+                            <listitem>
+                                <para>Mono</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-c </option>
+                    <emphasis>f1-f2[,f3-f4[, ... ] ]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        encode only frames <emphasis>f1-f2</emphasis> [and <emphasis>f3-f4</emphasis>]. Default is to encode all available frames.  Use this and you'll get statistics about remaining encoding time. The <emphasis>f[N]</emphasis> parameters may also be timecodes in the HH:MM:SS.FRAME format. Example:
+                    </para>
+                    <literallayout>
+                        -c 500-0:5:01,:10:20-1:18:02.1
+                    </literallayout>
+                     <para>
+                         Will encode only from frame 500 to 5 minutes and 1 second and from 10 min, 20 sec to 1 hour, 18 min, 2 sec and one frame.
+                     </para>
+                     <para>
+                         Note that transcode starts counting frames at <literal>0</literal> and excludes the last frame specified. That means that "<option>-c</option> 0-100" will encoded 100 frames starting at frame <literal>0</literal> up to frame <literal>99</literal>
+                     </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-d </option>
+                </term>
+                <listitem>
+                    <para>
+                        swap bytes in audio stream [off]. In most cases, DVD PCM audio tracks require swapping of audio bytes
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-e </option>
+                    <emphasis>r[,b[,c]]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        PCM audio stream parameter. Sample rate [Hz], bits per sample and number of channels [48000,16,2]. Normally this is autodetected.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-f </option>
+                    <emphasis>rate[,frc]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        import video frame rate[,frc] [25.000,0]. If <emphasis>frc</emphasis> (frame rate code) is specified, transcode will calculate the precise frames per second internally. Valid values for <emphasis>frc</emphasis> are:
+                    </para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>1</literal>
+                            </term>
+                            <listitem>
+                                <para>23.976 (24000/1001.0)</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>2</literal>
+                            </term>
+                            <listitem>
+                                <para>24</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>3</literal>
+                            </term>
+                            <listitem>
+                                <para>25</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>4</literal>
+                            </term>
+                            <listitem>
+                                <para>29.970 (30000/1001.0)</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>5</literal>
+                            </term>
+                            <listitem>
+                                <para>30</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>6</literal>
+                            </term>
+                            <listitem>
+                                <para>50</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>7</literal>
+                            </term>
+                            <listitem>
+                                <para>59.940 (2 * 29.970)</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>8</literal>
+                            </term>
+                            <listitem>
+                                <para>60</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>9</literal>
+                            </term>
+                            <listitem>
+                                <para>1</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>10</literal>
+                            </term>
+                            <listitem>
+                                <para>5</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>11</literal>
+                            </term>
+                            <listitem>
+                                <para>10</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>12</literal>
+                            </term>
+                            <listitem>
+                                <para>12</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>13</literal>
+                            </term>
+                            <listitem>
+                                <para>15</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-g </option>
+                    <emphasis>WidthxHeight</emphasis>
+                </term>
+                <listitem>
+                    <para>video stream frame size [720x576].</para>
+                    
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-h</option>
+                </term>
+                <listitem>
+                    <para>print out usage information.</para>
+                    
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-i </option>
+                    <emphasis>name</emphasis>
+                </term>
+                <listitem>
+                    <para>input file/directory/device/mountpoint/host name, default is [/dev/zero].</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-j </option>
+                    <emphasis>top[,left[,bottom[,right]]]</emphasis>
+                </term>
+                <listitem>
+                    <para>select frame region by clipping border. Negative values add a border [off].</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-k </option>
+                </term>
+                <listitem>
+                    <para>swap red/blue (Cb/Cr) in video frame [off]. Use if people have blue faces.</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-l </option>
+                </term>
+                <listitem>
+                    <para>mirror video frame [off].</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-m </option>
+                    <emphasis>file</emphasis>
+                </term>
+                <listitem>
+                    <para>write audio stream to separate file [off].</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-n </option>
+                    <emphasis>0xnn</emphasis>
+                </term>
+                <listitem>
+                    <para>import audio format id [0x2000]. Normally, this is autodetected.</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-o </option>
+                    <emphasis>file</emphasis>
+                </term>
+                <listitem>
+                    <para>output file name, default is [/dev/null].</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-p </option>
+                    <emphasis>file</emphasis>
+                </term>
+                <listitem>
+                    <para>read audio stream from separate file [off].</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-q </option>
+                    <emphasis>debuglevel</emphasis>
+                </term>
+                <listitem>
+                    <para>possible values for debuglevel:</para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>0</literal>
+                            </term>
+                            <listitem>
+                                <para>QUIET</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>1</literal>
+                            </term>
+                            <listitem>
+                                <para>INFO</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>2</literal>
+                            </term>
+                            <listitem>
+                                <para>DEBUG</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>4</literal>
+                            </term>
+                            <listitem>
+                                <para>STATS</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>8</literal>
+                            </term>
+                            <listitem>
+                                <para>WATCH</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>16</literal>
+                            </term>
+                            <listitem>
+                                <para>FLIST</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>32</literal>
+                            </term>
+                            <listitem>
+                                <para>VIDCORE</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>64</literal>
+                            </term>
+                            <listitem>
+                                <para>SYNC</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>128</literal>
+                            </term>
+                            <listitem>
+                                <para>COUNTER</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>256</literal>
+                            </term>
+                            <listitem>
+                                <para>PRIVATE</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-r </option>
+                    <emphasis>n[,m]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        reduce video height/width by n[,m] [off]. Example: <option>-r</option> 2 will rescale the framesize of a 720x576 file to 360x288.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-s </option>
+                    <emphasis>gain,[center,[front,[rear]]]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        increase volume of audio stream by gain,[center,front,rear] default [off,1,1,1].
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-t </option>
+                    <emphasis>n,base</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        split output to <emphasis>base</emphasis>%03d.avi with <emphasis>n</emphasis> frames [off].
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-u </option>
+                    <emphasis>m[,n]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        use <emphasis>m</emphasis> framebuffer[,<emphasis>n</emphasis> threads] for AV processing [10,1].
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-v </option>
+                </term>
+                <listitem>
+                    <para>print version.</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-w </option>
+                    <emphasis>b[,k[,c]]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        encoder bitrate[,keyframes[,crispness]] [(6000 for MPEG 1/2, 1800 for others),250,100].
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--video_max_bitrate </option>
+                    <emphasis>b</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        Use <emphasis>b</emphasis> as maximal bitrate (kbps) when encoding variable bitrate streams.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-x </option>
+                    <emphasis>vmod[,amod]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        video[,audio] import modules [auto,auto]. If omitted, transcode will probefor appropriate import modules. The avalaible import modules and their options are documented into the <emphasis>transcode_import(1)</emphasis> manual page.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>-y </option>
+                    <emphasis>vmod[,amod[,mmod]]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        video[,audio[,multiplex]] export modules [null].  If omitted, transcode will encode to the <emphasis>null</emphasis> module.  If a multiplex module is given, transcode will use the new-style encode/multiplex modules (still under development, see the encode and multiplex directories); if no multiplex module is given, the traditional export modules will be used. The avalaible export, encoder and multiplexor modules and their options are documented into the <emphasis>transcode_export(1)</emphasis> manual page.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--accel </option>
+                    <emphasis>type</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        enforce experimental IA32 acceleration for type [autodetect]. <emphasis>type</emphasis> may be one of
+                    </para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <emphasis>C</emphasis>
+                            </term>
+                            <listitem>
+                                <para>No acceleration</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <emphasis>ia32asm</emphasis>
+                            </term>
+                            <listitem>
+                                <para>plain x86 assembly</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <emphasis>mmx</emphasis>
+                            </term>
+                            <listitem>
+                                <para>MMX instruction set</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <emphasis>3dnow</emphasis>
+                            </term>
+                            <listitem>
+                                <para>3DNow! instruction set</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <emphasis>sse</emphasis>
+                            </term>
+                            <listitem>
+                                <para>SSE instruction set</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <emphasis>sse2</emphasis>
+                            </term>
+                            <listitem>
+                                <para>SSE2 instruction set</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--avi_limit </option><emphasis>N</emphasis><emphasis></emphasis>
+                </term>
+                <listitem>
+                    <para>split/rotate output AVI file after N MB [2048].</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--avi_comments </option>
+                    <emphasis>F</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        Read AVI header comments from file <filename>F</filename> [off]. The AVI file format supports so-called tomb-stone data. It can be used to write annotations into the AVI file.
+                    </para>
+                    <para>
+                        See the file <filename>docs/avi_comments.txt</filename> for a sample input file with all tags. When the file is read, empty lines and lines starting with '#' are ignored. The syntax is: "TAG&lt;space&gt;STRING". The order of the tags does not matter. If a tag has no string following it, it is ignored. That means, you can use the file docs/avi_comments.txt as input and only fill out the fields you want.
+                    </para>
+                    <para>A very simple example is:</para>
+                    <literallayout>
+                        ----------------snip----------------
+                        INAM My 1st Birthday
+                        ISBJ My first steps!
+                        IART My proud family
+                        ----------------snip----------------
+                    </literallayout>
+                    <para>
+                        Keep in mind that there is no endless space in the AVI header, most likely its around 1000 bytes.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--zoom_filter </option>
+                    <emphasis>string</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        use filter string for video resampling <option>-Z</option> [Lanczos3] The following filters are available:
+                    </para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>Bell</term>
+                            <listitem><para></para></listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>Box</term>
+                            <listitem><para></para></listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>Lanczos3 (default)</term>
+                            <listitem><para></para></listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>Mitchell</term>
+                            <listitem><para></para></listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>Hermite</term>
+                            <listitem><para></para></listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>B_spline</term>
+                            <listitem><para></para></listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>Triangle</term>
+                            <listitem><para></para></listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>Cubic_Keys4</term>
+                            <listitem><para></para></listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>Sinc8</term>
+                            <listitem><para></para></listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--cluster_percentage </option>
+                </term>
+                <listitem>
+                    <para>use percentage mode for cluster encoding <option>-W</option>> [off]</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--cluster_chunks </option>
+                    <emphasis>a-b</emphasis>
+                </term>
+                <listitem>
+                    <para>process chunk range instead of selected chunk [off]</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--export_asr </option>
+                    <emphasis>C</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        set export aspect ratio code <emphasis>C</emphasis> [as input] Valid codes for <emphasis>C</emphasis> are:
+                    </para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>1</literal>
+                            </term>
+                            <listitem>
+                                <para>1:1</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>2</literal>
+                            </term>
+                            <listitem>
+                                <para>4:3</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>3</literal>
+                            </term>
+                            <listitem>
+                                <para>16:9</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>4</literal>
+                            </term>
+                            <listitem>
+                                <para>2.21:1</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--export_prof </option>
+                    <emphasis>S</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        WARNING: this option will be renamed as <option>--export_profile</option> in future releases.
+                    </para>
+                    <para>
+                        Select an export profile {vcd, svcd, xvcd, dvd} [-pal|-ntsc|-secam]. Default is no profile.
+                    </para>
+                    <para>
+                        If you set this meta option to one of the values below, transcode will adjust some internal paramaters as well as geometry and clipping. If no export modules are specified, mpeg2enc for video and mp2enc for audio are used when compiled with mjpegtools support.
+                    </para>
+                    <para>
+                        Valid values for <emphasis>S</emphasis> are e.g. vcd, vcd-pal, vcd-ntsc, svcd, svcd-pal, ...
+                    </para>
+                    <para>
+                        xvcd profile is equal to svcd except that it allows for up to 9000 Kbps video bitrate (default is 5000) and arbitrary audio samplerate.
+                    </para>
+                    <para>
+                        When one of the above is used, transcode will calculate the needed clipping and resizing values for you based on the import and export aspect ratio. This is especially handy if you want to encode a 16:9 DVD into a 4:3 SVCD for example. Transcode internally then sets --pre_clip to add the black bars ("letterboxing").
+                    </para>
+                    <para>
+                        If you use "vcd" instead of "vcd-pal" or "vcd-ntsc", transcode will make an educated guess if PAL or NTSC vcd is wanted. The same is true for the other profiles. When the input file has no aspect ratio information at all, transcode guesses it based on the import frame sizes. You can set the import aspect ratio by giving <option>--import_asr</option> CODE.
+                    </para>
+                    <para>Examples (assume input is a 16:9 coded file at 720x576 (PAL)):</para>
+                    <literallayout>
+                        --export_prof svcd      clip top/bot -96; resizes to 480x576
+                        --export_prof vcd-ntsc  clip top/bot -96; resizes to 352x240
+                    </literallayout>
+                    <para>
+                        This enables simpilified commandlines where transcode tries to set sensible values for mpeg export. When you don't specify an export module with -y, mpeg2enc will be used.
+                    </para>
+                    <literallayout>
+                        transcode -i vob/ --export_prof svcd -Z fast -o test
+                    </literallayout>
+                    <para>
+                        The ffmpeg export module `-y ffmpeg' does support profiles as well. The module tries to be smart and sets internal ffmpeg parameters which are otherwise quite tricky to find out. Usage is similar to the above.
+                    </para>
+                    <literallayout>
+                        transcode -i vob/ --export_prof dvd -y ffmpeg -o test -m test.ac3
+                        tcmplex -m d -i test.m2v -p test.ac3 -o test.mpg
+                    </literallayout>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--export_par </option>
+                    <emphasis>C[,N]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        set export pixel aspect ratio to <emphasis>C</emphasis>[,<emphasis>N</emphasis>]. To encode anamorphic material, transcode can encode the target pixel aspect ratio into the file. This is NOT the actual aspect ratio of the image, but only the amount by which every single pixel is stretched when played with an aspect ratio aware application, like mplayer.
+                    </para>
+                    <para>
+                        To encode at non standard aspect ratios, set both <emphasis>C</emphasis> and <emphasis>N</emphasis>. E.g. to make every pixel twice as high as it's wide (e.g. to scale back to normal size after deinterlacing by dropping every second line).
+                    </para>
+                    <para>
+                        If <emphasis>C</emphasis> and <emphasis>N</emphasis> are specified, the value set for <emphasis>C</emphasis> does give the pixel aspect ratio of the width and <emphasis>N</emphasis> the one for the height. If only <emphasis>C</emphasis> is specified, the table below applies.
+                    </para>
+                    <para>Valid codes for <emphasis>C</emphasis> are</para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>1</literal>
+                            </term>
+                            <listitem>
+                                <para>1:1   No stretching</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>2</literal>
+                            </term>
+                            <listitem>
+                                <para>12:11 5:4 image to 4:3  (ex: 720x576 -&gt;  768x576)</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>3</literal>
+                            </term>
+                            <listitem>
+                                <para>10:11 3:2 image to 4:3  (ex: 720x480 -&gt;  640x480)</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>4</literal>
+                            </term>
+                            <listitem>
+                                <para>16:11 5:4 image to 16:9 (ex: 720x576 -&gt; 1024x576)</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>5</literal>
+                            </term>
+                            <listitem>
+                                <para>40:33 3:2 image to 16:9 (ex: 720x480 -&gt;  872x480)</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--import_asr </option>
+                    <emphasis>C</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        set import aspect ratio code <emphasis>C</emphasis> [autoprobed]
+                    </para>
+                    <para>Valid codes for <emphasis>C</emphasis> are</para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>1</literal>
+                            </term>
+                            <listitem>
+                                <para>1:1</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>2</literal>
+                            </term>
+                            <listitem>
+                                <para>4:3</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>3</literal>
+                            </term>
+                            <listitem>
+                                <para>16:9</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>4</literal>
+                            </term>
+                            <listitem>
+                                <para>2.21:1</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+ 
+            <varlistentry>
+                <term>
+                    <option>--resync_interval</option>
+                </term>
+                <listitem>
+                    <para>set how often the resynchronization engine should check form A/V drift, and correct it if needed.</para>
+                <para>It is recommended to use a resync interval which is an exact multiple of fps value.</para>
+                <para>Please note that not all resynchronization engines can honour this option.</para>
+                </listitem>
+            </varlistentry>
+ 
+            <varlistentry>
+                <term>
+                    <option>--resync_margin</option>
+                </term>
+                <listitem>
+                    <para>set the maximum allowed A/V drift, expressed in frames.</para>
+                    <para>When the resynchronization engine checks for drift correction, it takes action if and only
+                    if the drift threshold equals or exceeds the given margin.</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--keep_asr </option>
+                </term>
+                <listitem>
+                    <para>try to keep aspect ratio (only with -Z) [off]</para>
+                    <para>
+                        The <option>--keep_asr</option> options changes the meaning of <option>-Z</option>. It tries to fit the video into a framesize specified by <option>-Z</option> by keeping the <emphasis>original</emphasis> aspect ratio.
+                    </para>
+                    <literallayout>
+                        +----------------+                            +---480-----+
+                        |                |                            | black     |
+                        |720x306 = 2.35:1| -&gt; -Z 480x480 --keep_asr -&gt;|-----------4
+                        |                |                            | 480x204   8
+                        +----------------+                            |-----------0
+                        | black     |
+                        +-----------+
+                    </literallayout>
+                    <para>
+                        Consider <option>--keep_asr</option> a wrapper for calculating <option>-Y</option> options and <option>-Z</option> options.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--mplayer_probe </option>
+                </term>
+                <listitem>
+                    <para>
+                        use external mplayer binary to probe stream, reset default import modules as mplayer ones [off]. Default is to use internal probing code. Using this option without mplayer import modules (<option>-x</option> mplayer) can lead to unpredictable and possibly wrong results.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--quantizers </option>
+                    <emphasis>min,max</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        set encoder min/max quantizer. This is meaningfull only for video codecs of MPEG family. For other kind of codecs, this options is harmless. [2,31]
+                    </para>
+                    
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--divx_rc </option>
+                    <emphasis>p,rp,rr</emphasis>
+                </term>
+                <listitem>
+                    <para>divx encoder rate control parameter [2000,10,20]</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--divx_vbv_prof </option>
+                    <emphasis>N</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        divx5 encoder VBV profile (0=free-5=hiqhq) [3]. Sets a predefined profile for the Video Bitrate Verifier. If <emphasis>N</emphasis> is set to zero, no profile is applied and the user specified values from <option>--divx_vbv</option> are used.
+                    </para>
+                    <para>Valid profiles</para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>0</literal>
+                            </term>
+                            <listitem>
+                                <para>Free/No profile   ( Use supplied values )</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>1</literal>
+                            </term>
+                            <listitem>
+                                <para>Handheld  ( 320, 16, 3072 )</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>2</literal>
+                            </term>
+                            <listitem>
+                                <para>Portable  ( 1920, 64, 12288 )</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>3</literal>
+                            </term>
+                            <listitem>
+                                <para>Home Theatre  ( 10000, 192, 36864 )</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>4</literal>
+                            </term>
+                            <listitem>
+                                <para>High Definition   ( 20000, 384, 73728 )</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--divx_vbv </option>
+                    <emphasis>br,sz,oc</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        divx5 encoder VBV params (bitrate,size,occup.) [10000,192,36864] These parameters are normally set through the profile parameter <option>--divx_vbv_prof</option>. Do not mess with theses value unless you are absolutely sure of what you are doing. Transcode internally multiplicates vbv_bitrate with 400, vbv_size with 16384 and vbv_occupancy with 64 to ensure the supplied values are multiples of what the encoder library wants.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--export_fps </option>
+                    <emphasis>rate[,frc]</emphasis>
+                </term>
+                <listitem>
+                    <para>set export frame rate (and code) [as input].Valid values
+                        for <emphasis>frc</emphasis> are
+                    </para>
+                    <para>frc rate</para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <literal>1</literal>
+                            </term>
+                            <listitem>
+                                <para>23.976    (24000/1001.0)</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>2</literal>
+                            </term>
+                            <listitem>
+                                <para>24</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>3</literal>
+                            </term>
+                            <listitem>
+                                <para>25</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>4</literal>
+                            </term>
+                            <listitem>
+                                <para>29.970    (30000/1001.0)</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>5</literal>
+                            </term>
+                            <listitem>
+                                <para>30</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>6</literal>
+                            </term>
+                            <listitem>
+                                <para>50</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>7</literal>
+                            </term>
+                            <listitem>
+                                <para>59.940    (2 * 29.970)</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>8</literal>
+                            </term>
+                            <listitem>
+                                <para>60</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>9</literal>
+                            </term>
+                            <listitem>
+                                <para>1</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>10</literal>
+                            </term>
+                            <listitem>
+                                <para>5</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>11</literal>
+                            </term>
+                            <listitem>
+                                <para>10</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>12</literal>
+                            </term>
+                            <listitem>
+                                <para>12</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <literal>13</literal>
+                            </term>
+                            <listitem>
+                                <para>15</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--export_frc </option>
+                    <emphasis>F</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        set export frame rate code <emphasis>F</emphasis> [as input]. <emphasis>Obsolete</emphasis>, use <option>--export_fps</option> 0,F
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--hard_fps </option>
+                </term>
+                <listitem>
+                    <para>
+                        disable smooth dropping (for variable fps clips) [off]. See /docs/framerate.txt for more information.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--pulldown </option>
+                </term>
+                <listitem>
+                    <para>set MPEG 3:2 pulldown flags on export [off]</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--antialias_para </option>
+                    <emphasis>w,b</emphasis>
+                </term>
+                <listitem>
+                    <para>center pixel weight, xy-bias [0.333,0.500]</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--no_audio_adjust </option>
+                </term>
+                <listitem>
+                    <para>disable internal audio frame sample adjustment [off]</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--config_dir </option>
+                    <emphasis>dir</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        Assume config files are in this <emphasis>dir</emphasis>. This only affects the -y ffmpeg and -y xvid4 modules. It gives the path where the modules search for their configuration.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--lame_preset </option>
+                    <emphasis>name[,fast]</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        use lame preset with <emphasis>name</emphasis> [off]. Lame features some built-in presets. Those presets are designed to provide the highest possible quality. They have for the most part been subject to and tuned via rigorous listening tests to verify and achieve this objective. These are continually updated to coincide with the latest developments that occur and as a result should provide you with nearly the best quality currently possible from LAME. Any of those VBR presets can also be used in fast mode, using the new vbr algorithm. This mode is faster, but its quality could be a little lower. To enable the fast mode, append "<emphasis>,fast</emphasis>"
+                    </para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <emphasis>&lt;N kbps&gt;</emphasis>
+                            </term>
+                            <listitem>
+                                <para>
+                                    Using this preset will usually give you good quality at a specified bitrate. Depending on the bitrate entered, this preset will determine the optimal settings for that particular situation. While this approach works, it is not nearly as flexible as VBR, and usually will not reach the same quality level as VBR at higher bitrates. ABR.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <emphasis>medium</emphasis>
+                            </term>
+                            <listitem>
+                                <para>
+                                    This preset should provide near transparency to most people on most music. The resulting bitrate should be in the 150-180kbps range, according to music complexity. VBR.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <emphasis>standard</emphasis>
+                            </term>
+                            <listitem>
+                                <para>
+                                    This preset should generally be transparent to most people on most music and is already quite high in quality.  The resulting bitrate should be in the 170-210kbps range, according to music complexity. VBR.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <emphasis>extreme</emphasis>
+                            </term>
+                            <listitem>
+                                <para>
+                                    If you have extremely good hearing and similar equipment, this preset will provide slightly higher quality than the "standard" mode. The resulting bitrate should be in the 200-240kbps range, according to music complexity. VBR.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <emphasis>insane</emphasis>
+                            </term>
+                            <listitem>
+                                <para>
+                                    This preset will usually be overkill for most people and most situations, but if you must have the absolute highest quality with no regard to filesize, this is the way to go. This preset is the highest preset quality available.  320kbps CBR.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                (taken from <ulink url="a">http://www.mp3dev.org/mp3/doc/html/presets.html)</ulink>
+                            </term>
+                            <listitem>
+                                <para></para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--av_fine_ms </option>
+                    <emphasis>t</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        AV fine-tuning shift <emphasis>t</emphasis> in millisecs [autodetect] also see -D.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--nav_seek </option>
+                    <emphasis>file</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        use VOB or AVI navigation file [off]. Generate a nav file with tcdemux -W &gt;nav_log for VOB files or with aviindex(1) for AVI files.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--psu_mode </option>
+                </term>
+                <listitem>
+                    <para>
+                        process VOB in PSU, -o is a filemask incl. %d [off]. PSU means Program Stream Unit and this mode is useful for (mostly) NTSC DVDs which have several program stream units.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--psu_chunks </option>
+                    <emphasis>a-b</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        process only selected units <emphasis>a-b</emphasis> for PSU mode [all]
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--no_split </option>
+                </term>
+                <listitem>
+                    <para>
+                        encode to single file in chapter/psu/directory mode [off]. If you don't give this option, you'll end up with several files in one of the above mentioned modes. It is still possible to merge them with avimerge(1).
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--multi_input </option>
+                </term>
+                <listitem>
+                    <para>
+                        <emphasis>(EXPERIMENTAL)</emphasis> enable multiple input mode: intelligently join input files in import. The inputs can be expressed using standard POSIX globbing. While theorically all input modules are supported, it is safe to use this only when dealing with constant-sized audio (PCM) and intra-frame only video codecs (es: MJPEG). To be safe, use this mode with im, ffmpeg and raw import modules.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--pre_clip </option>
+                    <emphasis>t[,l[,b[,r]]]</emphasis>
+                </term>
+                <listitem>
+                    <para>select initial frame region by clipping border [off]</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--post_clip </option>
+                    <emphasis>t[,l[,b[,r]]]</emphasis>
+                </term>
+                <listitem>
+                    <para>select final frame region by clipping border [off]</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--a52_drc_off </option>
+                </term>
+                <listitem>
+                    <para>
+                        disable liba52 dynamic range compression [enabled]. If you dont specify this option, liba52 will provide the default behaviour, which is to apply the full dynamic range compression as specified in the A/52 stream. This basically makes the loud sounds softer, and the soft sounds louder, so you can more easily listen to the stream in a noisy environment without disturbing anyone.
+                    </para>
+                    <para>
+                        If you let it enabled this this will totally disable the dynamic range compression and provide a playback more adapted to a movie theater or a listening room.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--a52_demux </option>
+                </term>
+                <listitem>
+                    <para>demux AC3/A52 to separate channels [off]</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--a52_dolby_off </option>
+                </term>
+                <listitem>
+                    <para>
+                        disable liba52 dolby surround [enabled]. Selects whether the output is plain stereo (if the option is set) or if it is Dolby Pro Logic - also called Dolby surround or 3:1 - downmix (if the option is not used).
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--no_log_color </option>
+                </term>
+                <listitem>
+                    <para>
+                        disable colored log messages. By default transcode use colors in log messages in order to easily distinguish message classes. That behaviour can be problematic if output of transcode is a file or a pipe, so this option came handful.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--dir_mode </option>
+                    <emphasis>base</emphasis>
+                </term>
+                <listitem>
+                    <para>process directory contents to base-%03d.avi [off]</para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--frame_interval </option>
+                    <emphasis>N</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        select only every <emphasis>N</emphasis>th frame to be exported [1]
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--encode_fields </option>
+                    <emphasis>C</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        enable field based encoding (if supported) [off]. This option takes an argument if given to denote the order of fields. If the option is not given, it defaults to progressive (do not assume the picture is interlaced)
+                    </para>
+                    <para>
+                        Valid codes for <emphasis>C</emphasis> are:
+                    </para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <emphasis>p</emphasis>
+                            </term>
+                            <listitem>
+                                <para>progressive (default)</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <emphasis>t</emphasis>
+                            </term>
+                            <listitem>
+                                <para>top-field first</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <emphasis>b</emphasis>
+                            </term>
+                            <listitem>
+                                <para>bottom-field first</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--dv_yuy2_mode, --dv_yv12_mode</option>
+                </term>
+                <listitem>
+                    <para>
+                        Indicates that libdv decodes Digital Video frames in YUY2 (packed) or YV12 (planar) mode, respectively. Normally transcode figures out the correct mode automatically, but if you try to transcode PAL DV files and the results look strange, try one of these options.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--write_pid </option>
+                    <emphasis>file</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        write pid of signal thread to <emphasis>file</emphasis> [off]. Enables you to terminate transcode cleanly by sending a SIGINT (2) to the pid in <emphasis>file</emphasis>. Please note <emphasis>file</emphasis> will be overwritten. Usage example
+                    </para>
+                    <literallayout>
+                        $ transcode ... --write_pid /tmp/transcode.pid &amp;
+                        $ kill -2 `cat /tmp/transcode.pid`
+                    </literallayout>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--nice </option>
+                    <emphasis>N</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        set niceness to <emphasis>N</emphasis> [off]. The option --nice which renices transcode to the given positive or negative value. -10 sets a high priority; +10 a low priority. This might be useful for cluster mode.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--progress_meter </option>
+                    <emphasis>N</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        select type of progress meter [1]. Selects the type of progress message printed by transcode:
+                    </para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <emphasis>0</emphasis>
+                            </term>
+                            <listitem>
+                                <para>no progress meter</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <emphasis>1</emphasis>
+                            </term>
+                            <listitem>
+                                <para>standard progress meter</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>
+                                <emphasis>2</emphasis>
+                            </term>
+                            <listitem>
+                                <para>raw progress data (written to standard output)</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                    <para>
+                        Scripts that need progress data should use type 2, since the format of type 1 is subject to change without notice.
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--progress_rate </option>
+                    <emphasis>N</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        print progress every <emphasis>N</emphasis> frames [1]. Controls how frequently the status message is printed (every <emphasis>N</emphasis> frames).
+                    </para>
+                </listitem>
+            </varlistentry>
+            
+            <varlistentry>
+                <term>
+                    <option>--socket </option>
+                    <emphasis>FILE</emphasis>
+                </term>
+                <listitem>
+                    <para>
+                        Open a socket to accept commands while running. See <emphasis>tcmodinfo(1)</emphasis> and /docs/filter-socket.txt for more information about the protocol.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+    </refsect1>
+    
+    <refsect1 id='environment'>
+        <title>ENVIRONMENT</title>
+        <variablelist>
+            <varlistentry>
+                <term>
+                    <emphasis>TRANSCODE_NO_LOG_COLOR</emphasis>
+                </term>
+                <listitem>
+                    <para>if set, forces the colored logging off for all the tools of transcode suite.</para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+    </refsect1>
+    
+    <refsect1 id='notes'>
+        <title>Notes</title>
+        <variablelist>
+            <varlistentry>
+                <term>*</term>
+                <listitem>
+                    <para>Most source material parameter are auto-detected.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>*</term>
+                <listitem>
+                    <para>Clipping region options are expanded symmetrically.  Examples:</para>
+                    <para>-j 80 will be expanded to -j 80,0,80,0</para>
+                    <para>-j 80,8 will be expanded to -j 80,8,80,8</para>
+                    <para>-j 80,8,10 will be expanded to -j 80,8,10,8</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>*</term>
+                <listitem>
+                    <para>maximum image size is 1920x1088.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>*</term>
+                <listitem>
+                    <para>
+                        The video frame operations ordering is fixed: "-j -I -X -B -Z -Y -r -z -l -k -K -G -C" (executed from left to right).
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>*</term>
+                <listitem>
+                    <para>
+                        Shrinking the image with '-B' is not possible if the image width/height is not a multiple of 8, 16 or 32.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>*</term>
+                <listitem>
+                    <para>
+                        Expanding the image with '-X' is not possible if the image width/height is not a multiple of 8, 16 or 32.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>*</term>
+                <listitem>
+                    <para>
+                        The final frame width/height should be a multiple of 8. (to avoid encoding problems with some codecs)
+                    </para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>1.</term>
+                            <listitem>
+                                <para>
+                                    Reducing the video height/width by 2,4,8 Option '-r factor' can be used to shrink the video image by a constant factor, this factor can be 2,4 or 8.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>2.</term>
+                            <listitem>
+                                <para>
+                                    Clipping and changing the aspect ratio <command>transcode</command> uses 3 steps to produce the input image for the export modules
+                                </para>
+                                <variablelist>
+                                    <varlistentry>
+                                        <term>1.</term>
+                                        <listitem>
+                                            <para>Clipping of the input image.</para>
+                                        </listitem>
+                                    </varlistentry>
+                                    <varlistentry>
+                                        <term>2.</term>
+                                        <listitem>
+                                            <para>Changing the aspect ratio of the 1) output.</para>
+                                        </listitem>
+                                    </varlistentry>
+                                    <varlistentry>
+                                        <term>3.</term>
+                                        <listitem>
+                                            <para>Clipping of the 2) output.</para>
+                                        </listitem>
+                                    </varlistentry>
+                                </variablelist>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>*</term>
+                <listitem>
+                    <para>
+                        <emphasis>Bits per pixel</emphasis>
+                        (bits/pixel) is a value transcode calculates and prints when starting up. It is mainly useful when encoding to MPEG4 (xvid, divx, etc). You'll see line like
+                    </para>
+                    <para>[transcode] V: bits/pixel       | 0.237</para>
+                    <para>
+                        Simplified said, bits/pixel quantifies how good an encode will be. Although this value depends heavily on the used input material, as a general rule of thump it can be said that values greater or close to 0.2 will result in good encodes, encodes with values less than 0.15 will have noticeable artifacts.
+                    </para>
+                    <para>
+                        <emphasis>Bits per pixel</emphasis>
+                        depends on the resolution, bitrate and frames per second. If you have a low value ( &lt; 0.15), you might want to raise the bitrate or encode at a lower resolution. The exact formula is
+                    </para>
+                    <literallayout>
+                            bitrate*1000
+                        bpp =  ------------------
+                            width*height*fps
+                    </literallayout>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>*</term>
+                <listitem>
+                    <para>
+                        <emphasis>AC3 / Multiple channels</emphasis>
+                    </para>
+                    <para>
+                        When you do import an audio stream which has more then two audio channels - this is usually the case for AC3 audio - transcode will automagically downmix to two channels (stereo). You'll see line like
+                    </para>
+                    <para>[transcode] A: downmix          | 5 channels -&gt; 2 channels</para>
+                    <para>
+                        This is done, because most encoders and audio filters can not handle more than 2 channels correctly. The PCM internal representation does not support more than two channels, audio will be downmixed to stereo <emphasis>No</emphasis> downmix will happen, if you use AC3 as the internal audio codec or use audio pass-through.
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+    </refsect1>
+    
+    <refsect1 id='examples'>
+        <title>Examples</title>
+        <para>
+            The following command will read it's input from the DVD drive (I assume <filename>/dev/dvd</filename> is a symbolic link to the actual DVD device) and produce a splitted divx4 movie according to the chapter information on the DVD medium.  The output files will be named <emphasis>my_movie-ch00.avi</emphasis>, <emphasis>my_movie-ch01.avi</emphasis> ...
+        </para>
+        <literallayout>
+            <userinput>
+                transcode -i /dev/dvd/ -x dvd -j 16,0 -B 5,0 -Y 40,8 -s 4.47 -U my_movie -y xvid -w 1618
+            </userinput>
+        </literallayout>
+        <para>
+            Option <option>-j 16,0</option> will be expanded to <option>-j 16,0,16,0</option> and results in 16 rows from the top and the bottom of the image to be cut off. This may be usefull if the source consists of black top and bottom bars.
+        </para>
+        <para>
+            Option <option>-B 5,0</option> tells <command>transcode</command> to shrink the resulting image by 5*32=160 rows in height.
+        </para>
+        <para>
+            Option <option>-Y 40,8</option> will be expanded to <option>-Y 40,8,40,8</option> and tells <command>transcode</command> to ...
+        </para>
+        <para>
+            Option <option>-s 4.47</option> tells <command>transcode</command> to increase audio volume by a factor 4.47.
+        </para>
+        <para>
+            Option <option>-U my_movie</option> tells <command>transcode</command> to operate in chapter mode and produce output to files named <emphasis>my_movie-ch00.avi</emphasis>, <emphasis>my_movie-ch01.avi</emphasis>.... You can either merge the files afterwards with avimerge or add the option --no_split to the command line.
+        </para>
+        <para>
+            Option <option>-y xvid</option> tells <command>transcode</command> to use the export module export_xvid.so which in turn uses the XviD encoder to encode the video.
+        </para>
+        <para>
+            Option <option>-w 1618</option> tells <command>transcode</command> to set the encoder bitrate to 1618 which is lower than the default of 1800 and results in smaller files with the loss of visual quality.
+        </para>
+        <variablelist>
+            <varlistentry>
+                <term>Lets assume that you have an NTSC DVD (720x480) and you want to make an NTSC-SVCD</term>
+                <listitem>
+                    <para>
+                        The frame size of the DVD movie is 720x480 @ 16:9. For the purpose of frame resizing, the width 720 is not relavant (that is, it will not be used in the following reasoning). It is not needed because the original frame size is really defined by the frame height and aspect ratio. The _final result_ should be 640x480, encoded as 480x480 @ 4:3 (the height 480 multiplied by the aspect ratio 4:3 gives the width 640). This same frame size (640x480) can also be encoded as 640x360 @ 16:9
+                        (the height 360 by the aspect ratio 16:9 gives the width
+                        640).
+                    </para>
+                    <para>
+                        As the _original video_ has aspect ratio 16:9, first we resize to 640x360, keeping that aspect ratio. But the aspect ratio has to be changed to 4:3. To find the frame size in the new aspect ratio the height 360 is multiplied by the new aspect ratio, giving the width 480. This is accomplished with the transcode options "<option>--export_asr</option> 2 -Z 480x360,fast".
+                    </para>
+                    <para>
+                        To avoid stretching the video height in this change (because the new aspect ratio is less than the original), black borders should be added at the top and bottom of the video, bringing the frame to the desired 480x480 @ 4:3 size. The transcode option for this is "-Y -60,0,-60,0".
+                    </para>
+                    <para>
+                        If for some reason (maybe a subtitle filter) the black borders (of height 60 each) should be added before resizing the frame and changing the aspect ratio to 4:3. One reason for that would be the need of running a _pre_ filter after adding the black borders. Then the options "-j" or "--pre_clip" can be used instead of "-Y". In this case the black border height has to be recalculated by applying the aspect ratio 4:3 to the value alreadyfound: 60 * (4/3) = 80. The transcode options "-j -80,0,-80,0" or "--pre_clip -80,0,-80,0" are then used instead of "-Y -60,0,-60,0", and "-Z 480x360,fast" is replaced by "-Z 480x480,fast".
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+    </refsect1>
+    
+    <refsect1 id='authors'>
+        <title>Authors</title>
+        <para>
+            Written by Thomas Oestreich &lt;ostreich@theorie.physik.uni-goettingen.de&gt;, 
+            Tilmann Bitterberg and the Transcode-Team
+        </para>
+        <para>
+            See the <emphasis>AUTHORS</emphasis> file for details.
+        </para>
+    </refsect1>
+    
+    <refsect1 id='see_also'>
+        <title>See Also</title>
+        <para>
+            <citerefentry>
+                <refentrytitle>transcode_export</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+            ,
+            <citerefentry>
+                <refentrytitle>transcode_filter</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+            ,
+            <citerefentry>
+                <refentrytitle>transcode_import</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+            ,
+            <citerefentry>
+                <refentrytitle>avifix</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+            ,
+            <citerefentry>
+                <refentrytitle>avisync</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+            ,
+            <citerefentry>
+                <refentrytitle>avimerge</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+            ,
+            <citerefentry>
+                <refentrytitle>avisplit</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+            ,
+            <citerefentry>
+                <refentrytitle>tcprobe</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+            ,
+            <citerefentry>
+                <refentrytitle>tcscan</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+            ,
+            <citerefentry>
+                <refentrytitle>tccat</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+            ,
+            <citerefentry>
+                <refentrytitle>tcdemux</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+            ,
+            <citerefentry>
+                <refentrytitle>tcextract</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+            ,
+            <citerefentry>
+                <refentrytitle>tcdecode</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+            ,
+            <citerefentry>
+                <refentrytitle>tcmodinfo</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+            ,
+            <citerefentry>
+                <refentrytitle>tcxmlcheck</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+            ,
+            <citerefentry>
+                <refentrytitle>transcode</refentrytitle><manvolnum>1</manvolnum>
+            </citerefentry>
+        </para>
+        <!-- .br -->
+    </refsect1>
+    
+    <refsect1 id='www'>
+        <title>WWW</title>
+        <para>
+            Frequently asked questions (FAQ) at 
+            <ulink url='a'>
+                http://www.transcoding.org/cgi-bin/transcode?Transcode_FAQ
+            </ulink>
+            Example transcode sessions at 
+            <ulink url='a'>
+                http://www.transcoding.org/cgi-bin/transcode?Command_Examples
+            </ulink>
+        </para>
+    </refsect1>
+    
+    <refsect1 id='bugs'>
+        <title>Bugs</title>
+        <para>
+            Yes, there are bugs in transcode!
+            Do your part and report them immediately.
+        </para>
+        <para>
+            For details, see 
+            <ulink url='a'>
+                http://www.transcoding.org/cgi-bin/transcode?Reporting_Problems
+            </ulink>
+        </para>
+    </refsect1>
+</refentry>
+

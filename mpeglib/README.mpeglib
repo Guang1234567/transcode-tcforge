@@ -1,0 +1,419 @@
+
+    MPEGlib - a lightweight MPEG muxer/demuxer
+=============================================================================
+                                         Francesco Romani <fromani@gmail.com>
+                                                   Package Version: 0.2.3
+
+
+OVERVIEW:
+-----------------------------------------------------------------------------
+MPEGlib is a lightweight library which provides only MPEG muxing/demuxing
+facilities. It aims to implement the 'Systems' portion of ISO/IEC 13818 
+(MPEG2) standard. It can produce a MPEG stream from given A/V frames or can 
+extract A/V packets from a MPEG stream (or anything which resembles a MPEG 
+stream). MPEGlib does not provide any codec capability. You must use libmpeg2 
+(for decoding only) or libavcodec (for encoding and decoding) for codec 
+facilities. MPEGlib is heavily based on TCVP (http://tcvp.sf.net) MPEG code, 
+as stated in (bundled) LICENSE documentation; as the original code, 
+MPEGlib is released under MIT License.
+
+MPEGlib was created in order to have a stand-alone, modular, reusable and
+easily undestandable MPEG muxer/demuxer, and in order to gain more knowledge
+about standard and format :)
+
+As for releases <= 0.2.x, MPEGlib provides read-only access to MPEG files.
+
+
+NAMING
+-----------------------------------------------------------------------------
+The official name for project is 'MPEGlib'. It should be always referred
+with this name in documentation, comments, code and so on. Otherwise, you
+have found a bug: please report it :)
+Library file itself is called 'libMPEG*' (case matters) to achieve 
+conformance to standard and pratices. This will be the only exception to
+naming policy.
+All _exported_ symbols (please note that mpeg-private.h _should_ not be
+exported!) from MPEGlib should have prefix MPEG_ (for constant, macros...),
+or mpeg_ (for functions, structures...).
+
+
+DEVELOPMENT CYCLE
+-----------------------------------------------------------------------------
+When in heavy development stage (pre-1.0 releases, especially pre-0.5/0.6
+releases), all development occurs in SVN HEAD branch.
+Development process isn't continuous, but "discrete". Changes are grouped
+in quantums, and after each quantum a new entry is added into separate 
+ChangeLog, with date, which gives an overview of the introduced changes.
+After a quantum and a changelog entry is added, internal change counter
+is increased, so every changelog also has a "pseudo-release" information,
+the 'devX' label.
+To summarize, the 'devX' releases are intended to development use only,
+just like SVN snapshot. There is only one notable difference between devX
+pseudo-release and a SVN snapshot: a devX pseudo-release SHOULD always 
+compile and pass basic tests, arbitrary SVN snapshot does not guarantee 
+nothing. Pseudo-releases are exposed just for reference for the author(s),
+to track progress.
+When we think to have enough changes to reach a milestone (see ROADMAP below),
+the Release Candidate (rc) process starts. Allowed changes to codebase
+regards only bug-fixing or adding (more) documentation. A RC always refers
+to an 'official' release (but we are still in early develompment phase, so 
+weird things may happen, even if this shouldn't happen (hopefully)), which 
+haves the canonical form: MAJOR.MINOR.PATCHLEVEL.
+When we have fixed enough bugs (real or supposed) in a RC version, the
+official release comes out. 
+After a release, development starts again from the released codebase with
+a new dev(X+N) pseudo release, and so on.
+
+This will change after the 1.0.0, but this will happen in the far future,
+so no detailed plans, now :)
+
+
+USING MPEGlib:
+-----------------------------------------------------------------------------
+See comments on code, especially on header files, and examples provided 
+on tools/.
+
+
+KNOWN BUGS:
+-----------------------------------------------------------------------------
+NEED_FIX:
+1. mpeg_pes_read_packet() isn't fully tested
+2. provide unit testing
+3. memory hooks documentation is missing
+4. lazy probe is untested
+5. documentation of private functions
+6. broken start_time while probing
+7. broken PTS in tools/mpprobe
+8. VOB handling could be optimized (less bigger reads)
+
+SHOULD_FIX:
+1. in some points coding syle isn't consistent
+2. audio codec id sporadic misdetection
+3. move macros to enum where is possible and update codebase
+4. unhandled probing temporary failures
+
+MAYBE_FIX:
+- N/A
+
+
+ROADMAP:
+-----------------------------------------------------------------------------
+- v0.1.0: library ready (shared and static), tested, reliable, 
+          supporting PS read
+  (2005-09-05)
+- v0.2.0: full so support, stream autoprobe (MPEG_TYPE_ANY in mpeg_open),
+          error reporting, stream information recovery even without a 
+          program stream map, tcprobe regression test, EOF misdetection 
+          fixes
+  (2005-09-12)
+-- v0.2.1: update ES with last fancy features introduced for PS
+           explicit probing method, open flags (can disable probe at open)
+  (2005-09-18)
+-- v0.2.2: ES support roundup, test and improve error resilience 
+           (delayed for 0.2.3), error reporting roundup, malloc hooks, 
+           fix reverse order audio detection bug. 
+           mpegstrip delayed for post-0.4.0 (see below to figure out why).
+  (2005-09-25)
+-- v0.2.3: Fix issues on mpeg_pes_{next,read}_packet()
+           tools roundup, add transcode module(s)
+  (2005-10-??)
+-- v0.2.4: Calm down things and write a bunch of tests
+           add a strerror() like function
+           start with more detailed ChangeLog
+  (2005-10-??)
+-- v0.2.5: Address naming issues, reduce maps size
+           review PS probing (generalize it if is possible).
+  (2005-10-??)
+-- v0.2.6: lpcm probing support, mpprobe and pr_regtest.sh roundup, 
+           malloc hooks/handling documentation.
+           First public release?
+  (2005-11-??)
+- v0.3.0: PS write support as for read support in 0.1.0
+          separate vob and system stuff?
+  (2006-01-01)
+- v0.4.0: I/O model rewritten totally: try to obtain 
+          zero-copy from fd and/or mmap, reduce malloc pressure
+  (2006-??-??)
+- v0.5.0: make code (more?) reentrant and thread safe
+          maybe TS read support? Seek support? 
+          Fixing unresolved issues from 0.4.x
+  (2006-??-??)
+
+
+TESTING:
+-----------------------------------------------------------------------------
+You need the 'check' package (http://check.sf.net) to run tests in test/ 
+directory.
+You also need 'tcextract' (and of course some source material) from 
+'transcode' package to run included regression test.
+
+
+SOURCE OVERVIEW
+-----------------------------------------------------------------------------
+mpeg-base.c             - basic MPEGlib support: memory allocation helpers,
+                          I/O abstraction, logging support
+mpeg-core.c             - core MPEG facilities: pes packet handling 
+                          functions, some support data (aspect ratios...),
+                          core functions front-ends.
+mpeg-crc32.c            - crc32 implementation
+mpeg-es.c               - ES specific functions
+mpeg-ps.c               - PS specific functions
+mpeg-probe.c            - generic probing functions, independent from 
+                          stream type
+mpeg-private.h          - symbols, macros and constants for internal usage.
+                          It will not be exported.
+mpeglib.h               - exported header. Include core type declarations,
+                          symbols and macros.
+
+
+CODING STYLE
+-----------------------------------------------------------------------------
+Bullet point list:
+- every *exported* function, or structure, or data type, must have the 
+  'mpeg_' prefix.
+  Every exported constant or macro should have the 'MPEG_' prefix.
+  For internal symbols and/or functions, this is recommended but not
+  mandatory.
+- C99 code is allowed and incouraged, but C89 code is still OK.
+- C++/C99 like comments are allowed only for temporary comments 
+  (dev notes, FIXMES)
+  use: /* one line comment */
+  or
+  /*
+   * multi line
+   * comment
+   */
+- inline comments:
+  statement; /* at right of statements */
+  
+  a_very_long_statement;
+  /* under a long statement */
+  
+  /* before a field in a structure */
+  structure.field;
+  [this can be dropped in future]
+- indentation: 4 spaces, expanded.
+  vim: 
+   set tabstop=4
+   set expandtab
+   (retab)
+- provide doxygen-like documentation for every exported function 
+  *in header file* (see header for examples)
+- prefer for() { } loops over while() and do { } while()
+- functions:
+  void declaration(void *param);
+
+  void
+  definition(int param1, double param2) {
+        /* body */
+  }
+- bracket position:
+  while(1) {
+        /* body */
+  }
+- spacing:
+  if(a == b) { /*... */ }
+- always use brackets, even if there is only one conditional statement:
+  for(i = 0; i < N; i++) {
+        printf("%i\n", i);
+  }
+- use _explicit_ checks. I.e., not use
+  if(pointer)
+  but use
+  if(pointer != NULL)
+- assignement inside an if() should be avoided wherever possible 
+  (almost always :) ).
+  The only notable exception to this rule _can_ (not _should_) be
+  when using some I/O operation, especially read.
+  if(read(LEN) != LEN) { ... }
+  is allowed, since return value of read() should otherwise be
+  stored in a temporary variable. But such constructs should be used
+  with great care. Is better to use something like
+  ret = read(LEN);
+  if(ret != LEN) { ... }
+  and reuse 'ret' variable through various I/O operations.
+- prefer enumerations over preprocessor constants
+- usage of inline functions is allowed and encouraged. Prefer inline
+  over macros where is feasible
+
+
+ERROR DETECTING AND REPORTING
+-----------------------------------------------------------------------------
+Error detection and reporting in MPEGlib behaves a little like the standard
+*nix way: return code + errno.
+So, you should check the return code of a function, and if it is different
+to MPEG_OK (more on later), you should access the error code information
+which says, with (hopefully) a decent precision, /what/ is wrong.
+Well, where is such error code information?
+If a function has a 'mpeg_t' reference between it's paramethers, it should
+update errcode field when something goes wrong, and return MPEG_ERR.
+Otherwise, if a function doesn't have a context avalaible, it returns
+directly the exact error code. Please note following statements:
+
+- (int)MPEG_OK > (int)MPEG_ERR,
+- (int)MPEG_ERR <= -1
+- -(int)MPEG_ERROR_* <= (int)MPEG_ERR
+  ^
+  `- note this minus sign!
+
+Above sentences are guaranteed to stand through all MPEGlib life cycle.
+Otherwise, you have just found a bug, and please report it :)
+See the code and the header files for gory details.
+
+
+ABOUT MULTI-THREADING-SAFENESS
+-----------------------------------------------------------------------------
+
+MPEGlib is too young to care about multithreading. So, I do not care, yet.
+Maybe this can be an error, but I still experimenting in some critical
+areas of MPEGlib, so isn't so awful to have an non-thread-safe MPEGlib.
+Also remark that MPEGlib is still an alpha.
+So, as in version 0.2.x (and there still are no plans in such sense for
+0.3.x) only thread at once can use safely MPEGlib.
+
+
+ABOUT PACKETS
+-----------------------------------------------------------------------------
+The fundamental data type for dealing with I/O using MPEGlib is 'mpeg_pkt_t'.
+This type represent an MPEG PES packet, staying close to specifications
+as much as possibile.
+
+An mpeg_pkt_t is an semi-opaque data structure, roughly composed by three
+sections:
+1. packet metadata
+2. packet header data, packed.
+3. packet payload
+
+The last two sections shall reproduce exactly the content of the packet found
+on storage media (tipically, but not exclusively, a file). See tools/mpstrip
+to see an example of dealing with raw I/O of packets.
+
+Memory layout overview:
+
+
+     those two areas SHOULD be contiguos in memory.
+     but isn't mandatory to ensure so
+  /----------------------------------------------------------------\
+  |        this area (header and payload data) is guaranteed       |
+  |        to be contiguous. Performing                            |
+  |        write(fd, pkt->hdr, pkt->hdrsize + pkt->size)           |
+  |        isn't recommended, but is guaranteed to work            |
+  |        as expected                                             |
+  |      /---------------------------------------------------------\
+  |      |                                                         |
+  XXXXXX-HHHHHHHHHHHHHHHHHPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
+  |    | |(len = hdrsize)||             (len = size)               |
+  \----/ \---------------/\----------------------------------------/
+ packet  ^ packet header  ^            packet payload
+metadata |  data, packed  |
+         |                `- pkt->data points here
+         |
+	 `- pkt->hdr points here
+
+X = metadata section
+H = header section
+P = payload section
+
+The 'packet metadata' sections contains the most useful informations,
+already decoded and parsed by MPEGlib, which can be also retrieved 
+into packet header section, but in packed form.
+So, in any time client code can retrieve any informations carried
+in packet header data, but parsing by it's own the packed data.
+MPEGlib itself can't help to un-pack those data: all data which
+MPEGlib can unpack can be found on packet metadata section.
+But tu fulfill any possible need from client code, MPEGlib carry
+out verbatim the (detected) packet header secion, in a separate buffer.
+Client code can access such data using the 'hdr' field of the mpeg_pkt_t
+data structure. Header data span over successive 'hdrsize' contiguos bytes.
+Last but not least, the packet payload data (tipically compressed A/V
+MPEG streams) are carried verbatim in the 'packet payload' section.
+Client code can access payload via 'data' field; payload itself is
+constituted by 'size' contiguos byte, padding/stuffing included.
+
+FIXME: review stuffing handling.
+
+
+LAZY PROBING
+-----------------------------------------------------------------------------
+Client code may, in some circustances, invoke mpeg_open() *without*
+MPEG_FILE_PROBE set to on, and invoke later mpeg_probe(). This behaviour is
+called here 'Lazy Probing' (or 'Delayed Probing').
+MPEGlib version >= 0.2.0 support delayed probing, but there are some issues
+to take care.
+Generally speaking, Lazy Probing is discouraged. Use MPEG_FLAG_PROBE at
+mpeg_open() time should be good for 95% of client code. For remaining 5%,
+please consider that invoke mpeg_probe() can raise some issues.
+Those issues concerns mainly speed and efficiency, and should not lead
+to failures or unexpected behaviours to client code.
+Such problems are currently being addressed, but since MPEGlib is in heavy
+development stage, we can't provide any guarantee. So usage of mpeg_probe()
+is discouraged.
+
+In more detail, mpeg_probe() implies the usage of some seek()s, which can be
+a Bad Thing (tm), especially if source file is a streamed one (mpeg->FILE
+has streamed flag set to on). mpeg_probe() can also interfer with (planned)
+packet cache in still not undefined ways.
+
+If you look at the code, you may find above statements too paranoid, but
+there are written with modifications planned for 0.3.x (and above) in mind,
+and following the mantra "paranoia is a virtue". I will be happy to drop
+this paragraph if facts and tests allow so :P
+
+
+ABOUT API AND ABI STABILITY
+-----------------------------------------------------------------------------
+I simply do not care about ABI stability when in heavy development stage
+(releases <= 0.5.0/0.6.0). ABI stability shall be ensured after 1.0.
+I can't guarantee API stability through development stage. API shall become
+stable after architecture itself is stable, design issues are addressed
+and all features are deployed, not first. This should happen with release
+0.5.0 or 0.6.0 or after.
+Of course, API stability will be ensured after the 1.0 release together with
+ABI stability.
+
+
+KNOWN ISSUES
+-----------------------------------------------------------------------------
++ read-only access
+See above :)
+
++ malloc pressure
+MPEGlib heavily uses memory allocation primitives, mainly for objects (this
+happens rarely) and for packets (this happens very frequently). Packets
+are dinamicately allocated because payload size can't be precalculated,
+but can be extimated quite precisely while probing the stream, and probe
+always occurs in order to get some stream parameters.
+So, it can be possible to reduce malloc() usage in MPEGlib using some 
+improvements in code. Such improvements are scheduled for later release,
+version 0.4.0/0.5.0 or so.
+
++ suboptimal I/O model
+MPEGlib use a generic I/O layer since 0.1.0. In order to read (or, in the 
+future, write) bytes, every MPEG descriptor uses a wrapper, mpeg_file_t.
+An mpeg_file_t can be implemented in a huge range of modes, allowing
+I/O from regular files using libc or posix primitives, network and so on.
+Default mpeg_file_t implementation in MPEGlib, based on libc I/O primitives,
+has a naive implementation. This is a design choice, but can be changed
+in future releases. Obviously, patches are welcome :)
+
+
+EXPECTED CHANGES
+-----------------------------------------------------------------------------
+Of course, trying to fix the known issues :)
+This can lead to an API/ABI change. See also 'Roadmap' section in README file
+
+
+AUTHOR:
+-----------------------------------------------------------------------------
+Francesco Romani. Contact me (Italian, English) at 'fromani@gmail.com' (email) 
+or 'ikitt@jabber.linux.it' (jabber). Stay tuned on MPEGlib website
+(http://XXXXX) for updates, news and informations.
+
+
+THANKS TO:
+-----------------------------------------------------------------------------
+- all the testers
+- the tcvp authors for good code.
+- mplayer-devel, ffmpeg-devel and transcode-devel for reading good 
+  discussions and taking good ideas and suggestions
+

@@ -1,0 +1,116 @@
+
+body {
+	margin: 20px;
+	padding: 10px;
+	font-size: 12px;
+	background-color: #CDB5CD;
+}
+
+div {
+	margin: 10px;
+	padding: 5px;
+	background-color: #FFFFFF;
+}
+
+h1 {
+	margin: 10px;
+	padding: 5px;
+	font-size: 26px;
+	text-align: center;
+	background-color: #E9E9E9;
+}
+
+table {
+	align: center;
+}
+
+h2 {
+	font-size: 22px;
+	font-weight: bold;
+	line-height: 22px;
+	margin: 5px 5px;
+	background-color: #E9E9E9;
+}
+
+h3 {
+	font-size: 18px;
+	line-height: 14px;
+	margin: 5px 5px;
+	background-color: #E9E9E9;
+}
+
+h4 {
+	font-size: 16px;
+	margin: 5px 5px;
+	background-color: #E9E9E9;
+}
+
+h5 {
+	font-size: 14px;
+	margin: 5px 5px;
+	background-color: #E9E9E9;
+}
+
+h6 {
+	font-size: 12px;
+	margin: 5px 5px;
+	background-color: #E9E9E9;
+}
+
+p {
+	margin: 10px;
+	padding: 5px;
+	background-color: #E9E9E9;
+}
+
+li {
+	margin: 5px;
+	background-color: #E9E9E9;
+}
+
+pre {
+	font-size: 10px;
+	text-align: left;
+}
+
+blockquote {
+	font-style: italic;
+}
+
+.centered {
+	align: center;
+	text-align: center;
+}
+
+.version {
+	font-size: 8px;
+	text-align: right;
+	margin: 5px 5px 5px 5px;
+	padding: 5px 0px 0px 5px;
+}
+
+.note {
+	align: right;
+	text-align: right;
+}
+
+.banner {
+	align: right;
+	text-align: right;
+}
+
+.title {
+	margin: 10px 10px 10px 10px;
+	padding: 10px 5px 5px 10px;
+	font-size: 16px;
+	align: center;
+	text-align: center;
+}
+
+.footer {
+	margin: 5px 5px 5px 5px;
+	padding: 5px 0px 0px 5px;
+	font-size: 8px;
+	align: center;
+	text-align: center;
+}

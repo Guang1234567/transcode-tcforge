@@ -1,0 +1,124 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Linux (vers 12 April 2005), see www.w3.org" />
+
+  <title>transcode internals</title>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=us-ascii" />
+  <meta name="Author" content="Francesco Romani" />
+  <meta name="Keywords" content="transcode architecture internals input rotation" />
+  <meta name="Generator" content="ViM 7.x" />
+  <link rel="StyleSheet" href="tc_basic.css" type="text/css" media=
+  "screen" />
+</head>
+
+<body>
+  <div id="title" class="title">
+    <h1>Transcode - Input files rotation</h1>
+  </div>
+
+  <div id="summary">
+    <h3>Summary</h3>
+    <p>
+      This page describe the design principles and notes of new (as in 1.1.0 version) input rotation code.
+      Input rotation intelligently handles directory containing almost-homogeneous content, and perform
+      a smart contatenation of inputs (as opposed to "blind cat" previously performed on 1.0.x and former
+      releases). Application scenario and intended use of new code is described first; this lead to
+      explanation of design princples. Design notes and some implementation details are then provided.
+    </p>
+  </div>
+
+  <hr />
+  
+  <div id="index">
+    <table>
+      <tr>
+        <td><a href="#usecases">Intended application cases</a></td>
+        <td><p>describe the common use-cases scenario(s) for multiple inputs</p></td>
+      </tr>
+      <tr>
+        <td><a href="#principles">Design principles</a></td>
+        <td><p>design principles of input rotation infrastructure</p></td>
+      </tr>
+      <tr>
+        <td><a href="#probing">Design notes - probing</a></td>
+        <td><p>design notes about probing and input rotation</p></td>
+      </tr>
+      <tr>
+        <td><a href="#decoding">Design notes - importing</a></td>
+        <td><p>design notes on how transcode (main program) deals with input rotation</p></td>
+      </tr>
+    </table>
+  </div>
+
+  <hr />
+
+  <div id="usecases">
+    <a name="usecases"><h4>Intended application cases</h4></a>
+      <p>
+        New input rotation code introduced in 1.1.0 is a revision from the ground up of how multiple input
+        should be handled in transcode. First and foremost, some basic usage cases are identified:
+      </p>
+      <ul>
+        <li>
+          <p>
+            Jack wants to make a video clip from a bunch of JPEG images.
+          </p>
+        </li>
+        <li>
+          <p>
+            Tyler records TV using transcode itself, and he wants now to transcode a group of low-compressed AVIs
+            into XviD.
+          </p>
+        </li>
+        <li>
+          <p>
+            Marla has some NUV files and she wants to join them and transcode it to DVD.
+          </p>
+        </li>
+        </li>
+      </ul>
+      <p>
+        Some key aspects emerge from examination of intended use cases:
+      </p>
+      <ul>
+        <li>
+          <p>
+            Each input file can contains one <strong>or more</strong> source frame(s).
+          </p>
+        </li>
+        <li>
+          <p>
+            Multiple input need to be intelligently merged before to import (think to AVI case).
+          </p>
+        </li>
+        <li>
+          <p>
+            New code should handle grafefully and efficiently <strong>a lot</strong> of input files.
+          </p>
+        </li>
+
+      </ul>
+  </div>
+
+  <div id="principles">
+    <a name="principles"><h4>Design principles</h4></a>
+    <p>body of paragraph</p>
+  </div>
+
+  <div id="probing">
+    <a name="probing"><h4>Design notes - probing</h4></a>
+    <p>body of paragraph</p>
+  </div>
+  
+  <div id="decoding">
+    <a name="decoding"><h4>Design notes - decoding</h4></a>
+    <p>body of paragraph</p>
+  </div>
+</body>
+</html>

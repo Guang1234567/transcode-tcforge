@@ -1,0 +1,418 @@
+Added in -0.1:
+
+Xste file input format.
+Hashing in frame_list to increase lookup speed.
+Option string parsing, with LOTS of options.
+X11 32 and 24 bpp support to show output.
+Linked list for titles.
+Better reformat (words evenly distributed over multiple lines).
+De_striper for Umatic tapes (drop out compensator).
+
+-0.2:
+Drop unzipped files in transcode-0.5.1/filter/subtitler/
+Makefile fixed, automake works.
+
+To create a Makefile for subtitler, type automake in transcode-0.5.1/
+
+-0.3:
+Use the -V switch in transcode to select YUV mode, this is faster and the
+picture is better quality, especially the black level seems better.
+Please note that enabling output monitoring slows down the encodig process.
+Will look into faster diplay routines maybe later.
+
+-0.4:
+Unsigned char problem fixed, now  special character with code from 128-255
+are correctly displayed (umlauts etc).
+adjust_picture option added (in progress).
+Now you can set the brightness for a start (before the coder).
+The result is immediatly visible in X if you use the 'show_output' option.
+Note that incresing the brightness just adds some steps to 'Y', so any
+100% white areas are clipped.
+I added this as mediaplayer in MS windows seems to display things to dark
+in the default setting.
+
+-0.5:
+Added:
+Special commands in new-timed.txt file:
+Note: 1 frame8 is 160 mS and equals 4 frames in transcode (and the other
+world).
+
+frame8 *frame_counterxpos,ypos,end_frame8
+So:
+3 *frame_counter100,300,0,1000,135,5
+Displays the frame counter at xpos 100, ypos 300 from frame 12 through
+4000, moving south east (135 degrees) at speed 5 pixels per frame (approx).
+the '0' should be there, it is teh zaxis, but frame counter has
+automatically 65535 as z position, so it is always in front.
+Subtitles have z position 65534, and are normally in front too.
+
+The old system will work:
+5 Hello
+Displays 'Hello' under (in) the picture like normal subtitles from frame 20
+until the next 'normal' title line or a line with only a space appears.
+Commands (lines starting with a '*') will NOT cause the text to disappear.
+
+The command:
+frame8 *picturexpos,ypos,end_frame8,direction,scroll_speed filename.
+4 *picture60,188,-100,1000,90,3 /root/frames/rose.ppm
+
+Displays the rose.ppm file from frame 16 untill frame 4000, starting
+at position x=60 y=188, far behing the scree (-100) moving east (to the
+right) 90 degrees)
+at about 3 pixels per frame...
+Because of the '-100' z value, other opjects will make this dissappear.
+It is the users responsibility the pictures fit (are smaller then the
+screen size).
+Clipping is performed on each side of the screen.
+The LATEST entry is always on top, so things CAN be made to scroll behind
+other things.
+
+-0.5.1:
+fixed a bug, somehow the load_font.c got replaced by the wrong file,
+causing it to look in /root/.mplayer, worked for those that had mplayer
+installed.
+Some small fixes, geometry in moving direction.
+
+-0.5.2
+To many bug fixes to desribe in a short space, some:
+no longer crashes if text goes of top.
+Objects on odd lines do not cause the color to diplayed at the wrong place.
+Subtitler now looks for homedir/.subtitles/new-timed.txt
+and for homedir/.subtitles/font/font.desc
+
+-0.5.3
+Total rewrite.
+ppml language introduction, see
+PANTELTJES.PICTURE.MANIPULATION.LANGUAGE{PPML}
+Frames are now 40 ms.
+Subtitler will only read .ppml files from now on, ppml stands for
+Panteltjes Picture Manipulation Language'.
+
+
+-0.5.5
+Total rewrite....
+Yes again...
+Now you can have movies in the main screen, and manipulate these.
+A ne instance of transcode is started for each movie (automaticlly).
+I have set the limit for movies to 1024 (subtitler,h).
+With the current 2 GHz max PCs (2001 I write this), that would be really
+slow.
+The object type 'movie' is added, see example file demo.ppml,
+un-comment the lines with 'chicago' in it.
+This distribution would be to big if I included the movie, so here
+(in line 10) you have to enter a movie of your own.
+If any instances of transcode show up in 'ps x' after you stop the main
+transcode, the you can kill these with 'killall -KILL transcode'.
+Make sure no other transcoding things are running you need....
+
+A thread is started for each new instance, but this system uses a file
+n.ppm in homedir/.subtitles/, created by each new instance of transcode.
+so 1.ppm for the next etc.. and sets a semaphore n.sem, in the same dir.
+It then waits for the 'main transcode' to read these .ppm files and erase
+the semaphore.
+You could use the .ppm for other purposes too, it is the same format as the
+movie.
+xv homedir/.subtitles/0.ppm should show it.
+
+
+Version-0.5.6:
+Very many changes, please read README.COLOR.PROCESSOR
+You can now do different operations on each frame of the main picture.
+Corrections of hue and hue line drift are possible
+ssa input has been dropped, all ppml now.
+This allows for VERY powerful correction of film material.
+Some global options are dropped from the subtitler -J "subtitler=""
+string, and now can be specified for each frame in the .ppml file.
+This is much more powerful.
+Some bugs fixed.
+
+
+Version-0.5.7:
+Transparency has been added to text objects, works as in pictures.
+
+Line continuation (as in C language) has been added to the ppml language.
+To make a title rol:
+
+; define an object subtilte, so we can talk to it
+*subtitle subtitle
+
+; the title roll
+2 PantelCorp Presents:\
+The Panteltje Picture Manipulation Language \\
+'ppml' by Jan Panteltje\\\
+Copyright Panteltje Productions\\
+A PantelWorks Universe Company\\\
+
+;this will slowly move it upward of the screen.
+2 *subtitle dypos=-.1
+
+2 *subtitle dcol=7 contr=70
+
+
+Version-5.8:
+Fonts can be specified in the ppml file.
+Text formatting rewritten.
+
+Version-0.5.9
+If you use formatted subtitles, (useing '\') the iteration in the
+reformatter is switched off, preventing it from breaking lines where
+you would not want it.
+Fixed many other bugs in that reformatter.
+Testing will show if there are more..
+
+Added simple chroma key feature:
+Chroma key is a system that allows you to put an object on the screen,
+visible ONLY where the destination (screen) has a specific color.
+You can set this color that the main screen is required to have, for
+each object.
+Example:
+*new-york movie /video/movies/new-york.mpg
+6 *new-york xpos=200 ypos=10 ck_color=90 ck_window=20
+
+This shows the movie, at x=200, y=10, in the main screen, ONLY where
+the main screen has color 90 degrees (red from the color circle), with a
+tolerance of 20 degrees, so anywhere where the main screen has a color from
+70 to 110 degrees, your movie will be visible (in the original color).
+Chroma key is commonly used to fill in background in TV studios (things
+are painted blue, and all blue is replaced by the picture from some other
+source, could be for example background of a news-reader, with the news
+playing in the background blue.
+You can make a picture, draw a colored 'mask' and use that picture as
+keyhole.
+There are many possibilities.
+
+
+Version-0.6
+Added xsize, dxsize, ysize, dysize for pictures and movies.
+This REQUIRES you to have the 'mogrify' program from the ImageMagic
+distribution installed, as subtitler call it for resizing.
+
+
+Version-0.6.1
+center=0 and center=1 works if specified in any object reference,
+it must however be specified at least one frame BEFORE you put the
+text on the screen.
+Example:
+
+*subtitle subtitle
+19 *subtitle center=0
+20 hello
+-----------
+'Hello' will now be printed left justified.
+zrotate, xshear, and yshear added (uses ImageMagic mogrify).
+
+Version-0.6.2:
+Added espace and despace, allows you to make 'exploding' text.
+Added vfacor and hfactor.
+vfactor set how far subtitles start from the bottom of the screen.
+hfactor sets the left (and right -) margins.
+Added xdest and ydest, 'destinations' which will cause an object to move
+towards these coordinates at the speed specified, and stop on arrival.
+These are very powerful commands, they actually work on heading and speed,
+and calculate the distance towards the target.
+If you leave out xpos, it is assumed to be the current position, and the
+object will move only in the y direction.
+Leaving out ypos causes the object to move only in the x direction.
+
+Version-0.6.3:
+Added ddspeed, the accelerator!
+Line number correctly reported if error found in ppml file.
+
+
+-0.6.4:
+frame_offset negative number now is subtitle earlier.
+You will get warnings is the resulting frame number is < 1.
+
+
+-0.6.4.2:
+Fixed long line bug, a '\' in a line in the ppml file caused the next
+line to be appended to the current one, with the last character swallowed.
+Now '\' at the end of a line continues the line (as in C), a '\' anywhere
+else will force a line feed in the text (so you can format).
+
+
+-0.7:
+True type fonts supported.
+These need to be in ~/.xste/fonts/
+Also the difrectory ~/.xste/fonts/data/ must exist.
+The following PPML commands are no longer active:
+outline
+doutline
+
+The following are new PPML commands and work on al text objects:
+font_name                 string    xxx.ttf    name of a true type font (in font_dir).
+font_size                 int       size of font is pixels.
+font_iso_extension        int       language code, 15 for Euro symbol.
+font_outline_thickness   double     black outline around characters.
+font_blur_radius         double     blur.
+
+The default for font_dir is now ~~/.xste/fonts/
+
+
+-0.8:
+DVD like subs can be displayed, new ppml commands for this:
+palette                 text            16 x rgb palette (r0,g0,b0,r1,g1,b1,---r145,g15,b15).
+                                        if this isspecified, then text will be rendered.
+                                        using the folowing parameters (as in DVD):
+background              text            number background in palette.
+pattern                 text            number character body color in palette (0-15)
+emphasis1               text            number character outline in palette
+emphasis2               text            number character outline2 (character-space) in palette.
+
+background_contrast     text            background printing area contrast (0-15), 15 is opaque.
+pattern_contrast        text            character body contrast.
+emphasis1_contrast      text            character outline1 contrast.
+emphasis2_contrast      text            character outline2 (character-space) contrast.
+
+font_path
+font_dir
+are both recognized as the place where the true type fonts need to
+be (arial.ttf for example).
+You need to set this and the other font parameters for each object!
+
+extra character space set to zero by default (because of better font rendering).
+
+Temp files now in /tmp/subtitler/
+so no more huge disk usage with binary font images.
+
+Only YUV support for normal ppml and DVD type subs in ppml!
+
+Difference between contrast and transparency:
+If you insert an object, and increase transparency (max 100), it wil 'dissolve', you will
+look through it and see hat is behind it.
+If you decrease contrast (max 100, min 0) , it will become less bright, and finally black.
+You will NOT see what is behind it.
+Now to add some confusion, what is called 'contrast' in DVD subtitles is
+actually transparency!
+So a contrast of 0 for a DVD subtitle will show the background.
+A contrast of 15 will show the subtitle maximum.
+
+Some DVD color settings may give unwanted effects, experiment.
+Anti aliasing added for DVD subs.
+
+
+0.8.1:
+anti_alias command on command line will process emphasis2 as anti alias.
+(Use xste to generate this).
+Character spacing can be negative, so characters can be made to appear
+very close together.
+Reformatting for negative spacing values works.
+
+
+0.8.2:
+Updated README, tested on transcode transcode-0.6.11.
+Added test-demo script.
+Fixed a bug in the demo.ppml.
+
+0.8.3:
+Set the character extra spacing back to the old values of the fist
+subtitler (using the mplayer code).
+So the default extra spacing is now 2.
+This should fix any compatibility problems with older versions.
+You need to upgrade to xste 3.2.5 too!
+
+
+0.8.4:
+Patch for AMD64 compilation by Tilmann Bitterberg.
+Character spacing routines as in old versions, for better
+compatibility.
+Default character spacing now 2.
+
+
+0.8.5:
+Many buxfixes, especially centering, spacing and reformatting related.
+Text overflow on top and right side of screen fixed.
+
+-
+Talking about 'objects' title_list.c is now object_list.c
+Added a 'zaxis'.
+This allows you to add a distance to objects (be it text or pictures).
+Positive integers are closer to you then negative, negative values are
+'behind' the screen, positive closer to you.
+Because of this, syntax in new-timed.txt has changed.
+
+
+
+Try this as example, in file /root/.subtitles/new-timed.txt
+
+1 *frame_counter100,400,0,900000,180,4
+2 *text10,30,1000000,100000,65,3 I am always on top!
+3 *text10,30,-1000000,100000,130,3 I am far away!
+4 *text0,0,0,100000,0,0 This is a text on 0,0
+5 *picture60,188,0,1000,75,3 /root/rose.ppm
+6 Hello
+7 *picture0,188,0,1000,315,3 /root/rose.ppm
+8 *picture0,0,0,100 /root/rose.ppm
+10 *text200,400,0,300,75,2 Ha die pantels!
+25 PantelCorp Presents:\\\Buenos Aires 1 2001 \\Vertaling Jan Panteltje\\\Copyright Panteltje Productions\\
+49 Cool!
+60 So here we can do a lot of things, make compositions, etc..
+70 *frame_counter300,500,9999990,100000
+
+Please make sure your text editor does NOT fold line 25,
+subtitler needs a frame number at the start of the line.
+
+I have included rose.ppm, 352x288 color, and this file new-timed.txt,
+place rose.ppm in /root/ and new-timed.txt in /root/.subtitles/
+and things should work (you need the fonts installed too in
+/root/.subtitles/font/
+
+---------------
+To be done:
+Picture only for YUV 420 mode, (-V option in transcode), RGB still needs to
+be done.
+
+Things need thinking over, the syntax of the new-timed.txt file, should we
+move from frames8 (160ms) to 'normal' 40 ms frames (this requires a rewrite
+of the subtitle editor xste too), special effects.
+One of the first things on my list is to not do just a picture, but to play
+an AVI file in the screen (one or more).
+I am no avi expert, or an mpeg file of cause, I think I could hack
+mpeg2_decode from Berkely, already had a go at the coder for mcam.
+(Also have the jpeg and even wavelet stuff in mcam:
+http://www.home.zonnet.nl/panteltje/mcam/
+See my picture in mcam art.... :-)
+Anyways, 3D was in my mind, but I already have an excellent Linux package
+for the creation of 3D animation, 'blender' www.blender.nl, it can make
+AVIs too, I have made leaders with it for at the start of VHS tapes.
+So, ideas, also I am time limited, this took some hours to program...
+Code could likely be simplified, using 2 linked lists, forgot why I needed
+2, frame_list.c reads in the files, title_list.c does some processing..
+We will see where it goes.
+
+If you want only the output, try:
+-J subtitler="no_subtitles frame_offset=0 show_output color_depth=32"
+
+#echo "Starting first pass DivX codec"
+transcode \
+-i $1 \
+-x mpeg2,mp3 \
+- V \
+-R 1 \
+-w 1550 \
+-c 0-100000 \
+-J subtitler="adjust_picture brightness=10" \
+-I 3 \
+#-o a1-divx.avi \
+#-y divx4 \
+#-D 12
+
+
+echo "Starting second pass DivX codec"
+transcode \
+-i $1 \
+-o a1-divx.avi \
+-x mpeg2,mp3 \
+-y divx4 \
+-V \
+-R 2 \
+-w 1550 \
+-I 3 \
+-J subtitler="frame_offset=0 show_output color_depth=32 adjust_picture brightnes=10" \
+-c 0-100000 \
+#-D 12
+
+echo "Ready pass 2"
+exit
+
+

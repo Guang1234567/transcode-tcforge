@@ -1,0 +1,36 @@
+Key:
+[+] feature added
+[!] bugfix of an existing feature
+[*] change/improvement (not bugfix) of an existing feature
+[-] feature dropped
+
+===========================================================================
+transcode-1.2.0
+---------------
+[+] Brand new export layer with new-style, separate encoders and muxers.
+[+] New encoders: theora, vorbis, faac, x264.
+[+] New multiplexors: ogg, libavformat, yuv4mpeg2.
+[+] New filter: barrel.
+[+] ShoutCast support using ogg multiplexor.
+[!] Fix crash when using transformations (-Z, -j).
+[!] Fix compilation error with x264 version 78.
+[*] Improved internal buffering system.
+[*] Added basic A/V synchronization module.
+[!] Fix misuse of configuration files which leads to crash.
+[*] Allow to handle fallback directories for configuration files.
+[*] Improved debug messages handling and internal debug API.
+[-] The import_imlist is deprecated. Use --multi_input -x im instead.
+[*] Big YAIT update by Allan Snider.
+[!] Make the -W option work again like 1.0.x branch.
+[*] Switch from ImageMagick to GraphicsMagick.
+[*] Allow to build without FFmpeg.
+[!] Remove outdated libav* information from the FAQ.
+[+] Added support for CubicKeys4 and Sinc8 zoom algorithms.
+[+] Added module registry to automatically select a module from format
+[+] Added `tccfgshow' to inspect the transcode internal capabilities.
+[-] Removed the unmantained PVM code.
+[+] Added a special-crafted import module targeting webcams using libv4l.
+[*] Update the video stabilization plugins to version 0.61.
+[*] Added the -X option to tcdecode (let the user specify the acceleration)
+[+] Enable versioned, parallel installation.
+===========================================================================

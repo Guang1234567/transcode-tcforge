@@ -1,0 +1,1681 @@
+.\"     Title: transcode
+.\"    Author: 
+.\" Generator: DocBook XSL Stylesheets v1.73.2 <http://docbook.sf.net/>
+.\"      Date: 14th July 2008
+.\"    Manual: 14th July 2008
+.\"    Source: transcode(1)
+.\"
+.TH "TRANSCODE" "1" "14th July 2008" "transcode(1)" "14th July 2008"
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.SH "NAME"
+transcode \- LINUX video stream processing tool
+.SH "SYNOPSIS"
+.HP 10
+\fBtranscode\fR \-i\ \fIname\fR [\-o\ \fIname\fR] [\-y\ \fIvmod,amod\fR] [\-w\ \fIvbitrate\fR\ [\ \fI,vkeyframes\fR\ [\ \fI,vcrispness\fR\ ]\ ]] [\-a\ \fIatrack\fR\ [\ \fI,vtrack\fR\ ]] [\-b\ \fIabitrate\fR\ [\ \fI,is_vbr\fR\ [\ \fI,quality\fR\ [\ \fI,mode\fR\ ]\ ]\ ]] [\-M\ \fIdemuxer_mode\fR] [\-F\ \fIcodec_string\fR] [\fIother\fR\ \fIoptions\fR]
+.SH "QUICK SUMMARY"
+.PP
+
+\fBtranscode\fR
+supports a huge range of options, as described in detail in further section\&. Only one option is mandatory:
+\fB\-i name\fR, for supplying the input main (video) source\&. All other options are discretionary and they can be skipped\&. Most commonly needed options are
+\fB\-o\fR,
+\fB\-y\fR,
+\fB\-w\fR,
+\fB\-a\fR,
+\fB\-b\fR,
+\fB\-M\fR,
+\fB\-F\fR
+and a fair number of transcode session needs a little more than those\&. See section below for full description of all transcode options\&. To inspect the properties of a module, such as their parameters or the help text, use the \'tcmodinfo\' tool\&.
+.SH "DESCRIPTION"
+.PP
+
+\fBtranscode\fR
+is a linux text\-console utility for video stream processing, running on a platform that supports shared libraries and threads\&.
+.PP
+It supports a huge range of options, as described in detail in further section\&. Only one option is mandatory:
+\fB\-i name\fR, for supplying the input main (video) source\&. All other options are discretionary and they can be skipped\&. Most commonly needed options are
+\fB\-o\fR,
+\fB\-y\fR,
+\fB\-w\fR,
+\fB\-a\fR,
+\fB\-b\fR,
+\fB\-M\fR,
+\fB\-F\fR
+and a fair number of transcode session needs a little more than those\&. See section below for full description of all transcode options\&.
+.PP
+Decoding and encoding is done by loading modules that are responsible for feeding transcode with raw video/audio streams (import modules) and encoding the frames (export modules)\&.
+.PP
+It supports elementary video and audio frame transformations, including de\-interlacing or fast resizing of video frames and loading of external filters\&.
+.PP
+A number of modules are included to enable import of DVDs on\-the\-fly, MPEG elementary (ES) or program streams (VOB), MPEG video, Digital Video (DV), YUV4MPEG streams, NuppelVideo file format, AVI based codecs and raw or compressed (pass\-through) video frames and export modules for writing DivX;\-), XviD, DivX 4\&.xx/5\&.xx or uncompressed AVI and raw files with MPEG, AC3 (pass\-through) or PCM audio\&.
+.PP
+Additional export modules to write single frames (PPM) or YUV4MPEG streams are available, as well as an interface import module to the avifile library\&.
+.PP
+It\'s modular concept is intended to provide flexibility and easy user extensibility to include other video/audio codecs or filetypes\&. A set of tools is included to demux (tcdemux), extract (tcextract) and decode (tcdecode) the sources into raw video/audio streams for import, probing (tcprobe) and scanning (tcscan) your sources and to enable post\-processing of AVI files, fixing AVI file header information (avifix), merging multiple files (avimerge), splitting large AVI files (avisplit) to fit on a CD and avisync to correct AV\-offsyncs\&.
+.SH "OPTIONS"
+.PP
+\fB\-A \fR
+.RS 4
+use AC3 as internal audio codec [off]\&. Only pass\-through supported\&.
+.RE
+.PP
+\fB\-B \fR \fIn[,m[,M]]\fR
+.RS 4
+resize to height\-\fIn\fR*\fIM\fR
+rows [,width\-\fIm\fR*\fIM\fR] columns [off,32]\&.
+\fIM\fR
+must be one of 8, 16 or 32\&. It makes no difference which M you use\&. You might look at the
+\fIfast\fR
+flag of the
+\fB\-Z\fR
+option if you don not want to calculate
+\fIn\fR
+and
+\fIm\fR
+yourself\&.
+.RE
+.PP
+\fB\-C \fR \fImode\fR
+.RS 4
+enable anti\-aliasing mode (1\-3) [off]\&.
+.PP
+1
+.RS 4
+de\-interlace effects only
+.RE
+.PP
+2
+.RS 4
+resize effects only
+.RE
+.PP
+3
+.RS 4
+process full frame (slow)
+.RE
+.RE
+.PP
+\fB\-D \fR \fInum\fR
+.RS 4
+sync video start with audio frame num [0]\&.
+.RE
+.PP
+\fB\-E \fR \fIr[,b[,c]]\fR
+.RS 4
+audio output samplerate [Hz], bits per sample and channels [as input]\&. The option "\-J resample" must be provided for export modules not capable of re\-sampling\&. Samplerate and bits per sample can be specified as 0 to mean "same as input"; this allows converting from stereo to mono while leaving the other parameters alone (\-E 0,0,1)\&.
+.RE
+.PP
+\fB\-F \fR \fIcodec_string\fR
+.RS 4
+encoder parameter strings [module dependent]\&. The \-F parameter has different meanings for different export modules\&. Those meanings are documented in
+\fItranscode_export(1)\fR
+manual page\&.
+.RE
+.PP
+\fB\-G \fR \fIval\fR
+.RS 4
+Gamma correction (0\&.0\-10\&.0) [off]\&. A value of 1\&.0 does not change anything\&. A value lower than 1\&.0 will make the picture "brighter", a value above 1\&.0 will make it "darker"\&.
+.RE
+.PP
+\fB\-H \fR \fIn\fR
+.RS 4
+auto\-probe
+\fIn\fR
+MB of source (0=disable) default [1]\&. Use a higher value than the default to detect all subtitles in the VOB\&.
+.RE
+.PP
+\fB\-I \fR \fImode\fR
+.RS 4
+enable de\-interlacing mode (1\-5) [off]\&.
+.PP
+1
+.RS 4
+
+\fI"interpolate scanlines"\fR
+linear interpolation (takes the average of the surronding even rows to determine the odd rows), and copies the even rows as is\&.
+.RE
+.PP
+2
+.RS 4
+
+\fI"handled by encoder"\fR
+tells the encoding code to handle the fact that the frames are interlaced\&. Most codecs do not handle this\&.
+.RE
+.PP
+3
+.RS 4
+
+\fI"zoom to full frame"\fR
+drops to to half size, then zooms out\&. This can cause excessive blurring which is not always unwanted\&. On the other hand results are quite good\&.
+.RE
+.PP
+4
+.RS 4
+
+\fI"drop field / half height"\fR
+drop every other field and keep half height\&.
+.RE
+.PP
+5
+.RS 4
+
+\fI"interpolate scanlines / blend frames"\fR
+linear blend (similar to \-vop pp=lb in mplayer) this, like linear blend calculates the odd rows as the average of the surrounding even rows, and also calculates the even rows as an average of the original even rows and also calculates the even rows as an average of the original odd rows and averages the calculated and original rows\&. Something like avg (avg(row1,row3), avg(row2, row4))
+.RE
+.RE
+.PP
+\fB\-J \fR \fIfilter1[,filter2[,\&.\&.\&.]]\fR
+.RS 4
+apply external filter plugins [off]\&. The avalaible import modules and their options are documented into the
+\fItranscode_filter(1)\fR
+manual page\&.
+\fINote:\fR
+You can specify more than one \-J argument\&. The order of filter arguments specify in which order the filters are applied\&. Note also, for transcode internally it makes no difference whether you do "\-J filter1 \-J filter2" or "\-J filter1,filter2"\&. Use \'tcmodinfo \-i
+\fINAME\fR\' to get more information about the filter_\fINAME\fR\&. Not all filters support this but most of them do\&. Some of the filter plugins have additional documentation in the docs/ directory\&.
+.RE
+.PP
+\fB\-L \fR \fIn\fR
+.RS 4
+seek to VOB stream offset
+\fIn\fRx2kB default [0]\&. This option is usually calculated automatically when giving \-\-nav_seek and \-c\&.
+.RE
+.PP
+\fB\-K \fR
+.RS 4
+enable black/white by removing colors mode (grayscale) [off]\&. Please note this does not necessarily lead to a smaller image / better compression\&. For YUV mode, this is done by emptying the chroma planes, for RGB mode a weightend grayscale value is computed\&.
+.RE
+.PP
+\fB\-M \fR \fImode\fR
+.RS 4
+select AV synchronization mode (0\-5) [1]\&.
+.PP
+\fIOverview\fR
+.RS 4
+The import code takes care that the right video frames go together with the right audio frame\&. This can sometimes be a complex task and transcode tries to aid you as much as possible\&.
+\fIWARNING:\fR
+It does make a difference if you (the user) specifies a demuxer to use or if transcode resp\&. tcprobe(1) chooses the one which it thinks is right for your material\&. This is done on purpose to avoid mystic side\-effects\&. So think twice, wether you specify a demuxer or let transcode choose one or you might end up with an off\-sync result\&. The modes 0\-4 are the historical transcode ones\&. They deal only with MPEG\-like material and they can sometimes be ineffective\&. Modes starting from 5 are the new ones using the new synchronizer infrastructure\&. Those modes can be used with any kind of source material\&. The only drawback is that they are still under development\&.
+.RE
+.PP
+0
+.RS 4
+Pass\-through\&. Do not mess with the stream, switch off any synchronization/demuxing process\&.
+.RE
+.PP
+1
+.RS 4
+PTS only (default)\&. Synchronize video and audio by inspecting PTS/DTS time stamps of audio and video\&. Preferred mode for PAL VOB streams and DVDs\&.
+.RE
+.PP
+2
+.RS 4
+NTSC VOB stream synchronization feature\&. This mode generates synchronization information for transcode by analyzing the frame display time\&.
+.RE
+.PP
+3
+.RS 4
+(like \-M 1): sync AV at initial PTS, but invokes "\-D/\-\-av_fine_ms" options internally based on "tcprobe" PTS analysis\&. PTS stands for Presentation Time Stamp\&.
+.RE
+.PP
+4
+.RS 4
+(like \-M 2): initial PTS / enforce frame rate, with additional frame rate enforcement (for NTSC)\&.
+.RE
+.PP
+5
+.RS 4
+Enforce A/V sync by cloning or dropping frames\&.
+.RE
+.RE
+.PP
+\fB\-N \fR \fIformat\fR
+.RS 4
+select export format\&. Default is mp3 for audio, and module\-dependant format for video\&. This option has two different behaviours and accepts two different set of options, as side\-effect of ongoing export module transition\&. For old\-style modules (current default, as found in 1\&.0\&.x series), argument is audio format ID has hexadecimal value: see below for a list of recognized IDs\&. Default id, so default format for audio exported track, is MP3 (0x55)\&. If you are using, the transcode\'s the new\-style encode/multiplex modules (still under development, see the encode and multiplex directories), argument is a comma\-separated pair of export format names\&. Use tcmodinfo tool to check out what new\-style export module support what formats\&.
+.sp
+Available format for old\-style behaviour are:
+.PP
+\fI0x1\fR
+.RS 4
+PCM uncompressed audio
+.RE
+.PP
+\fI0x50\fR
+.RS 4
+MPEG layer\-2 aka MP2
+.RE
+.PP
+\fI0x55\fR
+.RS 4
+MPEG layer\-3 aka MP3\&. Also have a look at \-\-lame_preset if you intend to do VBR audio\&.
+.RE
+.PP
+\fI0x2000\fR
+.RS 4
+AC3 audio
+.RE
+.PP
+\fI0xfffe\fR
+.RS 4
+OGG/Vorbis audio
+.RE
+.RE
+.PP
+\fB\-O \fR
+.RS 4
+skip flushing of buffers at encoder stop [off, do flushing at each stop]\&.
+.RE
+.PP
+\fB\-P \fR \fIflag\fR
+.RS 4
+pass\-through flag (0=off|1=V|2=A|3=A+V) [0]\&. Pass\-through for
+\fIflag\fR
+!= 1 is broken and not a trivial thing to fix\&.
+.sp
+You can pass\-through DV video, AVI files and MPEG2 video\&. When doing MPEG2 pass\-through (together with the \-y raw module), you can give a requantization factor by using \-w (for example \-w 1\&.5), this will make the MPEG2 stream smaller\&.
+.sp
+The pass\-through mode is useful for reconstruction of a broken index of an AVI file\&. The \-x ffmpeg import\-module analyzes the compressed bitstream and can detect a keyframe for DIV3, MPEG4 (DivX, XviD, \&.\&.) and other formats\&. It then sets an internal flag which the export module will respect when writing the frame out\&.
+.RE
+.PP
+\fB\-Q \fR \fIn[,m]\fR
+.RS 4
+encoding[,decoding] quality (0=fastest\-5=best) [5,5]\&.
+.RE
+.PP
+\fB\-R \fR \fIn[,f1[,f2]]\fR
+.RS 4
+enable multi\-pass encoding (0\-3) [0,divx4\&.log,pcm\&.log]\&.
+.PP
+0 Constant bitrate (CBR) encoding\&. [default]
+.RS 4
+The codec tries to achieve constant bitrate output\&. This means, each encoded frame is mostly the same size\&. This type of encoding can help in maintaining constant filling of hardware buffer on set top players or smooth streaming over networks\&. By the way, Constant bitrate is often obtained sacrifying quality during high motion scenes\&.
+.RE
+.PP
+1 Variable bitrate encoding: First pass\&.
+.RS 4
+In this mode, the codec analyses the complete sequence in order to collect data that can improve the distribution of bits in a second VBR pass\&. The collected data is written to second sub argument (default: divx4\&.log)\&. This data is codec dependant and cannot be used across codecs\&. It is strongly advised to use the same codec settings for the VBR analysis pass and the VBR encoding pass if you want predictable results\&.
+.sp
+The video output of the first pass is not of much use and can grow very large\&. It\'s a good idea to not save the video output to a file but directly to /dev/null\&. Usually the bitrate is ignored during first pass\&.
+.sp
+Disabling audio export makes sense too, so use \-y codec,null\&. It is
+\fInot\fR
+recommended to disable the audio
+\fIimport\fR
+because transcode might drop video frames to keep audio and video in sync\&. This is not possible when the audio import is disabled\&. It may lead to the fact that the codec will see a different sequence of frames which effectively renders the log file invalid\&.
+.RE
+.PP
+2 Variable bitrate encoding: Second pass\&.
+.RS 4
+The first pass allowed the codec collecting data about the complete sequence\&. During the second pass, the codec will use that data in order to find an efficient bit distribution that respects both the desired bitrate and the natural bitrate curve shape\&. This ensures a good compromise between quality and desired bitrate\&.
+.sp
+Make sure you activate both sound and video encoding during this pass\&.
+.RE
+.PP
+3 Constant quantizer encoding\&.
+.RS 4
+The quantizer is the "compression level" of the picture\&. The lower the quantizer is, the higher is the quality of the picture\&. This mode can help in making sure the sequence is encoded at constant quality, but no prediction can be made on the final bitrate\&. When using this mode, the
+\fB\-w\fR
+option changes its meaning, it now takes the quantizer ranging from 1 to 31\&. Note that constant quantizer encoding is not supported with some codecs (notably mpeg1/2/4 with \-y ffmpeg)\&.
+.RE
+.RE
+.PP
+\fB\-S \fR \fIunit[,s1\-s2]\fR
+.RS 4
+process program stream unit[,s1\-s2] sequences [0,all]\&. This option is a bit redundant to \-\-psu*\&. This option lets you specify which units you want to have decoded or skipped\&. At a program stream unit boundary, all (internal) mpeg timers are reset to 0\&. tcprobe will tell you how many units are in one file\&.
+.RE
+.PP
+\fB\-T \fR \fIt[,c[,a]]\fR
+.RS 4
+select DVD title[,chapter[,angle]] [1,1,1]\&. Only a single chapter is transcoded\&. Use
+\fB\-T\fR
+1,\-1 to trancode all chapters in a row\&. You can even specify chapter ranges\&.
+.RE
+.PP
+\fB\-U \fR \fIbase\fR
+.RS 4
+process DVD in chapter mode to base\-ch%02d\&.avi [off]\&.
+.RE
+.PP
+\fB\-V \fR \fIformat\fR
+.RS 4
+select video layout / colour space for internal processing\&. Possible values for this options are: yuv420p (default), yuv422p, rgb24
+.sp
+yuv420p is default because it is most codecs\' internal format so there is no need for conversions\&. Some modules may not support it though: use rgb in that case\&.
+.sp
+rgb24 is the old (pre\-0\&.6\&.13) transcode internal format\&. Most codecs do not support this format natively and have to convert it to/from YUV first, so only use this option if you\'re really sure or you want to use a module that doesn\'t support YUV\&.
+.sp
+yuv422p is an experimental feature and a developers playground\&. Not many import, export and filter modules support this colorspace\&. A 4:2:2 colorspace offers much more quality than the consumer oriented 4:2:0 colorspaces like I420/YV12\&. Most equipment in film and video post\-production uses YUV422\&. YUV422 doubles the precision for chroma (color difference) information in the image\&.
+.sp
+All internal transformations are supported in YUV422 mode (clipping, flipping, zooming, etc)\&.
+.RE
+.PP
+\fB\-W \fR \fIn,m[,nav_file]\fR
+.RS 4
+autosplit and process part
+\fIn\fR
+of
+\fIm\fR
+(VOB only) [off]
+.RE
+.PP
+\fB\-X \fR \fIn[,m,[M]]\fR
+.RS 4
+resize to height+\fIn\fR*\fIM\fR
+rows [,width+\fIm\fR*\fIM\fR] columns [off,32]\&. M must be one of 8, 16 or 32\&. It makes no difference which M you use\&. You might look at the
+\fIfast\fR
+flag of the
+\fB\-Z\fR
+option if you do not want to calculate
+\fIn\fR
+and
+\fIm\fR
+yourself\&.
+.RE
+.PP
+\fB\-Y \fR \fItop[,left[,bottom[,right]]]\fR
+.RS 4
+select (encoder) frame region by clipping border\&. Negative values add a border [off]\&.
+.RE
+.PP
+\fB\-Z \fR \fIwidthxheight[,fast|interlaced]\fR
+.RS 4
+resize to
+\fIwidth\fR
+columns,
+\fIheight\fR
+rows with filtering [off,notfast,notinterlaced]\&. If
+\fIfast\fR
+is given, transcode will calculate the parameters for
+\fB\-X\fR
+and/or
+\fB\-B\fR\&. The file
+\fBfast\fR
+can only be used when the import and export geometry of an image is a multiple of 8\&.
+.sp
+In fast mode, a faster but less precise resizing algorithm will be used resulting in a slightly less good quality\&. Beside this (small) drawback, it is worth a try\&.
+.sp
+If
+\fIinterlaced\fR
+is given, transcode will assume the frame is interlaced when resizing, and resize each field independently\&. This will give better results on interlaced video, but is incompatible with fast mode\&. Also, the height (both old and new) must be a multiple of 4\&.
+.sp
+It is also possible to omit
+\fIwidth\fR
+OR
+\fIheight\fR\&. In this case, transcode will calculate the missing value using the import aspect ratio\&. The new value will be aligned to be a multiple of 8\&. Using an additional
+\fIfast\fR
+or
+\fIinterlaced\fR
+is also possible\&.
+.sp
+Examples (assume input is a 16:9 coded file at 720x576):
+.sp
+.RS 4
+.nf
+                        \-Z 576x328           uses filtered zoom\&.
+                        \-Z 576x328,fast      uses fast zoom\&.
+                        \-Z 576x,fast         guess 328 and do fast zoom\&.
+                        \-Z x328,interlaced   guess 576 and do interlaced zoom\&.
+                    
+.fi
+.RE
+If you also set
+\fB\-\-export_prof\fR, you can use just "fast" to indicate that fast resizing is wanted (likewise with "interlaced")\&.
+.RE
+.PP
+\fB\-a \fR \fIach[,vch]\fR
+.RS 4
+extract audio[,video] track for encoding\&.
+.RE
+.PP
+\fB\-b \fR \fIb[,v,[q,[m]]]\fR
+.RS 4
+audio encoder bitrate kBits/s[,vbr[,quality[,mode]]] [128,0,5,0]
+.sp
+The
+\fImode\fR
+parameter specifies which modus lame should use for encoding\&. Available modes are:
+.PP
+0
+.RS 4
+Joint Stereo (default)
+.RE
+.PP
+1
+.RS 4
+Full stereo
+.RE
+.PP
+2
+.RS 4
+Mono
+.RE
+.RE
+.PP
+\fB\-c \fR \fIf1\-f2[,f3\-f4[, \&.\&.\&. ] ]\fR
+.RS 4
+encode only frames
+\fIf1\-f2\fR
+[and
+\fIf3\-f4\fR]\&. Default is to encode all available frames\&. Use this and you\'ll get statistics about remaining encoding time\&. The
+\fIf[N]\fR
+parameters may also be timecodes in the HH:MM:SS\&.FRAME format\&. Example:
+.sp
+.RS 4
+.nf
+                        \-c 500\-0:5:01,:10:20\-1:18:02\&.1
+                    
+.fi
+.RE
+Will encode only from frame 500 to 5 minutes and 1 second and from 10 min, 20 sec to 1 hour, 18 min, 2 sec and one frame\&.
+.sp
+Note that transcode starts counting frames at
+0
+and excludes the last frame specified\&. That means that "\fB\-c\fR
+0\-100" will encoded 100 frames starting at frame
+0
+up to frame
+99
+.RE
+.PP
+\fB\-d \fR
+.RS 4
+swap bytes in audio stream [off]\&. In most cases, DVD PCM audio tracks require swapping of audio bytes
+.RE
+.PP
+\fB\-e \fR \fIr[,b[,c]]\fR
+.RS 4
+PCM audio stream parameter\&. Sample rate [Hz], bits per sample and number of channels [48000,16,2]\&. Normally this is autodetected\&.
+.RE
+.PP
+\fB\-f \fR \fIrate[,frc]\fR
+.RS 4
+import video frame rate[,frc] [25\&.000,0]\&. If
+\fIfrc\fR
+(frame rate code) is specified, transcode will calculate the precise frames per second internally\&. Valid values for
+\fIfrc\fR
+are:
+.PP
+1
+.RS 4
+23\&.976 (24000/1001\&.0)
+.RE
+.PP
+2
+.RS 4
+24
+.RE
+.PP
+3
+.RS 4
+25
+.RE
+.PP
+4
+.RS 4
+29\&.970 (30000/1001\&.0)
+.RE
+.PP
+5
+.RS 4
+30
+.RE
+.PP
+6
+.RS 4
+50
+.RE
+.PP
+7
+.RS 4
+59\&.940 (2 * 29\&.970)
+.RE
+.PP
+8
+.RS 4
+60
+.RE
+.PP
+9
+.RS 4
+1
+.RE
+.PP
+10
+.RS 4
+5
+.RE
+.PP
+11
+.RS 4
+10
+.RE
+.PP
+12
+.RS 4
+12
+.RE
+.PP
+13
+.RS 4
+15
+.RE
+.RE
+.PP
+\fB\-g \fR \fIWidthxHeight\fR
+.RS 4
+video stream frame size [720x576]\&.
+.RE
+.PP
+\fB\-h\fR
+.RS 4
+print out usage information\&.
+.RE
+.PP
+\fB\-i \fR \fIname\fR
+.RS 4
+input file/directory/device/mountpoint/host name, default is [/dev/zero]\&.
+.RE
+.PP
+\fB\-j \fR \fItop[,left[,bottom[,right]]]\fR
+.RS 4
+select frame region by clipping border\&. Negative values add a border [off]\&.
+.RE
+.PP
+\fB\-k \fR
+.RS 4
+swap red/blue (Cb/Cr) in video frame [off]\&. Use if people have blue faces\&.
+.RE
+.PP
+\fB\-l \fR
+.RS 4
+mirror video frame [off]\&.
+.RE
+.PP
+\fB\-m \fR \fIfile\fR
+.RS 4
+write audio stream to separate file [off]\&.
+.RE
+.PP
+\fB\-n \fR \fI0xnn\fR
+.RS 4
+import audio format id [0x2000]\&. Normally, this is autodetected\&.
+.RE
+.PP
+\fB\-o \fR \fIfile\fR
+.RS 4
+output file name, default is [/dev/null]\&.
+.RE
+.PP
+\fB\-p \fR \fIfile\fR
+.RS 4
+read audio stream from separate file [off]\&.
+.RE
+.PP
+\fB\-q \fR \fIdebuglevel\fR
+.RS 4
+possible values for debuglevel:
+.PP
+0
+.RS 4
+QUIET
+.RE
+.PP
+1
+.RS 4
+INFO
+.RE
+.PP
+2
+.RS 4
+DEBUG
+.RE
+.PP
+4
+.RS 4
+STATS
+.RE
+.PP
+8
+.RS 4
+WATCH
+.RE
+.PP
+16
+.RS 4
+FLIST
+.RE
+.PP
+32
+.RS 4
+VIDCORE
+.RE
+.PP
+64
+.RS 4
+SYNC
+.RE
+.PP
+128
+.RS 4
+COUNTER
+.RE
+.PP
+256
+.RS 4
+PRIVATE
+.RE
+.RE
+.PP
+\fB\-r \fR \fIn[,m]\fR
+.RS 4
+reduce video height/width by n[,m] [off]\&. Example:
+\fB\-r\fR
+2 will rescale the framesize of a 720x576 file to 360x288\&.
+.RE
+.PP
+\fB\-s \fR \fIgain,[center,[front,[rear]]]\fR
+.RS 4
+increase volume of audio stream by gain,[center,front,rear] default [off,1,1,1]\&.
+.RE
+.PP
+\fB\-t \fR \fIn,base\fR
+.RS 4
+split output to
+\fIbase\fR%03d\&.avi with
+\fIn\fR
+frames [off]\&.
+.RE
+.PP
+\fB\-u \fR \fIm[,n]\fR
+.RS 4
+use
+\fIm\fR
+framebuffer[,\fIn\fR
+threads] for AV processing [10,1]\&.
+.RE
+.PP
+\fB\-v \fR
+.RS 4
+print version\&.
+.RE
+.PP
+\fB\-w \fR \fIb[,k[,c]]\fR
+.RS 4
+encoder bitrate[,keyframes[,crispness]] [(6000 for MPEG 1/2, 1800 for others),250,100]\&.
+.RE
+.PP
+\fB\-\-video_max_bitrate \fR \fIb\fR
+.RS 4
+Use
+\fIb\fR
+as maximal bitrate (kbps) when encoding variable bitrate streams\&.
+.RE
+.PP
+\fB\-x \fR \fIvmod[,amod]\fR
+.RS 4
+video[,audio] import modules [auto,auto]\&. If omitted, transcode will probefor appropriate import modules\&. The avalaible import modules and their options are documented into the
+\fItranscode_import(1)\fR
+manual page\&.
+.RE
+.PP
+\fB\-y \fR \fIvmod[,amod[,mmod]]\fR
+.RS 4
+video[,audio[,multiplex]] export modules [null]\&. If omitted, transcode will encode to the
+\fInull\fR
+module\&. If a multiplex module is given, transcode will use the new\-style encode/multiplex modules (still under development, see the encode and multiplex directories); if no multiplex module is given, the traditional export modules will be used\&. The avalaible export, encoder and multiplexor modules and their options are documented into the
+\fItranscode_export(1)\fR
+manual page\&.
+.RE
+.PP
+\fB\-\-accel \fR \fItype\fR
+.RS 4
+enforce experimental IA32/AMD64 acceleration for type [autodetect]\&.
+\fItype\fR
+may be one of
+.PP
+\fIC\fR
+.RS 4
+No acceleration
+.RE
+.PP
+\fIia32asm\fR
+.RS 4
+plain x86 assembly
+.RE
+.PP
+\fImmx\fR
+.RS 4
+MMX instruction set
+.RE
+.PP
+\fI3dnow\fR
+.RS 4
+3DNow! instruction set
+.RE
+.PP
+\fIsse\fR
+.RS 4
+SSE instruction set
+.RE
+.PP
+\fIsse2\fR
+.RS 4
+SSE2 instruction set
+.RE
+.RE
+.PP
+\fB\-\-avi_limit \fR\fIN\fR
+.RS 4
+split/rotate output AVI file after N MB [2048]\&.
+.RE
+.PP
+\fB\-\-avi_comments \fR \fIF\fR
+.RS 4
+Read AVI header comments from file
+\fIF\fR
+[off]\&. The AVI file format supports so\-called tomb\-stone data\&. It can be used to write annotations into the AVI file\&.
+.sp
+See the file
+\fIdocs/avi_comments\&.txt\fR
+for a sample input file with all tags\&. When the file is read, empty lines and lines starting with \'#\' are ignored\&. The syntax is: "TAG<space>STRING"\&. The order of the tags does not matter\&. If a tag has no string following it, it is ignored\&. That means, you can use the file docs/avi_comments\&.txt as input and only fill out the fields you want\&.
+.sp
+A very simple example is:
+.sp
+.RS 4
+.nf
+                        \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-snip\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+                        INAM My 1st Birthday
+                        ISBJ My first steps!
+                        IART My proud family
+                        \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-snip\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+                    
+.fi
+.RE
+Keep in mind that there is no endless space in the AVI header, most likely its around 1000 bytes\&.
+.RE
+.PP
+\fB\-\-zoom_filter \fR \fIstring\fR
+.RS 4
+use filter string for video resampling
+\fB\-Z\fR
+[Lanczos3] The following filters are available:
+.PP
+Bell
+.RS 4
+.RE
+.PP
+Box
+.RS 4
+.RE
+.PP
+Lanczos3 (default)
+.RS 4
+.RE
+.PP
+Mitchell
+.RS 4
+.RE
+.PP
+Hermite
+.RS 4
+.RE
+.PP
+B_spline
+.RS 4
+.RE
+.PP
+Triangle
+.RS 4
+.RE
+.RE
+.PP
+\fB\-\-cluster_percentage \fR
+.RS 4
+use percentage mode for cluster encoding
+\fB\-W\fR> [off]
+.RE
+.PP
+\fB\-\-cluster_chunks \fR \fIa\-b\fR
+.RS 4
+process chunk range instead of selected chunk [off]
+.RE
+.PP
+\fB\-\-export_asr \fR \fIC\fR
+.RS 4
+set export aspect ratio code
+\fIC\fR
+[as input] Valid codes for
+\fIC\fR
+are:
+.PP
+1
+.RS 4
+1:1
+.RE
+.PP
+2
+.RS 4
+4:3
+.RE
+.PP
+3
+.RS 4
+16:9
+.RE
+.PP
+4
+.RS 4
+2\&.21:1
+.RE
+.RE
+.PP
+\fB\-\-export_prof \fR \fIS\fR
+.RS 4
+WARNING: this option will be renamed as
+\fB\-\-export_profile\fR
+in future releases\&.
+.sp
+Select an export profile {vcd, svcd, xvcd, dvd} [\-pal|\-ntsc|\-secam]\&. Default is no profile\&.
+.sp
+If you set this meta option to one of the values below, transcode will adjust some internal paramaters as well as geometry and clipping\&. If no export modules are specified, mpeg2enc for video and mp2enc for audio are used when compiled with mjpegtools support\&.
+.sp
+Valid values for
+\fIS\fR
+are e\&.g\&. vcd, vcd\-pal, vcd\-ntsc, svcd, svcd\-pal, \&.\&.\&.
+.sp
+xvcd profile is equal to svcd except that it allows for up to 9000 Kbps video bitrate (default is 5000) and arbitrary audio samplerate\&.
+.sp
+When one of the above is used, transcode will calculate the needed clipping and resizing values for you based on the import and export aspect ratio\&. This is especially handy if you want to encode a 16:9 DVD into a 4:3 SVCD for example\&. Transcode internally then sets \-\-pre_clip to add the black bars ("letterboxing")\&.
+.sp
+If you use "vcd" instead of "vcd\-pal" or "vcd\-ntsc", transcode will make an educated guess if PAL or NTSC vcd is wanted\&. The same is true for the other profiles\&. When the input file has no aspect ratio information at all, transcode guesses it based on the import frame sizes\&. You can set the import aspect ratio by giving
+\fB\-\-import_asr\fR
+CODE\&.
+.sp
+Examples (assume input is a 16:9 coded file at 720x576 (PAL)):
+.sp
+.RS 4
+.nf
+                        \-\-export_prof svcd      clip top/bot \-96; resizes to 480x576
+                        \-\-export_prof vcd\-ntsc  clip top/bot \-96; resizes to 352x240
+                    
+.fi
+.RE
+This enables simpilified commandlines where transcode tries to set sensible values for mpeg export\&. When you don\'t specify an export module with \-y, mpeg2enc will be used\&.
+.sp
+.RS 4
+.nf
+                        transcode \-i vob/ \-\-export_prof svcd \-Z fast \-o test
+                    
+.fi
+.RE
+The ffmpeg export module `\-y ffmpeg\' does support profiles as well\&. The module tries to be smart and sets internal ffmpeg parameters which are otherwise quite tricky to find out\&. Usage is similar to the above\&.
+.sp
+.RS 4
+.nf
+                        transcode \-i vob/ \-\-export_prof dvd \-y ffmpeg \-o test \-m test\&.ac3
+                        tcmplex \-m d \-i test\&.m2v \-p test\&.ac3 \-o test\&.mpg
+                    
+.fi
+.RE
+.RE
+.PP
+\fB\-\-export_par \fR \fIC[,N]\fR
+.RS 4
+set export pixel aspect ratio to
+\fIC\fR[,\fIN\fR]\&. To encode anamorphic material, transcode can encode the target pixel aspect ratio into the file\&. This is NOT the actual aspect ratio of the image, but only the amount by which every single pixel is stretched when played with an aspect ratio aware application, like mplayer\&.
+.sp
+To encode at non standard aspect ratios, set both
+\fIC\fR
+and
+\fIN\fR\&. E\&.g\&. to make every pixel twice as high as it\'s wide (e\&.g\&. to scale back to normal size after deinterlacing by dropping every second line)\&.
+.sp
+If
+\fIC\fR
+and
+\fIN\fR
+are specified, the value set for
+\fIC\fR
+does give the pixel aspect ratio of the width and
+\fIN\fR
+the one for the height\&. If only
+\fIC\fR
+is specified, the table below applies\&.
+.sp
+Valid codes for
+\fIC\fR
+are
+.PP
+1
+.RS 4
+1:1 No stretching
+.RE
+.PP
+2
+.RS 4
+12:11 5:4 image to 4:3 (ex: 720x576 \-> 768x576)
+.RE
+.PP
+3
+.RS 4
+10:11 3:2 image to 4:3 (ex: 720x480 \-> 640x480)
+.RE
+.PP
+4
+.RS 4
+16:11 5:4 image to 16:9 (ex: 720x576 \-> 1024x576)
+.RE
+.PP
+5
+.RS 4
+40:33 3:2 image to 16:9 (ex: 720x480 \-> 872x480)
+.RE
+.RE
+.PP
+\fB\-\-import_asr \fR \fIC\fR
+.RS 4
+set import aspect ratio code
+\fIC\fR
+[autoprobed]
+.sp
+Valid codes for
+\fIC\fR
+are
+.PP
+1
+.RS 4
+1:1
+.RE
+.PP
+2
+.RS 4
+4:3
+.RE
+.PP
+3
+.RS 4
+16:9
+.RE
+.PP
+4
+.RS 4
+2\&.21:1
+.RE
+.RE
+.PP
+\fB\-\-resync_interval\fR
+.RS 4
+set how often the resynchronization engine should check form A/V drift, and correct it if needed\&.
+.sp
+It is recommended to use a resync interval which is an exact multiple of fps value\&.
+.sp
+Please note that not all resynchronization engines can honour this option\&.
+.RE
+.PP
+\fB\-\-resync_margin\fR
+.RS 4
+set the maximum allowed A/V drift, expressed in frames\&.
+.sp
+When the resynchronization engine checks for drift correction, it takes action if and only if the drift threshold equals or exceeds the given margin\&.
+.RE
+.PP
+\fB\-\-keep_asr \fR
+.RS 4
+try to keep aspect ratio (only with \-Z) [off]
+.sp
+The
+\fB\-\-keep_asr\fR
+options changes the meaning of
+\fB\-Z\fR\&. It tries to fit the video into a framesize specified by
+\fB\-Z\fR
+by keeping the
+\fIoriginal\fR
+aspect ratio\&.
+.sp
+.RS 4
+.nf
+                        +\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-+                            +\-\-\-480\-\-\-\-\-+
+                        |                |                            | black     |
+                        |720x306 = 2\&.35:1| \-> \-Z 480x480 \-\-keep_asr \->|\-\-\-\-\-\-\-\-\-\-\-4
+                        |                |                            | 480x204   8
+                        +\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-+                            |\-\-\-\-\-\-\-\-\-\-\-0
+                        | black     |
+                        +\-\-\-\-\-\-\-\-\-\-\-+
+                    
+.fi
+.RE
+Consider
+\fB\-\-keep_asr\fR
+a wrapper for calculating
+\fB\-Y\fR
+options and
+\fB\-Z\fR
+options\&.
+.RE
+.PP
+\fB\-\-mplayer_probe \fR
+.RS 4
+use external mplayer binary to probe stream, reset default import modules as mplayer ones [off]\&. Default is to use internal probing code\&. Using this option without mplayer import modules (\fB\-x\fR
+mplayer) can lead to unpredictable and possibly wrong results\&.
+.RE
+.PP
+\fB\-\-quantizers \fR \fImin,max\fR
+.RS 4
+set encoder min/max quantizer\&. This is meaningfull only for video codecs of MPEG family\&. For other kind of codecs, this options is harmless\&. [2,31]
+.RE
+.PP
+\fB\-\-divx_rc \fR \fIp,rp,rr\fR
+.RS 4
+divx encoder rate control parameter [2000,10,20]
+.RE
+.PP
+\fB\-\-divx_vbv_prof \fR \fIN\fR
+.RS 4
+divx5 encoder VBV profile (0=free\-5=hiqhq) [3]\&. Sets a predefined profile for the Video Bitrate Verifier\&. If
+\fIN\fR
+is set to zero, no profile is applied and the user specified values from
+\fB\-\-divx_vbv\fR
+are used\&.
+.sp
+Valid profiles
+.PP
+0
+.RS 4
+Free/No profile ( Use supplied values )
+.RE
+.PP
+1
+.RS 4
+Handheld ( 320, 16, 3072 )
+.RE
+.PP
+2
+.RS 4
+Portable ( 1920, 64, 12288 )
+.RE
+.PP
+3
+.RS 4
+Home Theatre ( 10000, 192, 36864 )
+.RE
+.PP
+4
+.RS 4
+High Definition ( 20000, 384, 73728 )
+.RE
+.RE
+.PP
+\fB\-\-divx_vbv \fR \fIbr,sz,oc\fR
+.RS 4
+divx5 encoder VBV params (bitrate,size,occup\&.) [10000,192,36864] These parameters are normally set through the profile parameter
+\fB\-\-divx_vbv_prof\fR\&. Do not mess with theses value unless you are absolutely sure of what you are doing\&. Transcode internally multiplicates vbv_bitrate with 400, vbv_size with 16384 and vbv_occupancy with 64 to ensure the supplied values are multiples of what the encoder library wants\&.
+.RE
+.PP
+\fB\-\-export_fps \fR \fIrate[,frc]\fR
+.RS 4
+set export frame rate (and code) [as input]\&.Valid values for
+\fIfrc\fR
+are
+.sp
+frc rate
+.PP
+1
+.RS 4
+23\&.976 (24000/1001\&.0)
+.RE
+.PP
+2
+.RS 4
+24
+.RE
+.PP
+3
+.RS 4
+25
+.RE
+.PP
+4
+.RS 4
+29\&.970 (30000/1001\&.0)
+.RE
+.PP
+5
+.RS 4
+30
+.RE
+.PP
+6
+.RS 4
+50
+.RE
+.PP
+7
+.RS 4
+59\&.940 (2 * 29\&.970)
+.RE
+.PP
+8
+.RS 4
+60
+.RE
+.PP
+9
+.RS 4
+1
+.RE
+.PP
+10
+.RS 4
+5
+.RE
+.PP
+11
+.RS 4
+10
+.RE
+.PP
+12
+.RS 4
+12
+.RE
+.PP
+13
+.RS 4
+15
+.RE
+.RE
+.PP
+\fB\-\-export_frc \fR \fIF\fR
+.RS 4
+set export frame rate code
+\fIF\fR
+[as input]\&.
+\fIObsolete\fR, use
+\fB\-\-export_fps\fR
+0,F
+.RE
+.PP
+\fB\-\-hard_fps \fR
+.RS 4
+disable smooth dropping (for variable fps clips) [off]\&. See /docs/framerate\&.txt for more information\&.
+.RE
+.PP
+\fB\-\-pulldown \fR
+.RS 4
+set MPEG 3:2 pulldown flags on export [off]
+.RE
+.PP
+\fB\-\-antialias_para \fR \fIw,b\fR
+.RS 4
+center pixel weight, xy\-bias [0\&.333,0\&.500]
+.RE
+.PP
+\fB\-\-no_audio_adjust \fR
+.RS 4
+disable internal audio frame sample adjustment [off]
+.RE
+.PP
+\fB\-\-no_bitreservoir \fR
+.RS 4
+disable lame bitreservoir for MP3 encoding [off]
+.RE
+.PP
+\fB\-\-config_dir \fR \fIdir\fR
+.RS 4
+Assume config files are in this
+\fIdir\fR\&. This only affects the \-y ffmpeg and \-y xvid4 modules\&. It gives the path where the modules search for their configuration\&.
+.RE
+.PP
+\fB\-\-lame_preset \fR \fIname[,fast]\fR
+.RS 4
+use lame preset with
+\fIname\fR
+[off]\&. Lame features some built\-in presets\&. Those presets are designed to provide the highest possible quality\&. They have for the most part been subject to and tuned via rigorous listening tests to verify and achieve this objective\&. These are continually updated to coincide with the latest developments that occur and as a result should provide you with nearly the best quality currently possible from LAME\&. Any of those VBR presets can also be used in fast mode, using the new vbr algorithm\&. This mode is faster, but its quality could be a little lower\&. To enable the fast mode, append "\fI,fast\fR"
+.PP
+\fI<N kbps>\fR
+.RS 4
+Using this preset will usually give you good quality at a specified bitrate\&. Depending on the bitrate entered, this preset will determine the optimal settings for that particular situation\&. While this approach works, it is not nearly as flexible as VBR, and usually will not reach the same quality level as VBR at higher bitrates\&. ABR\&.
+.RE
+.PP
+\fImedium\fR
+.RS 4
+This preset should provide near transparency to most people on most music\&. The resulting bitrate should be in the 150\-180kbps range, according to music complexity\&. VBR\&.
+.RE
+.PP
+\fIstandard\fR
+.RS 4
+This preset should generally be transparent to most people on most music and is already quite high in quality\&. The resulting bitrate should be in the 170\-210kbps range, according to music complexity\&. VBR\&.
+.RE
+.PP
+\fIextreme\fR
+.RS 4
+If you have extremely good hearing and similar equipment, this preset will provide slightly higher quality than the "standard" mode\&. The resulting bitrate should be in the 200\-240kbps range, according to music complexity\&. VBR\&.
+.RE
+.PP
+\fIinsane\fR
+.RS 4
+This preset will usually be overkill for most people and most situations, but if you must have the absolute highest quality with no regard to filesize, this is the way to go\&. This preset is the highest preset quality available\&. 320kbps CBR\&.
+.RE
+.PP
+(taken from \fIhttp://www\&.mp3dev\&.org/mp3/doc/html/presets\&.html)\fR\&[1]
+.RS 4
+.RE
+.RE
+.PP
+\fB\-\-av_fine_ms \fR \fIt\fR
+.RS 4
+AV fine\-tuning shift
+\fIt\fR
+in millisecs [autodetect] also see \-D\&.
+.RE
+.PP
+\fB\-\-nav_seek \fR \fIfile\fR
+.RS 4
+use VOB or AVI navigation file [off]\&. Generate a nav file with tcdemux \-W >nav_log for VOB files or with aviindex(1) for AVI files\&.
+.RE
+.PP
+\fB\-\-psu_mode \fR
+.RS 4
+process VOB in PSU, \-o is a filemask incl\&. %d [off]\&. PSU means Program Stream Unit and this mode is useful for (mostly) NTSC DVDs which have several program stream units\&.
+.RE
+.PP
+\fB\-\-psu_chunks \fR \fIa\-b\fR
+.RS 4
+process only selected units
+\fIa\-b\fR
+for PSU mode [all]
+.RE
+.PP
+\fB\-\-no_split \fR
+.RS 4
+encode to single file in chapter/psu/directory mode [off]\&. If you don\'t give this option, you\'ll end up with several files in one of the above mentioned modes\&. It is still possible to merge them with avimerge(1)\&.
+.RE
+.PP
+\fB\-\-multi_input \fR
+.RS 4
+
+\fI(EXPERIMENTAL)\fR
+enable multiple input mode: intelligently join input files in import\&. The inputs can be expressed using standard POSIX globbing\&. While theorically all input modules are supported, it is safe to use this only when dealing with constant\-sized audio (PCM) and intra\-frame only video codecs (es: MJPEG)\&. To be safe, use this mode with im, ffmpeg and raw import modules\&.
+.RE
+.PP
+\fB\-\-pre_clip \fR \fIt[,l[,b[,r]]]\fR
+.RS 4
+select initial frame region by clipping border [off]
+.RE
+.PP
+\fB\-\-post_clip \fR \fIt[,l[,b[,r]]]\fR
+.RS 4
+select final frame region by clipping border [off]
+.RE
+.PP
+\fB\-\-a52_drc_off \fR
+.RS 4
+disable liba52 dynamic range compression [enabled]\&. If you dont specify this option, liba52 will provide the default behaviour, which is to apply the full dynamic range compression as specified in the A/52 stream\&. This basically makes the loud sounds softer, and the soft sounds louder, so you can more easily listen to the stream in a noisy environment without disturbing anyone\&.
+.sp
+If you let it enabled this this will totally disable the dynamic range compression and provide a playback more adapted to a movie theater or a listening room\&.
+.RE
+.PP
+\fB\-\-a52_demux \fR
+.RS 4
+demux AC3/A52 to separate channels [off]
+.RE
+.PP
+\fB\-\-a52_dolby_off \fR
+.RS 4
+disable liba52 dolby surround [enabled]\&. Selects whether the output is plain stereo (if the option is set) or if it is Dolby Pro Logic \- also called Dolby surround or 3:1 \- downmix (if the option is not used)\&.
+.RE
+.PP
+\fB\-\-no_log_color \fR
+.RS 4
+disable colored log messages\&. By default transcode use colors in log messages in order to easily distinguish message classes\&. That behaviour can be problematic if output of transcode is a file or a pipe, so this option came handful\&.
+.RE
+.PP
+\fB\-\-dir_mode \fR \fIbase\fR
+.RS 4
+process directory contents to base\-%03d\&.avi [off]
+.RE
+.PP
+\fB\-\-frame_interval \fR \fIN\fR
+.RS 4
+select only every
+\fIN\fRth frame to be exported [1]
+.RE
+.PP
+\fB\-\-encode_fields \fR \fIC\fR
+.RS 4
+enable field based encoding (if supported) [off]\&. This option takes an argument if given to denote the order of fields\&. If the option is not given, it defaults to progressive (do not assume the picture is interlaced)
+.sp
+Valid codes for
+\fIC\fR
+are:
+.PP
+\fIp\fR
+.RS 4
+progressive (default)
+.RE
+.PP
+\fIt\fR
+.RS 4
+top\-field first
+.RE
+.PP
+\fIb\fR
+.RS 4
+bottom\-field first
+.RE
+.RE
+.PP
+\fB\-\-dv_yuy2_mode, \-\-dv_yv12_mode\fR
+.RS 4
+Indicates that libdv decodes Digital Video frames in YUY2 (packed) or YV12 (planar) mode, respectively\&. Normally transcode figures out the correct mode automatically, but if you try to transcode PAL DV files and the results look strange, try one of these options\&.
+.RE
+.PP
+\fB\-\-write_pid \fR \fIfile\fR
+.RS 4
+write pid of signal thread to
+\fIfile\fR
+[off]\&. Enables you to terminate transcode cleanly by sending a SIGINT (2) to the pid in
+\fIfile\fR\&. Please note
+\fIfile\fR
+will be overwritten\&. Usage example
+.sp
+.RS 4
+.nf
+                        $ transcode \&.\&.\&. \-\-write_pid /tmp/transcode\&.pid &
+                        $ kill \-2 `cat /tmp/transcode\&.pid`
+                    
+.fi
+.RE
+.RE
+.PP
+\fB\-\-nice \fR \fIN\fR
+.RS 4
+set niceness to
+\fIN\fR
+[off]\&. The option \-\-nice which renices transcode to the given positive or negative value\&. \-10 sets a high priority; +10 a low priority\&. This might be useful for cluster mode\&.
+.RE
+.PP
+\fB\-\-progress_meter \fR \fIN\fR
+.RS 4
+select type of progress meter [1]\&. Selects the type of progress message printed by transcode:
+.PP
+\fI0\fR
+.RS 4
+no progress meter
+.RE
+.PP
+\fI1\fR
+.RS 4
+standard progress meter
+.RE
+.PP
+\fI2\fR
+.RS 4
+raw progress data (written to standard output)
+.RE
+.sp
+Scripts that need progress data should use type 2, since the format of type 1 is subject to change without notice\&.
+.RE
+.PP
+\fB\-\-progress_rate \fR \fIN\fR
+.RS 4
+print progress every
+\fIN\fR
+frames [1]\&. Controls how frequently the status message is printed (every
+\fIN\fR
+frames)\&.
+.RE
+.PP
+\fB\-\-socket \fR \fIFILE\fR
+.RS 4
+Open a socket to accept commands while running\&. See
+\fItcmodinfo(1)\fR
+and /docs/filter\-socket\&.txt for more information about the protocol\&.
+.RE
+.SH "ENVIRONMENT"
+.PP
+\fITRANSCODE_NO_LOG_COLOR\fR
+.RS 4
+if set, forces the colored logging off for all the tools of transcode suite\&.
+.RE
+.SH "NOTES"
+.PP
+*
+.RS 4
+Most source material parameter are auto\-detected\&.
+.RE
+.PP
+*
+.RS 4
+Clipping region options are expanded symmetrically\&. Examples:
+.sp
+\-j 80 will be expanded to \-j 80,0,80,0
+.sp
+\-j 80,8 will be expanded to \-j 80,8,80,8
+.sp
+\-j 80,8,10 will be expanded to \-j 80,8,10,8
+.RE
+.PP
+*
+.RS 4
+maximum image size is 1920x1088\&.
+.RE
+.PP
+*
+.RS 4
+The video frame operations ordering is fixed: "\-j \-I \-X \-B \-Z \-Y \-r \-z \-l \-k \-K \-G \-C" (executed from left to right)\&.
+.RE
+.PP
+*
+.RS 4
+Shrinking the image with \'\-B\' is not possible if the image width/height is not a multiple of 8, 16 or 32\&.
+.RE
+.PP
+*
+.RS 4
+Expanding the image with \'\-X\' is not possible if the image width/height is not a multiple of 8, 16 or 32\&.
+.RE
+.PP
+*
+.RS 4
+The final frame width/height should be a multiple of 8\&. (to avoid encoding problems with some codecs)
+.PP
+1\&.
+.RS 4
+Reducing the video height/width by 2,4,8 Option \'\-r factor\' can be used to shrink the video image by a constant factor, this factor can be 2,4 or 8\&.
+.RE
+.PP
+2\&.
+.RS 4
+Clipping and changing the aspect ratio
+\fBtranscode\fR
+uses 3 steps to produce the input image for the export modules
+.PP
+1\&.
+.RS 4
+Clipping of the input image\&.
+.RE
+.PP
+2\&.
+.RS 4
+Changing the aspect ratio of the 1) output\&.
+.RE
+.PP
+3\&.
+.RS 4
+Clipping of the 2) output\&.
+.RE
+.RE
+.RE
+.PP
+*
+.RS 4
+
+\fIBits per pixel\fR
+(bits/pixel) is a value transcode calculates and prints when starting up\&. It is mainly useful when encoding to MPEG4 (xvid, divx, etc)\&. You\'ll see line like
+.sp
+[transcode] V: bits/pixel | 0\&.237
+.sp
+Simplified said, bits/pixel quantifies how good an encode will be\&. Although this value depends heavily on the used input material, as a general rule of thump it can be said that values greater or close to 0\&.2 will result in good encodes, encodes with values less than 0\&.15 will have noticeable artifacts\&.
+.sp
+
+\fIBits per pixel\fR
+depends on the resolution, bitrate and frames per second\&. If you have a low value ( < 0\&.15), you might want to raise the bitrate or encode at a lower resolution\&. The exact formula is
+.sp
+.RS 4
+.nf
+                            bitrate*1000
+                        bpp =  \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+                            width*height*fps
+                    
+.fi
+.RE
+.RE
+.PP
+*
+.RS 4
+
+\fIAC3 / Multiple channels\fR
+.sp
+When you do import an audio stream which has more then two audio channels \- this is usually the case for AC3 audio \- transcode will automagically downmix to two channels (stereo)\&. You\'ll see line like
+.sp
+[transcode] A: downmix | 5 channels \-> 2 channels
+.sp
+This is done, because most encoders and audio filters can not handle more than 2 channels correctly\&. The PCM internal representation does not support more than two channels, audio will be downmixed to stereo
+\fINo\fR
+downmix will happen, if you use AC3 as the internal audio codec or use audio pass\-through\&.
+.RE
+.SH "EXAMPLES"
+.PP
+The following command will read it\'s input from the DVD drive (I assume
+\fI/dev/dvd\fR
+is a symbolic link to the actual DVD device) and produce a splitted divx4 movie according to the chapter information on the DVD medium\&. The output files will be named
+\fImy_movie\-ch00\&.avi\fR,
+\fImy_movie\-ch01\&.avi\fR
+\&.\&.\&.
+.sp
+.RS 4
+.nf
+            \fB
+                transcode \-i /dev/dvd/ \-x dvd \-j 16,0 \-B 5,0 \-Y 40,8 \-s 4\&.47 \-U my_movie \-y xvid \-w 1618
+            \fR
+        
+.fi
+.RE
+.PP
+Option
+\fB\-j 16,0\fR
+will be expanded to
+\fB\-j 16,0,16,0\fR
+and results in 16 rows from the top and the bottom of the image to be cut off\&. This may be usefull if the source consists of black top and bottom bars\&.
+.PP
+Option
+\fB\-B 5,0\fR
+tells
+\fBtranscode\fR
+to shrink the resulting image by 5*32=160 rows in height\&.
+.PP
+Option
+\fB\-Y 40,8\fR
+will be expanded to
+\fB\-Y 40,8,40,8\fR
+and tells
+\fBtranscode\fR
+to \&.\&.\&.
+.PP
+Option
+\fB\-s 4\&.47\fR
+tells
+\fBtranscode\fR
+to increase audio volume by a factor 4\&.47\&.
+.PP
+Option
+\fB\-U my_movie\fR
+tells
+\fBtranscode\fR
+to operate in chapter mode and produce output to files named
+\fImy_movie\-ch00\&.avi\fR,
+\fImy_movie\-ch01\&.avi\fR\&.\&.\&.\&. You can either merge the files afterwards with avimerge or add the option \-\-no_split to the command line\&.
+.PP
+Option
+\fB\-y xvid\fR
+tells
+\fBtranscode\fR
+to use the export module export_xvid\&.so which in turn uses the XviD encoder to encode the video\&.
+.PP
+Option
+\fB\-w 1618\fR
+tells
+\fBtranscode\fR
+to set the encoder bitrate to 1618 which is lower than the default of 1800 and results in smaller files with the loss of visual quality\&.
+.PP
+Lets assume that you have an NTSC DVD (720x480) and you want to make an NTSC\-SVCD
+.RS 4
+The frame size of the DVD movie is 720x480 @ 16:9\&. For the purpose of frame resizing, the width 720 is not relavant (that is, it will not be used in the following reasoning)\&. It is not needed because the original frame size is really defined by the frame height and aspect ratio\&. The _final result_ should be 640x480, encoded as 480x480 @ 4:3 (the height 480 multiplied by the aspect ratio 4:3 gives the width 640)\&. This same frame size (640x480) can also be encoded as 640x360 @ 16:9 (the height 360 by the aspect ratio 16:9 gives the width 640)\&.
+.sp
+As the _original video_ has aspect ratio 16:9, first we resize to 640x360, keeping that aspect ratio\&. But the aspect ratio has to be changed to 4:3\&. To find the frame size in the new aspect ratio the height 360 is multiplied by the new aspect ratio, giving the width 480\&. This is accomplished with the transcode options "\fB\-\-export_asr\fR
+2 \-Z 480x360,fast"\&.
+.sp
+To avoid stretching the video height in this change (because the new aspect ratio is less than the original), black borders should be added at the top and bottom of the video, bringing the frame to the desired 480x480 @ 4:3 size\&. The transcode option for this is "\-Y \-60,0,\-60,0"\&.
+.sp
+If for some reason (maybe a subtitle filter) the black borders (of height 60 each) should be added before resizing the frame and changing the aspect ratio to 4:3\&. One reason for that would be the need of running a _pre_ filter after adding the black borders\&. Then the options "\-j" or "\-\-pre_clip" can be used instead of "\-Y"\&. In this case the black border height has to be recalculated by applying the aspect ratio 4:3 to the value alreadyfound: 60 * (4/3) = 80\&. The transcode options "\-j \-80,0,\-80,0" or "\-\-pre_clip \-80,0,\-80,0" are then used instead of "\-Y \-60,0,\-60,0", and "\-Z 480x360,fast" is replaced by "\-Z 480x480,fast"\&.
+.RE
+.SH "AUTHORS"
+.PP
+Written by Thomas Oestreich <ostreich@theorie\&.physik\&.uni\-goettingen\&.de>, Tilmann Bitterberg and the Transcode\-Team
+.PP
+See the
+\fIAUTHORS\fR
+file for details\&.
+.SH "SEE ALSO"
+.PP
+
+\fBtranscode_export\fR(1)
+,
+\fBtranscode_filter\fR(1)
+,
+\fBtranscode_import\fR(1)
+,
+\fBavifix\fR(1)
+,
+\fBavisync\fR(1)
+,
+\fBavimerge\fR(1)
+,
+\fBavisplit\fR(1)
+,
+\fBtcprobe\fR(1)
+,
+\fBtcscan\fR(1)
+,
+\fBtccat\fR(1)
+,
+\fBtcdemux\fR(1)
+,
+\fBtcextract\fR(1)
+,
+\fBtcdecode\fR(1)
+,
+\fBtcmodinfo\fR(1)
+,
+\fBtcxmlcheck\fR(1)
+,
+\fBtranscode\fR(1)
+.SH "WWW"
+.PP
+Frequently asked questions (FAQ) at
+\fI http://www\&.transcoding\&.org/cgi\-bin/transcode?Transcode_FAQ \fR\&[1]
+Example transcode sessions at
+\fI http://www\&.transcoding\&.org/cgi\-bin/transcode?Command_Examples \fR\&[1]
+.SH "BUGS"
+.PP
+Yes, there are bugs in transcode! Do your part and report them immediately\&.
+.PP
+For details, see
+\fI http://www\&.transcoding\&.org/cgi\-bin/transcode?Reporting_Problems \fR\&[1]
+.SH "NOTES"
+.IP " 1." 4
+http://www.mp3dev.org/mp3/doc/html/presets.html)
+.RS 4
+\%a
+.RE

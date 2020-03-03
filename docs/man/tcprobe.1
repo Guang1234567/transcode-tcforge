@@ -1,0 +1,127 @@
+.TH tcprobe 1 "12th October 2003" "tcprobe(1)"
+.SH NAME
+tcprobe \- probe multimedia streams from medium and print information on the
+standard output
+.SH SYNOPSIS
+.TP
+.B tcprobe
+.B -i
+.I name
+[
+.B -B
+] [
+.B -M
+] [
+.B -T
+.I title
+] [
+.B -b
+.I bitrate
+] [
+.B -H
+.I n
+] [
+.B -f
+.I seekfile
+] [
+.B -d
+.I verbosity
+] [
+.B -v
+]
+.SH COPYRIGHT
+\fBtcprobe\fP is Copyright (C) by Thomas Oestreich.
+.SH DESCRIPTION
+.B tcprobe
+is part of and usually called by \fBtranscode\fP.
+.br
+However, it can also be used independently.
+.br
+\fBtcprobe\fP reads source (from stdin if not explicitely defined) and
+prints on the standard output.
+.SH OPTIONS
+.IP "\fB-i \fIname\fP"
+Specify input source.  If ommited, \fIstdin\fP is assumed.
+.br
+You can specify a file, directory, device, mountpoint or host address
+as input source.  \fBtcprobe\fP usually handles the different types
+correctly.
+.IP "\fB-B\fP"
+Binary output to stdout for use in transcode.
+.IP "\fB-M\fP"
+Use EXPERIMENTAL mplayer probe, useful for streams that tcprobe doesn't
+recognize elsewhere. With this option enabled, tcprobe merely acts as
+a frontend for mplayer; of course mplayer binary needs to be installed
+and avalaible somewhere in PATH.
+.IP "\fB-T \fItitle\fP"
+Probe for DVD
+.I title
+.IP "\fB-H\fP \fIn\fP"
+This option tells \fBtcprobe\fP to scan \fIn\fP MB of input data. Default
+is to scan 1 MB. To detect all subtitles and audio tracks (if available) it is
+highly recommended that this \fIn\fP should be at least increased to 10 or even
+higher. Very often only some audio tracks start during the first MB of a VOB or
+DVD file so transcode cannot detect them if not called with a higher value.
+Please note that transcode(1) has a similar -H option as well which has the
+same meaning.
+.IP "\fB-s\fP \fIn\fP"
+Skip the first \fIn\fP bytes of the input stream. Default is to skip no bytes.
+.IP "\fB-b\fP \fIbitrate\fP"
+Set audio encoder bitrate to \fIbitrate\fP
+.IP "\fB-f \fIseekfile\fP"
+Read index/seek information from \fIseekfile\fP. This is especially useful for
+AVI files when it takes a long time to probe when there is no index in the AVI
+available. Also see aviindex(1).
+.IP "\fB-d\fP \fIlevel\fP"
+With this option you can specify a bitmask to enable different levels
+of verbosity (if supported).  You can combine several levels by adding the
+corresponding values:
+
+QUIET         0
+
+INFO          1
+
+DEBUG         2
+
+STATS         4
+
+WATCH         8
+
+FLIST        16
+
+VIDCORE      32
+
+SYNC         64
+
+COUNTER     128
+
+PRIVATE     256
+.IP "\fB-v\fP"
+Print version information and exit.
+.SH NOTES
+\fBtcprobe\fP is a front end for probing various source types and is used in \fBtranscode\fP's import modules.
+.SH EXAMPLES
+The command
+.B tcprobe -i foo.avi
+will print interesting information about the AVI file itself and its video and
+audio content.
+.PP
+.SH AUTHORS
+.B tcprobe
+was written by Thomas Oestreich
+.br
+<ostreich@theorie.physik.uni-goettingen.de> with contributions from
+many others.  See AUTHORS for details.
+.SH SEE ALSO
+.BR aviindex (1),
+.BR avifix (1),
+.BR avisync (1),
+.BR avimerge (1),
+.BR avisplit (1),
+.BR tcprobe (1),
+.BR tcscan (1),
+.BR tccat (1),
+.BR tcdemux (1),
+.BR tcextract (1),
+.BR tcdecode (1),
+.BR transcode (1)

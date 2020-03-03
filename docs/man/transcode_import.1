@@ -1,0 +1,229 @@
+.\"     Title: transcode_import
+.\"    Author: 
+.\" Generator: DocBook XSL Stylesheets v1.73.2 <http://docbook.sf.net/>
+.\"      Date: 14th July 2008
+.\"    Manual: 15th April 2008
+.\"    Source: transcode_import(1)
+.\"
+.TH "TRANSCODE_IMPORT" "1" "14th July 2008" "transcode_import(1)" "15th April 2008"
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.SH "NAME"
+transcode_import \- transcode import modules collection
+.SH "SYNOPSIS"
+.HP 10
+\fBtranscode\fR \-x\ \fIname\fR\ [\ \fI,name\fR\ ]  [\fIother\ options\fR]
+.SH "COPYRIGHT"
+.PP
+
+\fBtranscode\fR
+is Copyright (C) 2001\-2003 by Thomas Oestreich, 2003\-2004 Tilmann Bitterberg, 2004\-2010 Transcode Team
+.SH "IMPORT MODULES"
+.PP
+If no module is specified through the \-x option,
+\fBtranscode\fR
+will autodetect them using internal probing code\&. If just one import module is specified, it is used both for video and audio import; if both modules are specified, the first is used for video import, the second for audio import\&. To see what import modules are avalaible for your transcode installation, do a
+.sp
+.RS 4
+.nf
+           $ ls \-1 $( tcmodinfo \-p )/import*\&.so
+           
+.fi
+.RE
+.sp
+A complete transcode installation has the following import modules\&.
+.PP
+\fBalsa\fR \fI[audio]\fR
+.RS 4
+This module reads audio samples from an ALSA device using libalsa\&.
+.sp
+This module accepts the following options:
+.PP
+device (string)
+.RS 4
+selects ALSA device to use for capturing audio\&.
+.RE
+.RE
+.PP
+\fBbktr\fR \fI[video]\fR
+.RS 4
+This module reads video frames from an capture device using bktr module\&. This module is designed to work on *BSD\&. For linux, use the v4l module\&.
+.sp
+This module accepts the following options:
+.PP
+tunerdev (string)
+.RS 4
+help: selects tuner device\&.
+.RE
+.PP
+vsource (string)
+.RS 4
+selects video source (device dependant input)\&.
+.RE
+.PP
+format (string)
+.RS 4
+selects video normalization\&.
+.RE
+.PP
+asource (string)
+.RS 4
+selects audio source (device dependant input)\&.
+.RE
+.RE
+.PP
+\fBdvd\fR \fI[video, audio, extra]\fR
+.RS 4
+This module provides access to DVD content using libdvdread, directly from DVD device\&. (e\&.g\&. on\-the\-fly operation, no intermediate disk storage needed)\&.
+.sp
+At run time, this module requires: libdvdread >= 0\&.9\&.3
+.sp
+This module accepts the following options:
+.PP
+delay (integer)
+.RS 4
+set device access delay (seconds)\&.
+.RE
+.RE
+.PP
+\fBim\fR \fI[video]\fR
+.RS 4
+This module reads single images from disk using ImageMagick; a stream of correlated images can be automatically read if their filenames contains a common prefix and a serial number\&. All formats supported by ImageMagick are supported as well\&.
+.sp
+At run time, this module requires: libMagick >= 6\&.2\&.4\&.0
+.sp
+This module accepts the following options:
+.PP
+noseq (flag)
+.RS 4
+disable internal auto loading of images with similar names\&.
+.RE
+.RE
+.PP
+\fBpv3\fR \fI[video, audio]\fR
+.RS 4
+This module provides access to Earth Soft PV3 audio/video streams using win32 binary codecs and an internal win32 emulation layer (NO wine needed)\&.
+.sp
+At run time, this module requires: PV3 win32 dlls\&.
+.sp
+This module accepts the following options:
+.PP
+dllpath (string)
+.RS 4
+set path/filename to load dv\&.dll from
+.RE
+.RE
+.PP
+\fBvag\fR \fI[audio]\fR
+.RS 4
+This module decodes VAG\-format audio (from PlayStation)\&.
+.sp
+This module accepts the following options:
+.PP
+blocksize (integer)
+.RS 4
+stereo blocking size\&.
+.RE
+.RE
+.PP
+\fBvob\fR \fI[video, audio]\fR
+.RS 4
+This module imports audio/video from VOB files\&. If you need direct DVD access, use import_dvd module\&.
+.sp
+This module accepts the following options:
+.PP
+nodemux (flag)
+.RS 4
+skip demuxing processing stage\&. This sometimes improves A/V sync\&.
+.RE
+.RE
+.PP
+\fBx11\fR \fI[video]\fR
+.RS 4
+This module captures video frames from X window system using libX11\&.
+.sp
+At run time, this module requires: libcx11\-6 >= 1\&.0\&.0
+.sp
+This module accepts the following options:
+.PP
+skew_limit (integer)
+.RS 4
+maximum frame A/V skew (ms) before correction attempt
+.RE
+.RE
+.PP
+\fBv4l2\fR \fI[video, audio]\fR
+.RS 4
+This module allow to capture video frames through a V4L2 (V4L api version 2) device\&. While audio capturing is possible, this kind of usage is discouraged in favour of OSS or ALSA import modules\&.
+.sp
+This module accepts the following options:
+.PP
+overrun_guard (integer)
+.RS 4
+flag (default off)\&. Toggles the buffer overrun guard, that prevents crash when capture buffers are full\&.
+.RE
+.PP
+resync_margin (integer)
+.RS 4
+threshold audio/video desync (in frames) that triggers resync once reached\&.
+.RE
+.PP
+crop (string)
+.RS 4
+forces cropping into selected window (format: WIDTHxHEIGHT+LEFTxTOP)
+.RE
+.PP
+input (string)
+.RS 4
+select the V4L input source\&. V4L cards have often have more than an input source like, say, a tv tuner and a composite source\&. Use "list" parameter to get a list of supported input sources\&.
+.RE
+.PP
+format (string)
+.RS 4
+forces output format to given one; use "list" to get a list of supported formats\&.
+.RE
+.PP
+resync_interval (integer)
+.RS 4
+checks the resync_margin every given amount of frames\&.
+.RE
+.PP
+format (integer)
+.RS 4
+forces video frames convertion by using index; use \-1 to get a list of supported conversions\&.
+.RE
+.PP
+ignore_mute (boolean)
+.RS 4
+disable the device audio muting during the operation\&.
+.RE
+.PP
+channel (string)
+.RS 4
+synthonize the V4L tuner to selected TV channel\&. The channel frequencies are taken by the module configuration file, and they must be expressed in KHz\&.
+.RE
+.PP
+convert (integer)
+.RS 4
+forces video frames convertion by using index; use the special value "list" to get a list of supported conversions\&.
+.RE
+.RE
+.SH "AUTHORS"
+.PP
+Written by Thomas Oestreich <ostreich@theorie\&.physik\&.uni\-goettingen\&.de>, Tilmann Bitterberg and the Transcode\-Team
+.PP
+See the
+\fIAUTHORS\fR
+file for details\&.
+.SH "SEE ALSO"
+.PP
+
+\fBtranscode\fR(1)
+,
+\fBtcmodinfo\fR(1)
+,
+\fBtranscode_filter\fR(1)
+,
+\fBtranscode_export\fR(1)

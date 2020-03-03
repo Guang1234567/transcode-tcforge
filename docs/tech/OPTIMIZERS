@@ -1,0 +1,145 @@
+You want to improve you programming skills?
+You cannot stand wasted CPU cycles?
+You know how to write good/fast/efficient code?
+Then this might be for you.
+
+Transcode has a lot of filter plugins which are not optimized. Filters
+in transcode usually get a single video frame and do transformations on
+that frame. The filter API is as simple as efficient it is explained in
+great detail in /docs/filter-API.txt with sample code for a dummy
+filter.
+
+All filters in transcode are in the filter/ directory and are mostly a
+single C file. The variety of filters ranges from very simple filters
+-- like filter_invert.c -- to complex stuff like filter_yuvdenoise.c.
+
+The audio filters  are per definition less CPU intensive than the video
+filters because they have to deal with less data.
+
+Here is an overview of filters which would be glad about a speedup
+(lexicographical order)
+
+* filter_32detect.c
+  Is a interlace detection plugin. The detection algorithm could be
+  improved as well as the speed.
+
+* filter_aclip.c
+  Audio filter which generate audio clips from source
+
+* filter_astat.c
+  Audio filter which collects statistics about the audio stream.
+
+* filter_cshift.c
+  A chroma-lag shifter. It shifts the color components of the video to
+  the left or right.  For RGB mode, the filter converts the data to YUV and
+  back again.
+
+* filter_dnr.c
+  A denoiser with no SIMD optimizations It uses a different algorithm
+  than the yuvdenoiser.
+
+* filter_fields.c
+  A very efficient and well written filter.
+
+* filter_invert.c
+  Simple filter which inverts the video.
+
+* filter_logo.c
+  renders a logo into the video stream.
+
+* filter_logoaway.c
+  removes a logo from the video stream.
+
+* filter_mask.c
+  Filter through a rectangular mask, everything outside the masked will
+  be blacked out.
+
+* filter_normalize.c
+  Normalizes the audio stream. The filter is based on mplayers volnorm
+  filter.
+
+* filter_resample.c
+  Resamples to audio stream doing conversions from eg. 48000Hz to
+  44100Hz. The code is based on code from the sox application.
+
+* filter_smartdeinter.c
+  This filter provides a smart, motion-based deinterlacing
+  capability. In static picture areas, interlacing artifacts do
+  not appear, so data from both fields is used to provide full
+  detail. In moving areas, deinterlacing is performed.
+
+  The filter was written for VirtualDub by Donald Graft. It produces
+  very good results. It was written with the RGB colorspace in mind. To
+  use it in transcode with YUV mode enabled a yuv2rgb and rgb2yuv
+  wrapper has been built around this filter. It would speed up a lot, if
+  rewritten for native YUV mode. There are probably other areas in this
+  filter which are a candidate for a speedup.
+
+* filter_smooth.c
+  Is a single-frame smoothing plugin. It is very CPU intensive
+
+* filter_testframe.c
+  It generates stream of testframes. Optimizing this filter is probably
+  not worth it but it is a good testbed for generating problematic
+  testframes.
+
+* filter_xsharpen.c
+  This filter performs a subtle but useful sharpening effect. The
+  result is a sharpening effect that not only avoids amplifying
+  noise, but also tends to reduce it. A welcome side effect is that
+  files processed with this filter tend to compress to smaller files.
+
+  The filter was written for VirtualDub by Donald Graft.  It was written
+  with the RGB colorspace in mind. To be useful with transcodes YUV
+  mode, the filter has been partially rewritten.
+
+* filter_yuvdenoise.c
+  This filter comes from the mjpeg tools and denoises the video by doing
+  a motion analyse. There are some SIMD parts in this filter but it could
+  be much faster.
+
+* filter_yuvmedian.c
+  This filter comes from the mjpeg tools and smoothes the video by
+  appying a median algorithm. It is CPU intensive.
+
+
+/* ****************************************************************** */
+
+Colorspaces
+In transcode, the filter gets a char* which points to the raw video
+data. Only two colorspaces are possible in transcode.
+
+* RGB
+This is actually RGB24 meaning there are 24 bits or 3 Bytes available
+for each pixel. It is a packed format, each component is 1 byte large.
+The size of the image is Width*Height*3.
+The memory layout is
+
+ ___________________________________
+|__R__|__G__|__B__|__R__|__G__|__B__| ....
+ \_______________/ \_______________/
+    Pixel(0,0)        Pixel(1,0)
+
+* YUV (4:2:0)
+This is actually YUV420P (I420) with 1+1/2 byte per pixel. It is a planar
+format meaning first all Y data then Cb and then Cr.
+The memory layout is
+
+ __________________ ...  ______  ...  _____
+|__Y__|__Y__|__Y__| ... |__Cb_|  ... |__Cr_| ....
+ \___/ \___/ \___/
+ (0,0) (1,0) (2,0)
+
+There are Width*Height Y bytes, Width*Height/4 Cb bytes and
+Width*Height/4 Cr bytes. The size of the image is Width*Height*3/2.
+
+
+* YUV (4:2:2)
+This is YUV422 8-bit planar, with 2 bytes per pixel.  The layout is the
+same as for YUV420P, but the Cb and Cr planes are twice as high (double
+vertical resolution).
+
+Size of the image is 2*W*H.
+
+(c) 2003 Tilmann Bitterberg <transcode@tibit.org>
+Modified: $Date: 2007-03-21 20:17:10 $

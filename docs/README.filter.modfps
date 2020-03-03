@@ -1,0 +1,324 @@
+
+I. Introduction
+
+This file contains some example commands, and scripts which I've
+found useful when working with modfps.  Additionally there's some
+general documentation on how to use it.
+
+modfps is a filter written for transcode which allows one to alter
+the frame rate by either dropping or cloning frames.  While one might
+initially think that there's a better more intelligent way to alter
+the frame rate, most things I've toyed with which seriously compromise
+the original frames look poor.
+
+2. Options
+
+first of all, I expect that you've run "tcmodinfo -i modfps" ... that's
+a good way to at least find out about the options.  I'll try giving
+some more explanation for each option.
+
+infps, infrc are depreciated, and I can't immediately think why they
+might be used.
+
+verbose: for each frame, some information about the time the frames
+	sit in the stream, and whether a frame is skipped/cloned will
+	be printed.  This is info is probably not useful except for
+	debugging.
+
+mode :	There are two modes of operation, buffered (1) and fast (0).
+	Buffered mode is the default and recommended mode of operation.
+	While fast mode will get you the correct frame rate, depending
+	on the video stream you're working with it may look very poor
+
+	For example, if you have a 29.97fps stream recorded from your
+	tv card, I've frequently found that it's really 23.976fps or
+	25.0fps, and there are just duplicate frames.  If you use fast
+	mode to convert the steam, your odds are one in 5 if you're
+	going from 29.97 to 23.976 of randomly hitting the pattern
+	such that the skipped frames are the duplicate frames.  If you
+	miss, you'll skip a frame with action, which gives you a big
+	jump, and soon after that they'll be the duplicate frame.  This
+	gives one a bad headache if you try to watch to much of it on
+	a monitor (I'm not sure if it might be acceptable output to
+	a tv.
+
+	Unless you really need the speed, I'd suggest sticking with
+	mode 1.
+
+buffer: The number of frames to buffer.  The default is 5, which is
+	perfect when going from 29.97fps to 23.976.  As a note, while
+	it might initially seem like a good idea to run with 100 buffers
+	if you've got the RAM, note that modfps does not consider local
+	effects when deciding which frame to skip/clone.  Thus, if one
+	were going from 29.97fps to 15fps and there were 60 frames
+	buffered, it could decide that all of the frames that it wants to
+	skip are the last ones, which would mean that AV could be off
+	by 1.5 seconds.
+
+	A good formulae to decide on the number of buffers to use is:
+	buffers = absolute value of ( input_fps/(input_fps-output_fps) )
+
+subsample: When calculating the difference of frames, how many pixels do
+	we look at?  If we looked at all of them, buffered mode would
+	run slower, while not behaving too differently.  The current
+	default is to run with subsample=32 , or to say in English, to
+	compare every 32nd pixel.  on a 640x480 frame this gives 9600
+	points of comparison. ... on the 640x240 frames I record from
+	tv, it's 4800 points of comparison, and I've yet to see modfps
+	choose a bad frame to skip, but perhaps your source is different
+	enough to warrant setting this lower.
+
+clonetype: Ah, the fun stuff.  When cloning a frame, modfps will let
+	one do more than a simple copy of the data.  Suppose that the
+	first cloned frame is frame 5.  Frame 5 and 6 of the import
+	steam will correspond to frame 5 and 7 of the export steam.
+	Frame 6 of the export steam will varry based on clonetype.
+
+	0: no special behavior, export frame 6 will be the same as
+	export frame 5.
+
+	1: export frame 6 will be composed by alternating the rows
+	from export frame 5 and 7, with the top row being from frame
+	5 .  If the display device is interlaced, like a TV, this
+	might look best (it's similar to how a 23.976 fps dvd is
+	displayed at 29.97 fps; some of the frames have alternating
+	rows from the frame previous and after).
+
+	2: export frame 6 will be composed by alternating the rows
+	from export frame 5 and 7, with the top row being from frame
+	7 .  This is similar to value 1, except the order of the
+	frames is switched.  I'm not sure if this would be useful, but
+	it was trivial to add.
+
+	3: every pixel of frame 6 will be an arithmetic average of
+	the corresponding pixel from frame 5 and 7.
+
+	4: First we examine where the cloned frame sits in the export
+	stream, and compare it to where it came from in the import
+	steam.  some of the time, the following frame is closer to
+	"correct" based on timestamps.  If so, frame 6 is a copy of
+	frame 7.
+
+	in other cases, the frame might be temporally weighted closer
+	to frame 5, or between 7.  In such cases, we assign a weight
+	to frame 5 and 7 such that the sum of the weights are 1.
+	Then each pixel of frame 6 will be the sum of the weight of
+	the frame times the pixel of the frame.  I.E. if the temporal
+	weight is closest to frame 5, frame 6 will look mostly like
+	frame 5, but will have some info from frame 7 in it.
+
+	I think for non-interlaced displays this or value 5 will give
+	the best results.
+
+	5: for this, I considered how a TV looks, with the bright
+	pixels "sticking around" better than the less bright areas.
+	This is currently only implemented for YUV (and it will
+	probably stay that way).
+
+	An approximate ordering of the speed of the different clone
+	types is: 0, 1, 2, 3, 4, 5 from fastest to slowest.   In my
+	opinion, modes 0-4 are fast enough to not worry about speed,
+	while mode 5 is slow enough that you should test and make
+	sure you like the results before doing a lot with it.
+
+
+3. Misc.
+
+Because transcode by default will buffer some (5) frames, whenever
+one isn't encoding an entire file (I.E. using "-c" "-J cut" or
+"-J skip").
+
+As of transcode 0.6.9 filters do not see frames which are not in
+the range of "-c" ... thus if one is cutting frames 1000-1500 the
+first frame modfps sees is 1000 .  As modfps buffers the frame it
+sets the TC_FRAME_IS_SKIPPED flag, so it won't be encoded.  After
+it's read in the buffers it wants, it will start outputting the
+frames it's buffered.  I.E. the first frame modfps doesn't set as
+skipped will be 1005 from the encoder's point of view while
+corresponding to frame 1000 from the import stream.
+
+When using -c ,  one should add the number of buffers to the last
+segment, because all of the frames are offset by a bit.
+
+I.E. if: "-c 3916-13090,17493-24185,28304-42212,46777-54710" gives
+you the segments you want without modifying the frame rates, when
+you use modfps=buffers=5 (the default) you should modify the option
+to "-c 3916-13090,17493-24185,28304-42212,46777-54715"
+
+Also of interest is that ivtc works as well with modfps as it
+does with decimate.  While there's no real benefit to use it when
+transcoding from 29.97 to 23.976 fps I've seen 29.97 video which has
+telecine effects, except it's at 25.0 fps ... "-J ivtc,modfps=buffers=7"
+works well in this case.
+
+When using -J cut, cut will alter the number of audio frames skipped
+so that "-J cut=1000-1500,modfps -f 29.97 --export_fps 23,1" will keep
+the AV in sync while -c wouldn't.  However, again all the frames in
+the export are off by the number of buffers.  But the effects are
+different from -c , so if you wanted to use
+"-J cut="3916-13090,17493-24185,28304-42212" you would then use
+"-J cut="3921-13095,17498-24190,28309-42217"
+
+4. Example commands
+
+the source video of the example was recorded from my tv card, with
+half the height of the source (to avoid interlacing effects, and
+because I can't encode 640x480 realtime) .  Because of this, the
+video I get is usually either 29.97fps (10%) 23.976 (65%) 25.0 (25%).
+The percentages correspond to roughly how often I come upon this
+source.  As you can see, I rarely have something that will look
+good without modification, and even then, decimate wouldn't always
+save me.
+
+First, I do a first pass of xvid, video only.
+
+/usr/bin/nice -n +19 /usr/local/test/bin/transcode --print_status \
+5 --export_fps 25.0,3 -x mplayer -J modfps=buffer=7,hqdn3d -V -i tv.avi \
+-b 64 -c 3916-13090,17493-24185,28304-42212,46777-54715 -y xvid,null \
+-j 0,8 -Y 0,-4 -B 0,39,08 -w 600 -R 1
+
+Next, I do the 2nd pass, again, video only.
+
+/usr/bin/nice -n +19 /usr/local/test/bin/transcode --print_status 5 \
+--export_fps 25.0,3 -x mplayer -J modfps=buffer=7,hqdn3d -V -i tv.avi \
+-b 64 -c 3916-13090,17493-24185,28304-42212,46777-54715 -y xvid,null \
+-j 0,8 -Y 0,-4 -B 0,39,08 -w 600 -R 2 -o tmp.tv.avi
+
+Now that I have the video, I examine audio.  I've found that since
+commercials are much louder than TV, before I give anything to filter
+astat, I'll rip the raw audio.  Note, that the values of -c are
+different for audio than they were for video.
+
+I wish to stress: Currently, one cannot use "-c" with transcode and
+process audio and video at the same time while changing the frame
+rate without losing AV sync.
+
+/usr/bin/nice -n +19 /usr/local/test/bin/transcode --print_status \
+500 -f 29.970 --export_fps 25.000 -u 35 -x null,auto -y null,wav -m \
+sound.tv.avi -c 3267-10919,14593-20175,23611-35212,39020-45637 -i tv.avi
+
+Then we do a quick pass thru with filter astat.
+
+/usr/bin/nice -n +19 /usr/local/test/bin/transcode --print_status 500 \
+-f 23.976,1 -p sound.tv.avi -J astat=alog -u 50
+
+Finally, I encode the audio while using passthru mode to merge it with
+video.
+
+/usr/bin/nice -n +19 /usr/local/test/bin/transcode --print_status 50 \
+-i tmp.tv.avi -o out.tv.avi -p sound.tv.avi -s `cat alog` -P1 -b 64 \
+-y raw
+
+Please note in the above example that modfps was only used to handle
+changing the rate of the video, and that one must give different
+values to -c (as of transcode 0.6.9)
+
+5. Possibly useful scripts
+
+The following scripts are what I use to calculate my cut sections
+which are given to transcode.  I use avidemux v2 on input avi's
+to cut out commercials from a video stream I had recorded on tv.
+I could use avidemux to save the avi, however some of the sections
+well be reencodded, and it's a semi-slow process (taking a few
+minutes, meaning that it's highly interruptive) so I prefer to just
+have transcode take a bit longer to skip over the commercials.
+instead I save the edit list, and have my encoding scripts cat
+the edit list thru two commands.  The first gives the "-c" values
+for video, and the 2nd handles it for audio.
+
+----- BEGIN PERL SCRIPT -----
+#!/usr/bin/perl
+
+$numbuffers = 5;
+$i = 0;
+$argc = @ARGV;
+
+# we take one argument: the number of buffers
+if ($argv > 0){
+  $numbuffers = $ARGV[0];
+}
+
+while(<STDIN>){
+  if(/^Start : (\d+)/){
+    # even tho initially some frames will be skipped, with newest
+    # transcode, we keep the beginning where it should be, but we must
+    # add 5 frames to the very last segment.
+    $c[$i]{start} = 1 + $1;
+    $_ = <STDIN>;
+    if(/^Size : (\d+)/){
+      $c[$i]{end} = $c[$i]{start}+$1;
+      $i++;
+    } else {
+      print;
+      die "ergh, we were supposed to find the end\n";
+    }
+  }
+}
+
+if($i > 0){
+  $c[$i-1]{end} += $numbuffers ;
+} else {
+  print "-c 0";
+  exit -1;
+}
+
+print "-c ";
+for($j=0;$j<$i;$j++){
+  print "$c[$j]{start}-$c[$j]{end}";
+  if($i-1 != $j){
+    print ",";
+  }
+}
+print "\n";
+----- END PERL SCRIPT -----
+
+----- BEGIN PERL SCRIPT -----
+#!/usr/bin/perl
+
+# read from stdin the workbench
+
+$infps = 5;
+$outfps = 4;
+$argc=@ARGV;
+if ($argc>0){
+  $infps=$ARGV[0];
+}
+if ($argc>1){
+  $outfps = $ARGV[1];
+}
+
+use POSIX;
+$i = 0;
+while(<STDIN>){
+  if(/^Start : (\d+)/){
+    $c[$i]{start} = ceil((1+$1)*($outfps/$infps));
+    $_ = <STDIN>;
+    if(/^Size : (\d+)/){
+      $c[$i]{end} = floor($c[$i]{start}+($1*$outfps/$infps));
+      $i++;
+    } else {
+      print;
+      die "ergh, we were supposed to find the end\n";
+    }
+  }
+}
+print "-c ";
+for($j=0;$j<$i;$j++){
+  print "$c[$j]{start}-$c[$j]{end}";
+  if($i-1 != $j){
+    print ",";
+  }
+}
+print "\n";
+----- END PERL SCRIPT -----
+
+The first script takes one argument, the number of buffers
+passed to modfps, and will default to 5, like modfps.  The 2nd
+script takes two arguments, the import_fps and the export_fps.
+Note that the intent of my choice of audio sections was not to
+get audio outside of the cutzone (possibly large noise from the
+very last bit of a commercial), and thus the video and audio
+might end up encoding a different number of frames, and thus
+with many cut sections, AV sync might be lost.  However, these
+work for me ;)
+

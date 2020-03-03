@@ -1,0 +1,66 @@
+.TH tcxmlcheck 1 "29th June 2003" "tcxmlcheck(1)"
+.SH NAME
+tcxmlcheck \- Check information in smil input file
+.SH SYNOPSIS
+.na
+.B tcxmlcheck
+[
+.BI options
+] [
+.BI -
+]
+.SH COPYRIGHT
+\fBtcxmlcheck\fP is Copyright (C) by Malanchini Marzio
+.SH DESCRIPTION
+.B tcxmlcheck
+Check a smil input file. Most of the options are used by transcode at run time.
+.SH OPTIONS
+.TP
+\fB-i\fP \fIname\fP
+Specify the name of the input video/audio smil file [stdin].
+.TP
+\fB-p\fP \fIname\fP
+Specify the name of the ausiliary audio smil file [none]
+.TP
+\fB-B\fP
+Binary output to stdout (used by transcode) [off]
+Force to print to stdout the vob structure of the smil file
+.TP
+.B -S
+Write stdin into shared memory (used by transcode)[off].
+This is used by transcode at run time to store the vob information that will be modified by calling \fBtcxmlcheck\fP with the -V or -A options.
+.TP
+.B -V
+Check only video smil file [off].
+This is used by transcode at run time: it read the smil file to override some information in the vob structure.
+.TP
+.B -A
+Check only ausiliary audio smil file [off].
+This is used by transcode at run time: it read the smil file to override some information in the vob structure.
+.TP
+.B -v
+Print the version
+.SH EXAMPLES
+.PP
+Command:
+.PP
+.B tcxmlcheck \-i filename.smil
+.PP
+Return \fB0\fP if the input file is correct, \fB1\fP with an error message in the other cases.
+.PP
+.B tcxmlcheck -i filename.smil -S -B -V
+.PP
+Analyze the \fBfilename.smil\fP and store the vob structure into share memory (used only by transcode at run time).
+.PP
+.PP
+.B tcxmlcheck -i filename.smil -B -V
+.PP
+Retrive the content from the share memory related to \fBfilename.smil\fP (used only by transcode at run time).
+.PP
+.SH AUTHORS
+.B tcxmlcheck
+was written by Marzio Malanchini
+.br
+<marzio_malanchini@vodafone.it>
+.SH SEE ALSO
+.BR transcode (1)

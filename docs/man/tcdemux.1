@@ -1,0 +1,190 @@
+.TH tcdemux 1 "09th January 2003" "tcdemux(1)"
+.SH NAME
+tcdemux \- demultiplex a program stream
+.SH SYNOPSIS
+.TP
+.B tcdemux
+.B -i
+.I name
+[
+.B -t
+.I magic
+] [
+.B -x
+.I codec
+] [
+.B -S
+.I unit,[s1-s2]
+] [
+.B -a
+.I ach,[vch]
+] [
+.B -s
+.I 0xnn
+] [
+.B -M
+.I mode
+] [
+.B -f
+.I fps
+] [
+.B -W
+] [
+.B -O
+] [
+.B -P
+.I name
+] [
+.B -A
+.I n[,m[,...]]
+] [
+.B -d
+.I verbosity
+] [
+.B -v
+]
+.SH COPYRIGHT
+\fBtcdemux\fP is Copyright (C) by Thomas Oestreich.
+.SH DESCRIPTION
+.B tcdemux
+is part of and usually called by \fBtranscode\fP.
+.br
+However, it can also be used independently.
+.br
+\fBtcdemux\fP reads source (from stdin if not explicitely defined) and
+prints on the standard output.
+.SH OPTIONS
+.IP "\fB-i \fIname\fP"
+Specify input source.  If ommited, \fIstdin\fP is assumed.
+.br
+.IP "\fB-x \fIcodec\fP"
+Process only packets containing given
+.I codec
+as payload.
+Examples are "mpeg2" for MPEG video or "ac3" for audio packets.
+.br
+.IP "\fB-t \fImagic\fP"
+Specify the input file type
+.I magic.
+Useful for using
+.B tcdemux
+in pipelines. This is normally autodetected.
+.br
+.IP "\fB-a \fIach[,vch]\fP"
+Process only packets containing given audio track
+.I ach
+and video track
+.I vch.
+Most program stream feature multiple audio tracks but only a single video stream. Default is "-a 0,0".
+.br
+.IP "\fB-s \fI0xnn\fP"
+Select specific multimedia track using the standard identifier
+.I 0xnn.
+This useful to extract subtitle packets.
+.br
+.IP "\fB-f \fIfps\fP"
+Specify the frame rate
+.I fps
+for subtitle meta information used by external applications.
+.br
+.IP "\fB-S \fIunit[,s1-s2]\fP"
+Select a program unit
+.I unit
+and a selected GOP range
+.I s1-s2
+for processing. A
+.I unit
+is usually a set of GOPs that need to be synchronized
+at the very beginning. This option can be used to eleminate junk units at the beginning of the main presentation or to select certain episodes of a TV series from a DVD. A GOP is a logical unit to be properly decoded, i.e., decoding can only start at the beginning of a GOP.
+.br
+.IP "\fB-O"
+Do not skip initial sequence. Used internally by transcode.
+.br
+.IP "\fB-A \fIn[,m[,...]]\fP"
+Select packets using an identifier for extracting only selected streams without processing. This is useful for size reduction of your multimedia stream. Example:
+
+.B tcdemux -i big_dvd.vob -A 0xe0,0x81,0x20 > small_dvd.vob
+
+extracts all packets for the video stream, AC3 audio track (1) and the
+first subtitle stream (0).
+.br
+.IP "\fB-M \fImode\fP"
+Select synchronization strategy
+.I mode.
+This is how transcode selects the beginning of a video and audio stream to
+assure both streams are sychronized for further processing:
+
+0	no synchronization. Packets are printed directly to \fIstdout\fP.
+
+1	synchronization based on PTS information found in the packet header. Audio packets are delayed until a suitable starting point is found. Default for PAL videos.
+
+2	NTSC adapted synchronization mode. Detailed information for each GOP contained in the video stream are piped to a \fIstdout\fP to be processed by
+the certain import modules. This enables adjusting the frame rate or inverse telecine, if necessary.
+
+3       more advanced synchronization mode 1 with msec granular adjustment. Details delegated to transcode.
+
+4       more advanced synchronization mode 2 with msec granular adjustment for NTSC materail. Details delegated to transcode.
+
+5-7	undocumented debugging modes for internal use.
+.br
+.IP "\fB-P \fIfile\fP"
+Write GOP meta information to
+.I file
+instead of \fstdout\fP.
+.br
+.IP \fB-W
+Print a navigation log file for a given video stream to \fIstdout\fP. This is used for transcode's "psu mode" and "cluster mode".
+.br
+.IP "\fB-d\fP \fIlevel\fP"
+With this option you can specify a bitmask to enable different levels
+of verbosity (if supported).  You can combine several levels by adding the
+corresponding values:
+
+QUIET         0
+
+INFO          1
+
+DEBUG         2
+
+STATS         4
+
+WATCH         8
+
+FLIST        16
+
+VIDCORE      32
+
+SYNC         64
+
+COUNTER     128
+
+PRIVATE     256
+.IP "\fB-v\fP"
+Print version information and exit.
+.SH NOTES
+\fBtcdemux\fP is a front end for de-multiplexing program streams and is used in \fBtranscode\fP's import modules.
+.SH EXAMPLES
+The command
+
+.B tcprobe -i movie.vob -x mpeg2
+
+extracts only MPEG video packets. Further processing, i.e., extracting the
+elementary video stream is done by
+.B tcextract.
+.PP
+.SH AUTHORS
+.B tcdemux
+was written by Thomas Oestreich
+.br
+<ostreich@theorie.physik.uni-goettingen.de> with contributions from
+many others.  See AUTHORS for details.
+.SH SEE ALSO
+.BR avifix (1),
+.BR avimerge (1),
+.BR avisplit (1),
+.BR tcdecode (1),
+.BR tcdemux (1),
+.BR tcextract (1),
+.BR tccat (1),
+.BR tcscan (1),
+.BR transcode (1)

@@ -1,0 +1,62 @@
+Sun Dec 21 16:41:33 CET 2003
+Subtitler -0.8.2
+tested on transcode-0.6.11
+
+
+Subtitler 'filter' to be used with transcode
+I do not like the name 'filter' it is scientifically incorrect,
+Subtitler does not filter (out) anything, it ADDS data (text).
+'plugin' would be better perhaps.
+
+This is Linux software.
+released under the GPL.
+
+If anything does not work, it is because I changed a 100 things,
+since I am changing things all the time, have a look at obvious things,
+or mail me.
+Subtitler has already made many hours of subtitled DivX movies.
+This distribution is just a hand made copy of some files in my transcode
+directory.
+--
+
+
+Copy the source .h and .c files to
+transcode-xxxxx/filter/subtitler/
+(xxx is the current version of transcode)
+Type
+make
+make install
+in this directory.
+
+Make a directory /root/.xste/fonts/
+
+Test:
+Subtitler looks by default at /root/.xste/fonts/
+for truetype fonts (.ttf)
+Run (and perhaps edit font path)
+./test-demo
+Try uncommenting some things in the demo.ppml.
+
+
+NOTE:
+ONLY if you have the ImageMagick package installed, you can try xsize, ysize,
+dxsize, dysize on pictures and movies.
+Subtitler uses the 'mogrify' program from the ImageMagick distribution
+for resizing.
+
+There are other experiments of mine in the subtitler code, one removes white
+stripes from Umatic tapes (drop outs) by replacing these with data from a
+previous frame...
+None of that code is finished, so ....
+
+
+Stability:
+This thing has been running for 24 hours several days, alas without the X11
+routines I added today, .. should work OK.
+
+
+More info if available on http://www.home.zonnet.nl/panteltje/subtitles/
+
+Jan Panteltje
+panteltje@yahoo.com
+

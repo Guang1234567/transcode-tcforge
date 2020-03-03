@@ -1,0 +1,178 @@
+NEW: transcode Additions
+You can reset the filter at a scene change with the do_reset option.
+Scenechange thresholds can be controled through
+
+  block_thres   every SAD value greater than this will be considered "bad"
+                [default 1024]
+  scene_thres   Percentage of blocks where motion estimation should fail
+                before a scene change is considered
+  do_reset      1 = reset the filter after a scene change
+                0 = dont reset [default]
+
+ eg:
+
+ transcode -V -i ...
+   -J yuvdenoise=mode=2:block_thres=1024:scene_thres=50%:do_reset=1
+
+YUV4MPEG-Denoiser (eventually part of the mjpegtools)
+-----------------------------------------------------
+
+
+
+1. About
+--------
+
+This program can remove noise from your typical video recordings to
+increase the compression-ratio to be achieved by mpeg2enc (or if a
+fixed bitrate is used, it can dramatically increase the image-
+quality).
+
+The filter mainly reduces color- and luminance-noise and flickering
+due to phase errors. It however does *not* do a good job on
+color-noise introduced by the common BT8x8 chip-set itself (You will
+have noticed, if you ever dared to record vertically reduced sequences
+with that chip-set -- say 288 (or 384, or whatever...) lines instead of
+full 576 -- that "nice" interleaved color-changes from one line to the
+next. This annoying artefact is introduced by BT8x8 chip-set itself, by
+only saving one color information for two lines but not interpolating
+on the transmitted color-information. Despite of that oddity it has a
+reasonable quality for that price... So just record "Full-Pal/NTSC"
+and use yuvscaler to downscale your material! The quality is far
+better than recording at your destination resolution directly!!!)
+
+
+
+
+2. Usage
+--------
+
+That's really easy! Just pipe a YUV4MPEG-stream into the filter... :)
+no switches, no options (NO CARRIER. erm,...) and dare to win (or
+loose -- Well, there *is* material which cannot be processed
+successfully. It's rare, but it exists! Material containing really
+heavy noise is very difficult. So better try it, before you sit and
+wait for hours without getting a better result...)
+
+As we now have a border-detection (which is most likely to fail ;-) we
+need an option to override it: Just type "yuvdenoise -b xx" being "xx"
+any number between 0 (zero, nix, nil, NULL) and a reasonable value
+counted from top of the image. That is, "-b 64" will turn the topmost
+64 lines in pure black as well as the lowest 64 lines, too... These
+black borders seem to be symmetrically ?!? ;-)
+
+My tip: If you can, use this feature (take the value from the
+auto-detection as a first guess) as pure YUV-black (16,128,128) is easy
+to encode and therefor saves some bits better to be used for the real
+frame... Turn this feature off by typing "-b 0"
+
+
+
+3. Transcode Usage
+------------------
+When used within transcode, the filter does provide options.
+Usage of the filter is
+  $ transcode ... -J yuvdenoise=help
+Provide additional options (not that these are meaningful)
+  $ transcode ... -J yuvdenoise=chroma_contrast=50:luma_contrast=120:sharpen=100
+
+The help text is:
+denoiser Usage:
+===========================================================================
+
+threshold <0..255> denoiser threshold
+                   accept any image-error up to +/- threshold for a single
+                   pixel to be accepted as valid for the image. If the
+                   absolute error is greater than this, exchange the pixel
+                   with the according pixel of the reference image.
+                   (default=5)
+
+delay <1...255>    Average 'n' frames for a time-lowpassed pixel. Values
+                   below 2 will lead to a good response to the reference
+                   frame, while larger values will cut out more noise (and
+                   as a drawback will lead to noticable artefacts on high
+                   motion scenes.) Values above 8 are allowed but rather
+                   useless. (default=3)
+
+radius <8...24>    Limit the search radius to that value. Usually it will
+                   not make sense to go higher than 16. Esp. for VCD sizes.
+                   (default=8)
+
+border <x>,<y>,<w>,<h> Set active image area. Every pixel outside will be set
+                   to <16,128,128> ("pure black"). This can save a lot of bits
+                   without even touching the image itself (eg. on 16:9 movies
+                   on 4:3 (VCD and SVCD) (default=0,0,0,0)
+
+luma_contrast <0...255>    Set luminance contrast in percent. (default=100)
+
+chroma_contrast <0...255>  Set chrominance contrast in percent. AKA "Saturation"
+                           (default=100)
+sharpen <0...255>  Set sharpness in percent. WARNING: do not set too high
+                   as this will gain bit-noise. (default=125)
+
+deinterlace <0..1> Force deinterlacing. By default denoise interlaced.
+
+mode <0..2>        [2]: Fast mode. Use only Pass II (bitnoise-reduction) for
+                   low to very low noise material. (default off)
+                   [1]: Interlaced material
+                   [0]: Progressive material (default)
+
+pp_threshold <0...255>   Pass II threshold (same as -t).
+                   WARNING: If set to values greater than 8 you *will* see
+                   artefacts...(default=4)
+
+pre <0..1>         [0]: run as a post process filter (default)
+                   [1]: run as a pre process filter (not recommended)
+
+block_thres   every SAD value greater than this will be considered "bad"
+              [default 1024]
+
+scene_thres   Percentage of blocks where motion estimation should fail
+              before a scene is considered changed
+
+do_reset      [1] = reset the filter after a scene change
+              [0] = dont reset (default)
+
+
+4. My way of using it...
+------------------------
+
+* I record at least 352x576 to 768x576 (PAL) with nuvrec (Roman
+  Hochleitner's "NuppelVideo"), eg I use to record double the vertical
+  resolution, I finally need! This is important for BT8x8 (it may not
+  for Mjpeg based cards -- I don't know...).
+
+* I use exportvideo to get rid of annoying borders and to generate a
+  YUV4MPEG-stream which is piped ...
+
+* ... into yuvscaler first(!) --> 352x288
+
+* and then into the filter. (Well, the other way would work, too,
+  except that the filter doesn't do interlaced MC yet and doesn't do a
+  good job on interlaced frames that way... I'll fix that!)
+
+
+
+
+5. Drawbacks
+------------
+
+In rare cases you'll notice very clean blocks directly aside totally
+noisy ones... Seeing blocks is probably not what you want to get.
+
+It uses a MC with a search-radius of 32 pixels. It *will* slow down
+the encoding process. (I probably will use i686 asm sometime to
+increase speed any further).
+
+I really have tested it on various source material (comics,
+commercials, movies, video-clips...) I have not found material which
+generally does not work -- but you may encounter such material. If so,
+feel free to inform me about this.
+
+
+
+
+Stefan Fendt
+<stefan@lionfish.ping.de>
+
+transcode info and port by Tilmann Bitterberg
+<transcode@tibit.org>

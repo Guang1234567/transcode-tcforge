@@ -1,0 +1,143 @@
+.TH avisplit 1 "25th June 2003" "avisplit(1)"
+.SH NAME
+avisplit \- split AVI-files into chunks of a maximum size
+.SH SYNOPSIS
+.na
+.B avisplit
+[
+.B -i
+.I file
+.B -o
+.I base
+[
+.B -s
+.I size
+] [
+.B -H
+.I num
+] [
+.B -t
+.I s1-s2[,s3-s4,..]
+.B -c
+.B -m
+.B -b
+.I num
+.B -f
+.I commentfile
+]
+] [
+.B -v
+]
+.SH COPYRIGHT
+\fBavisplit\fP is Copyright (C) by Thomas Oestreich.
+.SH DESCRIPTION
+.B avisplit
+splits a single AVI-file into chunks of size \fIsize\fP.
+.br
+Each of the created chunks will be an independent file, i.e. it can
+be played without needing any other of the chunk.
+.SH OPTIONS
+.TP
+\fB-i\fP \fIfile\fP
+Specify the filename of the file to split into chunks.
+.TP
+\fB-o\fP \fIbase\fP
+Specify the base of the output filename(s) \fBavisplit\fP will then split to
+\fBbase-%04d.avi\fP
+.TP
+\fB-s\fP \fIsize\fP
+Use this option to specify the maximum size (in units of MB) of the
+chunks \fBavisplit\fP should create. \fI0\fP means dechunk, create as many
+files as possible.
+.TP
+\fB-H\fP \fInum\fP
+Create only the first \fInum\fP chunks then exit.
+.TP
+\fB-t\fP \fIs1-s2[,s3-s4,..]\fP
+Split the input file based on time/framecode (hh:mm:ss.ms)
+.TP
+.B -c
+Together with \fB-t\fP. Merge all segments into one AVI-File again instead
+generating seperate files.
+.TP
+.B -m
+Together with \fB-t\fP. Force split at upper bondary instead of lower border.
+.TP
+\fB-b\fP \fInum\fP
+Specify if avisplit should write an VBR mp3 header into the AVI file. Default is
+1 because it does not hurt. \fInum\fP is either 1 or 0.
+.TP
+\fB-f\fP \fIcommentfile\fP
+Read AVI tombstone data for header comments from \fIcommentfile\fP. See
+/docs/avi_comments.txt for a sample.
+.TP
+.B -v
+Print only version information and exit.
+.SH EXAMPLES
+The command
+.PP
+.B avisplit -s 700 -i my_file.avi
+.PP
+will split the file \fImy_file.avi\fP into chunks which's maximum size
+will not exceed 700 MB, i.e. they will fit onto a CD, each.  The
+created chunks will be named my_file.avi-0000, my_file.avi-0001, etc.
+.PP
+.B avisplit -i my_file.avi -c -o out.avi -t 00:10:00-00:11:00,00:13:00-00:14:00
+.PP
+will grab Minutes 10 to 11 and 13 to 14 from my_file.avi and merge it into out.avi
+.SH BAD SYNCH
+When you split a file with \fBavisplit\fP and the A/V sync for the first file
+is OK but the sync on all successive files is bad then have a look at the
+output of tcprobe(1) (shortend).
+
+.br
+ | V: 25.000 fps, codec=dvsd, frames=250, width=720, height=576
+.br
+ | A: 48000 Hz, format=0x01, bits=16, channels=2, bitrate=1536 kbps,
+.br
+ |    \fI10\fP chunks, 1920000 bytes
+.br
+
+You'll see the AVI file has only 10 Audio chunks but 250 video
+chunks. That means one audio chunk spans several video frames.
+avisplit can not cut a chunk in half, it only handles complete
+chunks. If you do, say, avisplit -s 20, it is possible that the first file will
+have 6 audio chunks and the second one only 4 meaning there is too much
+audio in the first AVI file.
+
+The solution is to remux the AVI file with
+.RS
+.B transcode -i in.avi -P1 -N 0x1 -y raw -o out.avi
+.RE
+(of course -N 0x1 is not correct for all AVI files).
+Now look at tcprobe again
+
+.br
+ | V: 25.000 fps, codec=dvsd, frames=250, width=720, height=576
+.br
+ | A: 48000 Hz, format=0x01, bits=16, channels=2, bitrate=1536 kbps,
+.br
+ |   \fI250\fP chunks, 1920000 bytes
+.br
+
+The data in this file is \fIexactly\fP the same (its bit-identical)
+as it was in in.avi; the AVI file was just written in a
+different way, we do now have 250 audio chunks which makes splitting much
+easier and more accurate for avisplit.
+.SH AUTHORS
+.B avisplit
+was written by Thomas Oestreich
+.br
+<ostreich@theorie.physik.uni-goettingen.de> with contributions from
+many others.  See AUTHORS for details.
+.SH SEE ALSO
+.BR aviindex (1),
+.BR avifix (1),
+.BR avimerge (1),
+.BR tccat (1),
+.BR tcdecode (1),
+.BR tcdemux (1),
+.BR tcextract (1),
+.BR tcprobe (1),
+.BR tcscan (1),
+.BR transcode (1)

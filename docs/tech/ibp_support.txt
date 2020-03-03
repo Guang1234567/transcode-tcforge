@@ -1,0 +1,65 @@
+IBP support for transcode
+
+This is the web page about IBP and related tools
+http://loci.cs.utk.edu/
+
+Binary utilities can user lors URI for input and/or output file.
+
+If we want to access file in the IBP depot then URI in form
+
+lors://host:port/local_path/file?bs=number&duration=number&copies=number&threads=number&timeout=number&servers=number&size=number
+
+is used. User can also use the short form URI
+
+lors:///local_path/file
+
+When we want to read an IBP file, the local_path/file specifies local file
+where is stored exNode with XML specification. When writing an IBP file the
+local_path/file specifies local file where to store exNode with XML
+specification of IBP depots used.
+
+The paremeters in the full form of URI mean as follows:
+
+host 	 specification of L-Bone server location
+port 	 specification of L-Bone server port (default 6767)
+bs 	 specification of block-size for transfer in megabytes (default 10)
+duration specification of allocation duration in seconds (default 3600s)
+copies   specification of number of copies (default 1)
+threads  specification of number of threads (concurrent TCP streams) (default 1)
+timeout  specification of timeout in seconds (default 100)
+servers  specification of number of unique IBP depots (default 1)
+size     specification of assumed file size in bytes (default 10MB)
+
+There are environment variables that can be used instead of URI parameters for
+the LoRS layer.
+
+LBONE_SERVER   specifies L-Bone server location
+LBONE_PORT     specifies L-Bone server port (default 6767)
+LORS_BLOCKSIZE specifies block-size for transfer in megabytes (default 10)
+LORS_DURATION  specifies duration of allocation in seconds (default 3600s)
+LORS_COPIES    specifies number of copies (default 1)
+LORS_THREADS   specifies number of threads (concurrent TCP streams) (default 1)
+LORS_TIMEOUT   specifies timeout in seconds (default 100)
+LORS_SERVERS   specifies number of unique IBP depots (default 1)
+LORS_SIZE      specifies assumed file size in bytes (default 10MB)
+
+At least LBONE_SERVER or host must be set.
+
+Transcode program can be used in almost traditional way. If we want to store
+the file to the IBP depot then URI in form lors:///local_path/file is used
+instead of local file name. The environment variables should be set unless user
+specifies URI in its full form. The same form of URI can be used for loading
+the file from the IBP depot. Transcode can read and write ordinary local files
+as well. The prefix lors:// is required for accessing IBP, otherwise local file
+is used.
+
+For example:
+
+LBONE_SERVER=our.ibp.host;
+transcode -i lors:///video.dv.xnd -P1 -N 0x1 -y raw -o lors:///temp1-remux.avi.xnd -E 44100,16,2 -J resample
+
+Transcode will use source file identified by serialized description of IBP
+exNode stored in video.dv.xnd file on local disc in the current directory. The
+L-Bone server location is taken from environment variable (referring to
+our.ibp.host) and resulting serialized exNode XML description will be
+stored in the current directory as temp1-remux.avi.xnd

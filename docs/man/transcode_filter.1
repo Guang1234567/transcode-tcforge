@@ -1,0 +1,1863 @@
+.TH transcode filter modules  1 "3th February 2008" "transcode_filter(1)"
+.SH NAME
+transcode \- filter modules collection
+.SH SYNOPSIS
+.B transcode -J filters [other options]
+.SH COPYRIGHT
+\fBtranscode\fP is Copyright (C) 2001-2003 by Thomas Oestreich, 2003-2004 Tilmann
+Bitterberg, 2004-2008 Transcode Team
+
+.SH MODULE OPTIONS
+The syntax for filter options is simple. A filter is specified with
+
+.RS 4
+.nf
+\-J filter=\fIoptionstring\fP
+.fi
+.RE
+
+The optionstring can contain multiple options which are separated by colons \`:\'
+
+.RS 4
+.nf
+\-J filter=\fIoption1\fP:\fIoption2\fP:\fIoption3\fP
+.fi
+.RE
+
+An option can have an argument or non (bool). For options with an argument, the
+format in which the argument has to be given to the option is specified in a
+printf(1) like string. The most common case is `%d' which simply means a number. The argument has to be seperated from the option by a \`=\'.
+
+.RS 4
+.nf
+\-J filter=\fIbool1\fP:\fIoption1\fP=\fI15\fP:\fIoption2\fP=\fI20x30\fP
+.fi
+.RE
+
+Most filters try to do the right thing with the default options. You should
+play with various parameters if you are not satisfied with the default
+behaviour. If you have no idea what a filter does, its very likely that you
+don't need it.
+
+If a filter takes (for eg.) a filename as an argument, make sure that the
+filename does not contain a `:' or a `='. Its a limitation of the parser. A
+comma `,' is possible but must be extra quoted. For the text filter that is
+
+.RS 4
+.nf
+\-J text=string="Hello\\, World"
+.fi
+.RE
+
+.SH FILTER MODULES
+To see what filter modules are avalaible for your transcode installation, do a
+
+.RS 4
+.B ls -1 $( tcmodinfo -p )/filter*.so
+.RE
+
+A complete transcode installation has the following filter modules:
+
+.br
+.\" Here starts the generated filter part, produced by make-filter-man.sh
+.TP 4
+\fB29to23\fP - \fBframe rate conversion filter (interpolating 29 to 23)\fP
+\fB29to23\fP was written by Max Alekseyev, Tilmann Bitterberg. The version documented here is v0.3 (2003-07-18). This is a video filter. It can handle RGB and YUV mode. It is a pre-processing only filter.
+.TP 4
+\fB32detect\fP - \fB3:2 pulldown / interlace detection plugin\fP
+\fB32detect\fP was written by Thomas. The version documented here is v0.2.4 (2003-07-22). This is a video filter. It can handle RGB and YUV mode. It supports multiple instances and can run as a pre-processing and/or as a post-processing filter.
+.IP
+.RS
+\(bu
+.I threshold
+= \fI%d\fP  [default \fI9\fP]
+.RS 3
+Interlace detection threshold
+.RE
+\(bu
+.I chromathres
+= \fI%d\fP  [default \fI4\fP]
+.RS 3
+Interlace detection chroma threshold
+.RE
+\(bu
+.I equal
+= \fI%d\fP  [default \fI10\fP]
+.RS 3
+threshold for equal colors
+.RE
+\(bu
+.I chromaeq
+= \fI%d\fP  [default \fI5\fP]
+.RS 3
+threshold for equal chroma
+.RE
+\(bu
+.I diff
+= \fI%d\fP  [default \fI30\fP]
+.RS 3
+threshold for different colors
+.RE
+\(bu
+.I chromadi
+= \fI%d\fP  [default \fI15\fP]
+.RS 3
+threshold for different chroma
+.RE
+\(bu
+.I force_mode
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+set internal force de-interlace flag with mode -I N
+.RE
+\(bu
+.I pre
+= \fI%d\fP  [default \fI1\fP]
+.RS 3
+run as pre filter
+.RE
+\(bu
+.I verbose
+(bool)
+.RS 3
+show results
+.RE
+.IP
+This filter checks for interlaced video frames.
+Subsequent de-interlacing with transcode can be enforced with 'force_mode' option
+.RE
+.TP 4
+\fB32drop\fP - \fB3:2 inverse telecine removal plugin\fP
+\fB32drop\fP was written by Thomas Oestreich. The version documented here is v0.4 (2003-02-01). This is a video filter. It can handle RGB and YUV mode. It is a pre-processing only filter.
+.TP 4
+\fBaclip\fP - \fBgenerate audio clips from source\fP
+\fBaclip\fP was written by Thomas Oestreich. The version documented here is v0.1.1 (2003-09-04). This is a audio filter. It is a pre-processing only filter.
+.IP
+.RS
+\(bu
+.I level
+= \fI%d\fP  [default \fI10\fP]
+.RS 3
+The audio must be under this level to be skipped
+.RE
+\(bu
+.I range
+= \fI%d\fP  [default \fI25\fP]
+.RS 3
+Number of samples over level will be keyframes
+.RE
+.RE
+.TP 4
+\fBastat\fP - \fBaudio statistics filter plugin\fP
+\fBastat\fP was written by Thomas Oestreich. The version documented here is v0.1.3 (2003-09-04). This is a audio filter. It is a pre-processing only filter.
+.IP
+.RS
+\(bu
+.I file
+= \fI%s\fP
+.RS 3
+File to save the calculated volume rescale number to
+.RE
+.RE
+.RE
+.TP 4
+\fBcompare\fP - \fBcompare with other image to find a pattern\fP
+\fBcompare\fP was written by Antonio Beamud. The version documented here is v0.1.2 (2003-08-29). This is a video filter. It can handle RGB and YUV mode. It supports multiple instances. It is a post-processing only filter.
+.IP
+.RS
+\(bu
+.I pattern
+= \fI%s\fP
+.RS 3
+Pattern image file path
+.RE
+\(bu
+.I results
+= \fI%s\fP
+.RS 3
+Results file path
+.RE
+\(bu
+.I delta
+= \fI%f\fP  [default \fI45.000000\fP]
+.RS 3
+Delta error
+.RE
+.IP
+Generate a file in with information about the times, frame, etc the pattern
+defined in the image parameter is observed.
+.RE
+.IP
+The format of the command file is framenumber followed by at least one whitespace followed
+by the command followed by at least one whitespace followed by arguments for the command.
+Empty lines and lines starting with a `#' are ignored. The frame numbers must be sorted ascending.
+
+      # Example file
+      # At frame 10 load the smooth filter
+      10 load smooth
+      # reconfigure at 20
+      20 configure smooth=strength=0.9
+      99 disable smooth
+
+
+.RE
+.TP 4
+\fBcpaudio\fP - \fBcopy one audio channel to the other channel filter plugin\fP
+\fBcpaudio\fP was written by William H Wittig. The version documented here is v0.1 (2003-04-30). This is a audio filter. It is a post-processing only filter.
+.IP
+.RS
+\(bu
+.I source
+= \fI%c\fP  [default \fIl\fP]
+.RS 3
+Source channel (l=left, r=right)
+.RE
+.IP
+Copies audio from one channel to another
+.RE
+.TP 4
+\fBdecimate\fP - \fBNTSC decimation plugin\fP
+\fBdecimate\fP was written by Thanassis Tsiodras. The version documented here is v0.4 (2003-04-22). This is a video filter. It can handle YUV mode only. It is a post-processing only filter.
+.IP
+.RS
+\(bu
+.I verbose
+(bool)
+.RS 3
+print verbose information
+.RE
+.IP
+see /docs/README.Inverse.Telecine.txt
+.RE
+.TP 4
+\fBdenoise3d\fP - \fBHigh speed 3D Denoiser\fP
+\fBdenoise3d\fP was written by Daniel Moreno & A'rpi. The version documented here is v1.0.6 (2003-12-20). This is a video filter. It can handle YUV mode only. It supports multiple instances. It can be used as a pre-processing or as a post-processing filter.
+.IP
+.RS
+\(bu
+.I luma
+= \fI%f\fP  [default \fI4.000000\fP]
+.RS 3
+spatial luma strength
+.RE
+\(bu
+.I chroma
+= \fI%f\fP  [default \fI3.000000\fP]
+.RS 3
+spatial chroma strength
+.RE
+\(bu
+.I luma_strength
+= \fI%f\fP  [default \fI6.000000\fP]
+.RS 3
+temporal luma strength
+.RE
+\(bu
+.I chroma_strength
+= \fI%f\fP  [default \fI4.000000\fP]
+.RS 3
+temporal chroma strength
+.RE
+\(bu
+.I pre
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+run as a pre filter
+.RE
+.IP
+What:
+The denoise3d filter from mplayer (sibling of hqdn3d). Works very crude and
+simple but also very fast. In fact it is even faster than the original from
+mplayer as I managed to tweak some things (a.o. zero frame copying).
+
+Who:
+Everyone who wants to have their captured frames thoroughly denoised (i.e. who
+want to encode to mpeg or mjpeg) but do not have enough processing power to
+real-time encode AND use hqdn3d (better quality but a lot slower) or dnr (yet
+slower), not to mention the other denoisers that are even slower. Quality is
+really good for static scenes (if fed with the right parameters), moving
+objects may show a little ghost-image (also depends on parameters) though. Your
+milage may vary.
+
+How:
+Parameters are the same as the hqdn3d module, although in practice you'll not
+end up with exactly the same values. Just experiment.  Particular for this
+version of the filter is that if you supply -1 to either component's parameters
+(luma/chroma), that component will not have the filter applied to. If you're
+still short on CPU cycles, try disabling the luma filter, this will not make
+much difference in the effectiveness of the filter!
+.RE
+.TP 4
+\fBdetectclipping\fP - \fBdetect clipping parameters (-j or -Y)\fP
+\fBdetectclipping\fP was written by Tilmann Bitterberg, A'rpi. The version documented here is v0.1.0 (2003-11-01). This is a video filter. It can handle RGB and YUV mode. It supports multiple instances and can run as a pre-processing and/or as a post-processing filter.
+.IP
+.RS
+\(bu
+.I range
+= \fI%u-%u/%d\fP  [default \fI0-4294967295/1\fP]
+.RS 3
+apply filter to [start-end]/step frames
+.RE
+\(bu
+.I limit
+= \fI%d\fP  [default \fI24\fP]
+.RS 3
+the sum of a line must be below this limit to be considered as black
+.RE
+\(bu
+.I post
+(bool)
+.RS 3
+run as a POST filter (calc -Y instead of the default -j)
+.RE
+.IP
+Detect black regions on top, bottom, left and right of an image.  It is suggested that the filter is run for around 100 frames.  It will print its detected parameters every frame. If you don't notice any change in the printout for a while, the filter probably won't find any other values.  The filter converges, meaning it will learn.
+.RE
+.TP 4
+\fBdetectsilence\fP - \fBaudio silence detection with tcmp3cut commandline generation\fP
+\fBdetectsilence\fP was written by Tilmann Bitterberg. The version documented here is v0.0.1 (2003-07-26). This is a audio filter. It is a pre-processing only filter.
+.TP 4
+\fBdivxkey\fP - \fBcheck for DivX 4.xx / OpenDivX / DivX;-) keyframe\fP
+\fBdivxkey\fP was written by Thomas Oestreich. The version documented here is v0.1 (2002-01-15). This is a video filter. It is a pre-processing only filter.
+.TP 4
+\fBdnr\fP - \fBdynamic noise reduction\fP
+\fBdnr\fP was written by Gerhard Monzel. The version documented here is v0.2 (2003-01-21). This is a video filter. It can handle RGB and YUV mode. It is a post-processing only filter.
+.IP
+.RS
+\(bu
+.I lt
+= \fI%d\fP  [default \fI10\fP]
+.RS 3
+Threshold to blend luma/red
+.RE
+\(bu
+.I ll
+= \fI%d\fP  [default \fI4\fP]
+.RS 3
+Threshold to lock luma/red
+.RE
+\(bu
+.I ct
+= \fI%d\fP  [default \fI16\fP]
+.RS 3
+Threshold to blend croma/green+blue
+.RE
+\(bu
+.I cl
+= \fI%d\fP  [default \fI8\fP]
+.RS 3
+Threshold to lock croma/green+blue
+.RE
+\(bu
+.I sc
+= \fI%d\fP  [default \fI30\fP]
+.RS 3
+Percentage of picture difference (scene change)
+.RE
+.IP
+see /docs/filter_dnr.txt (german only)
+.RE
+.TP 4
+\fBdoublefps\fP - \fBdouble frame rate by deinterlacing fields into frames\fP
+\fBdoublefps\fP was written by Andrew Church. The version documented here is v1.1 (2006-05-14). This is a video and audio filter. It can handle YUV and YUV422 modes. It is a pre-processing only filter.
+.IP
+.RS
+\(bu
+.I topfirst
+= \fI%d\fP  [default \fI0\fP when height=480, else \fI1\fP]
+.RS 3
+Assume top field is displayed first
+.RE
+\(bu
+.I fullheight
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Output full-height frames
+.RE
+
+Doubles the frame rate of interlaced video by separating each field
+into a separate frame.  The fields can either be left as is (giving a
+progessive video with half the height of the original) or re-interlaced
+into their original height (at the doubled frame rate) for the
+application of a separate deinterlacing filter.
+
+Note that due to transcode limitations, it is currently necessary to use
+the -Z option to specify the output frame size when using half-height mode
+(this does not slow the program down if no actual zooming is done).
+.RE
+.TP 4
+\fBextsub\fP - \fBDVD subtitle overlay plugin\fP
+\fBextsub\fP was written by Thomas Oestreich. The version documented here is 0.3.5 (2003-10-15). This is a video filter. It can handle RGB and YUV mode. It can be used as a pre-processing or as a post-processing filter.
+.IP
+.RS
+\(bu
+.I track
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Subtitle track to render
+.RE
+\(bu
+.I vertshift
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+offset of subtitle with respect to bottom of frame in rows
+.RE
+\(bu
+.I timeshift
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+global display start time correction in msec
+.RE
+\(bu
+.I antialias
+= \fI%d\fP  [default \fI1\fP]
+.RS 3
+anti-aliasing the rendered text (0=off,1=on)
+.RE
+\(bu
+.I pre
+= \fI%d\fP  [default \fI1\fP]
+.RS 3
+Run as a pre filter
+.RE
+\(bu
+.I color1
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Make a subtitle color visible with given intensity
+.RE
+\(bu
+.I color2
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Make a subtitle color visible with given intensity
+.RE
+\(bu
+.I ca
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Shuffle the color assignment by choosing another subtitle color
+.RE
+\(bu
+.I cb
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Shuffle the color assignment by choosing another subtitle color
+.RE
+.RE
+.TP 4
+\fBfieldanalysis\fP - \fBField analysis for detecting interlace and telecine\fP
+\fBfieldanalysis\fP was written by Matthias Hopf. The version documented here is v1.0 pl1 (2004-08-13). This is a video filter. It can handle RGB,YUV and YUV422 mode. It is a pre-processing only filter.
+.IP
+.RS
+\(bu
+.I interlacediff
+= \fI%f\fP  [default \fI1.1\fP]
+.RS 3
+Minimum temporal inter-field difference for detecting interlaced video
+.RE
+\(bu
+.I unknowndiff
+= \fI%f\fP  [default \fI1.5\fP]
+.RS 3
+Maximum inter-frame change vs. detail differences for neglecting interlaced video
+.RE
+\(bu
+.I progressivediff
+= \fI%f\fP  [default \fI8\fP]
+.RS 3
+Minimum inter-frame change vs. detail differences for detecting progressive video
+.RE
+\(bu
+.I progressivechange
+= \fI%f\fP  [default \fI0.2\fP]
+.RS 3
+Minimum temporal change needed for detecting progressive video
+.RE
+\(bu
+.I changedifmore
+= \fI%f\fP  [default \fI10\fP]
+.RS 3
+Minimum temporal change for detecting truly changed frames
+.RE
+\(bu
+.I forcetelecinedetect
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Detect telecine even on non-NTSC (29.97fps) video
+.RE
+\(bu
+.I verbose
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Output analysis for every frame
+.RE
+\(bu
+.I outdiff
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Output internal debug frames as luminance of YUV video (see source)
+.RE
+.RE
+.TP 4
+\fBfields\fP - \fBField adjustment plugin\fP
+\fBfields\fP was written by Alex Stewart. The version documented here is v0.1.1 (2003-01-21). This is a video filter. It can handle RGB and YUV mode. It is a pre-processing only filter.
+.IP
+.RS
+\(bu
+.I flip
+(bool)
+.RS 3
+Exchange the top field and bottom field of each frame
+.RE
+\(bu
+.I shift
+(bool)
+.RS 3
+Shift the video by one field
+.RE
+\(bu
+.I flip_first
+(bool)
+.RS 3
+Normally shifting is performed before flipping, this option reverses that
+.RE
+.IP
+The 'fields' filter is designed to shift, reorder, and
+generally rearrange independent fields of an interlaced
+video input.  Input retrieved from broadcast (PAL, NTSC,
+etc) video sources generally comes in an interlaced form
+where each pass from top to bottom of the screen displays
+every other scanline, and then the next pass displays the
+lines between the lines from the first pass.  Each pass is
+known as a "field" (there are generally two fields per
+frame).  When this form of video is captured and manipulated
+digitally, the two fields of each frame are usually merged
+together into one flat (planar) image per frame.  This
+usually produces reasonable results, however there are
+conditions which can cause this merging to be performed
+incorrectly or less-than-optimally, which is where this
+filter can help.
+
+The following options are supported for this filter
+(they can be separated by colons):
+
+  shift - Shift the video by one field (half a frame),
+          changing frame boundaries appropriately.  This is
+          useful if a video capture started grabbing video
+          half a frame (one field) off from where frame
+          boundaries were actually intended to be.
+
+  flip  - Exchange the top field and bottom field of each
+          frame.  This can be useful if the video signal was
+          sent "bottom field first" (which can happen
+          sometimes with PAL video sources) or other
+          oddities occurred which caused the frame
+          boundaries to be at the right place, but the
+          scanlines to be swapped.
+
+  flip_first
+        - Normally shifting is performed before flipping if
+          both are specified.  This option reverses that
+          behavior.  You should not normally need to use
+          this unless you have some extremely odd input
+          material, it is here mainly for completeness.
+
+  help  - Print this text.
+
+Note: the 'shift' function may produce slight color
+discrepancies if YV12 is used as the internal transcode
+video format (default).  This is because YV12 does not
+contain enough information to do field shifting cleanly. For
+best (but slower) results, use RGB mode for field shifting.
+.RE
+.TP 4
+\fBfps\fP - \fBconvert video frame rate, gets defaults from -f and --export_fps\fP
+\fBfps\fP was written by Christopher Cramer. The version documented here is v1.1 (2004-05-01). This is a video filter. It can handle RGB and YUV mode. It can be used as a pre-processing or as a post-processing filter.
+.IP
+.RS
+.IP
+options: <input fps>:<output fps>
+example: -J fps=25:29.97 will convert from PAL to NTSC
+If no options are given, defaults or -f/--export_fps/--export_frc will be used.
+Some examples:
+
+	-J fps=10:5:pre		convert from 10 fps to 5 fps, preprocess
+	-J fps=10:post:12	convert from 10 to 12, postprocess
+	-J fps=pre=1:7:5	convert from 7 to 5, postprocess
+	-J fps=9:3.1:post=-0x7	convert from 9 to 3.1, postprocess
+
+If that last one is confusing you, remember that 0 is false and everything
+else is true. Of course, octal and hexadecimal numbers are supported too.
+This is intended to be backward compatible with the old format.
+.RE
+.TP 4
+\fBhqdn3d\fP - \fBHigh Quality 3D Denoiser\fP
+\fBhqdn3d\fP was written by Daniel Moreno & A'rpi. The version documented here is v1.0.2 (2003-08-15). This is a video filter. It can handle YUV mode only. It supports multiple instances. It can be used as a pre-processing or as a post-processing filter.
+.IP
+.RS
+\(bu
+.I luma
+= \fI%f\fP  [default \fI4.000000\fP]
+.RS 3
+spatial luma strength
+.RE
+\(bu
+.I chroma
+= \fI%f\fP  [default \fI3.000000\fP]
+.RS 3
+spatial chroma strength
+.RE
+\(bu
+.I luma_strength
+= \fI%f\fP  [default \fI6.000000\fP]
+.RS 3
+temporal luma strength
+.RE
+\(bu
+.I chroma_strength
+= \fI%f\fP  [default \fI4.500000\fP]
+.RS 3
+temporal chroma strength
+.RE
+\(bu
+.I pre
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+run as a pre filter
+.RE
+.IP
+This filter aims to reduce image noise producing smooth images and making still images really still (This should enhance compressibility).
+.RE
+.TP 4
+\fBinvert\fP - \fBinvert the image\fP
+\fBinvert\fP was written by Tilmann Bitterberg. The version documented here is v0.1.4 (2003-10-12). This is a video filter. It can handle RGB,YUV and YUV422 mode. It is a post-processing only filter.
+.IP
+.RS
+\(bu
+.I range
+= \fI%u-%u/%d\fP  [default \fI0-4294967295/1\fP]
+.RS 3
+apply filter to [start-end]/step frames
+.RE
+.RE
+.TP 4
+\fBivtc\fP - \fBNTSC inverse telecine plugin\fP
+\fBivtc\fP was written by Thanassis Tsiodras. The version documented here is v0.4.1 (2004-06-01). This is a video filter. It can handle YUV mode only. It is a pre-processing only filter.
+.IP
+.RS
+\(bu
+.I verbose
+(bool)
+.RS 3
+print verbose information
+.RE
+\(bu
+.I field
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+which field to replace (0=top 1=bottom)
+.RE
+\(bu
+.I magic
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+perform magic? (0=no 1=yes)
+.RE
+.IP
+see /docs/README.Inverse.Telecine.txt
+.RE
+.TP 4
+\fBlevels\fP - \fBLuminosity level scaler\fP
+\fBlevels\fP was written by Bryan Mayland. The version documented here is v1.0.0 (2004-06-09). This is a video filter. It can handle YUV mode only. It supports multiple instances. It is a post-processing only filter.
+.IP
+.RS
+\(bu
+.I input
+= \fI%d-%d\fP  [default \fI0-255\fP]
+.RS 3
+input luma range (black-white)
+.RE
+\(bu
+.I gamma
+= \fI%f\fP  [default \fI1.000000\fP]
+.RS 3
+input luma gamma
+.RE
+\(bu
+.I output
+= \fI%d-%d\fP  [default \fI0-255\fP]
+.RS 3
+output luma range (black-white)
+.RE
+.RE
+.TP 4
+\fBlogo\fP - \fBrender image in videostream\fP
+\fBlogo\fP was written by Tilmann Bitterberg. The version documented here is v0.10 (2003-10-16). This is a video filter. It can handle RGB and YUV mode. It is a post-processing only filter.
+.IP
+.RS
+\(bu
+.I file
+= \fI%s\fP
+.RS 3
+Image filename
+.RE
+\(bu
+.I posdef
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Position (0=None, 1=TopL, 2=TopR, 3=BotL, 4=BotR, 5=Center)
+.RE
+\(bu
+.I pos
+= \fI%dx%d\fP  [default \fI0x0\fP]
+.RS 3
+Position (0-width x 0-height)
+.RE
+\(bu
+.I range
+= \fI%u-%u\fP  [default \fI0-0\fP]
+.RS 3
+Restrict rendering to framerange
+.RE
+\(bu
+.I ignoredelay
+(bool)
+.RS 3
+Ignore delay specified in animations
+.RE
+\(bu
+.I rgbswap
+(bool)
+.RS 3
+Swap red/blue colors
+.RE
+\(bu
+.I grayout
+(bool)
+.RS 3
+YUV only: don't write Cb and Cr, makes a nice effect
+.RE
+\(bu
+.I flip
+(bool)
+.RS 3
+Mirror image
+.RE
+.IP
+This filter renders an user specified image into the video.
+Any image format ImageMagick can read is accepted.
+Transparent images are also supported.
+Image origin is at the very top left.
+
+see /docs/filter_logo.txt
+.RE
+.TP 4
+\fBlogoaway\fP - \fBremove an image from the video\fP
+\fBlogoaway\fP was written by Thomas Wehrspann <thomas@wehrspann.de>. The version documented here is v0.5 (2004-03-07). This is a video filter. It can handle RGB and YUV mode. It is a post-processing only filter. It supports multiple instances.
+.IP
+.RS
+\(bu
+.I range
+= \fI%d-%d\fP  [default \fI0-4294967295\fP]
+.RS 3
+Frame Range
+.RE
+\(bu
+.I pos
+= \fI%dx%d\fP  [default \fI-1x-1\fP]
+.RS 3
+Position of logo
+.RE
+\(bu
+.I size
+= \fI%dx%d\fP  [default \fI-2x-2\fP]
+.RS 3
+Size of logo
+.RE
+\(bu
+.I mode
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Filter Mode (0=none,1=solid,2=xy,3=shape)
+.RE
+\(bu
+.I border
+(bool)
+.RS 3
+Visible Border
+.RE
+\(bu
+.I dump
+(bool)
+.RS 3
+Dump filterarea to file
+.RE
+\(bu
+.I xweight
+= \fI%d\fP  [default \fI50\fP]
+.RS 3
+X-Y Weight(0%-100%)
+.RE
+\(bu
+.I fill
+= \fI%2x%2x%2x\fP  [default \fI000\fP]
+.RS 3
+Solid Fill Color(RGB)
+.RE
+\(bu
+.I file
+= \fI%s\fP
+.RS 3
+Image with alpha/shape information
+.RE
+.IP
+This filter removes an image in a user specified area from the video.  You can
+choose from different methods.
+
+see /docs/filter_logoaway.txt
+.RE
+.TP 4
+\fBlowpass\fP - \fBHigh and low pass filter\fP
+\fBlowpass\fP was written by Tilmann Bitterberg. The version documented here is v0.1.0 (2002-02-26). This is a audio filter. It is a pre-processing only filter.
+.IP
+.RS
+\(bu
+.I taps
+= \fI%d\fP  [default \fI30\fP]
+.RS 3
+strength (may be negative)
+.RE
+.RE
+.TP 4
+\fBmask\fP - \fBFilter through a rectangular Mask\fP
+\fBmask\fP was written by Thomas Oestreich, Chad Page. The version documented here is v0.2.3 (2003-10-12). This is a video filter. It can handle RGB,YUV and YUV422 mode. It is a pre-processing only filter.
+.IP
+.RS
+\(bu
+.I lefttop
+= \fI%dx%d\fP  [default \fI0x0\fP]
+.RS 3
+Upper left corner of the box
+.RE
+\(bu
+.I rightbot
+= \fI%dx%d\fP  [default \fI32x32\fP]
+.RS 3
+Lower right corner of the box
+.RE
+.IP
+This filter applies an rectangular mask to the video.  Everything outside the mask is set to black.
+.RE
+.TP 4
+\fBmodfps\fP - \fBplugin to modify framerate\fP
+\fBmodfps\fP was written by Marrq. The version documented here is v0.10 (2003-08-18). This is a video filter. It can handle RGB and YUV mode. It is a pre-processing only filter.
+.IP
+.RS
+\(bu
+.I mode
+= \fI%d\fP  [default \fI1\fP]
+.RS 3
+mode of operation
+.RE
+\(bu
+.I infps
+= \fI%f\fP  [default \fI25.000000\fP]
+.RS 3
+Original fps
+.RE
+\(bu
+.I infrc
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Original frc
+.RE
+\(bu
+.I buffer 
+= \fI%d\fP  [default \fI5\fP]
+.RS 3
+How many frames to buffer
+.RE
+\(bu
+.I subsample
+= \fI%d\fP  [default \fI32\fP]
+.RS 3
+How many pixels to subsample
+.RE
+\(bu
+.I clonetype
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+How to clone frames
+.RE
+\(bu
+.I verbose
+= \fI%d\fP  [default \fI1\fP]
+.RS 3
+run in verbose mode
+.RE
+.IP
+This filter aims to allow transcode to alter the fps
+of video.  While one can reduce the fps to any amount,
+one can only increase the fps to at most twice the
+original fps.
+
+There are two modes of operation, buffered and unbuffered,
+unbuffered is quick, but buffered, especially when dropping frames
+should look better.
+
+For most users, modfps will need either no options, or just mode=1
+
+see /docs/README.filter.modfps
+.RE
+.TP 4
+\fBmsharpen\fP - \fBVirtualDub's MSharpen Filter\fP
+\fBmsharpen\fP was written by Donald Graft, William Hawkins. The version documented here is (1.0) (2003-07-17). This is a video filter. It can handle RGB and YUV mode. It is a post-processing only filter.
+.IP
+.RS
+\(bu
+.I strength
+= \fI%d\fP  [default \fI100\fP]
+.RS 3
+How much  of the effect
+.RE
+\(bu
+.I threshold
+= \fI%d\fP  [default \fI10\fP]
+.RS 3
+How close a pixel must be to the brightest or dimmest pixel to be mapped
+.RE
+\(bu
+.I highq
+= \fI%d\fP  [default \fI1\fP]
+.RS 3
+Tradeoff speed for quality of detail detection
+.RE
+\(bu
+.I mask
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Areas to be sharpened are shown in white
+.RE
+.IP
+This plugin implements an unusual concept in spatial sharpening.
+Although designed specifically for anime, it also works well with
+normal video. The filter is very effective at sharpening important
+edges without amplifying noise.
+
+  * Strength 'strength' (0-255) [100]
+    This is the strength of the sharpening to be applied to the edge detail areas. It is applied only to the edge detail areas as determined by the 'threshold' parameter. Strength 255 is the strongest sharpening.
+  * Threshold 'threshold' (0-255) [10]
+    This parameter determines what is detected as edge detail and thus sharpened. To see what edge detail areas will be sharpened, use the 'mask' parameter.
+  * Mask 'mask' (0-1) [0]
+    When set to true, the areas to be sharpened are shown in white against a black background. Use this to set the level of detail to be sharpened. This function also makes a basic edge detection filter.
+  * HighQ 'highq' (0-1) [1]
+    This parameter lets you tradeoff speed for quality of detail detection. Set it to true for the best detail detection. Set it to false for maximum speed.
+.RE
+.TP 4
+\fBnormalize\fP - \fBVolume normalizer\fP
+\fBnormalize\fP was written by pl, Tilmann Bitterberg. The version documented here is v0.1.1 (2002-06-18). This is a audio filter. It is a pre-processing only filter.
+.IP
+.RS
+\(bu
+.I smooth
+= \fI%f\fP  [default \fI0.06\fP]
+.RS 3
+Value for smoothing ]0.0 1.0[
+.RE
+\(bu
+.I smoothlast
+= \fI%f\fP  [default \fI0.06\fP]
+.RS 3
+Value for smoothing last sample ]0.0, 1.0[
+.RE
+\(bu
+.I algo
+= \fI%d\fP  [default \fI1\fP]
+.RS 3
+Algorithm to use (1 or 2). 1=uses a 1 value memory and coefficients new=a*old+b*cur (with a+b=1).   2=uses several samples to smooth the variations (standard weighted mean on past samples)
+.RE
+.RE
+.TP 4
+\fBnull\fP - \fBdemo filter plugin; does nothing\fP
+\fBnull\fP was written by Thomas Oestreich. The version documented here is v0.2 (2003-09-04). This is a video and audio filter. It can be used as a pre-processing or as a post-processing filter.
+.TP 4
+\fBpp\fP - \fBMplayers postprocess filters\fP
+\fBpp\fP was written by Michael Niedermayer et al, Gerhard Monzel. The version documented here is v1.2.4 (2003-01-24). This is a video filter. It can handle YUV mode only. It supports multiple instances. It can be used as a pre-processing or as a post-processing filter.
+.IP
+.RS
+\(bu
+.I hb
+= \fI%d:%d\fP  [default \fI64:40\fP]
+.RS 3
+Horizontal deblocking filter
+.RE
+\(bu
+.I vb
+= \fI%d:%d\fP  [default \fI64:40\fP]
+.RS 3
+Vertical deblocking filter
+.RE
+\(bu
+.I h1
+(bool)
+.RS 3
+Experimental h deblock filter 1
+.RE
+\(bu
+.I v1
+(bool)
+.RS 3
+Experimental v deblock filter 1
+.RE
+\(bu
+.I dr
+(bool)
+.RS 3
+Deringing filter
+.RE
+\(bu
+.I al
+(bool)
+.RS 3
+Automatic brightness / contrast
+.RE
+\(bu
+.I f
+(bool)
+.RS 3
+Stretch luminance to (0..255)
+.RE
+\(bu
+.I lb
+(bool)
+.RS 3
+Linear blend deinterlacer
+.RE
+\(bu
+.I li
+(bool)
+.RS 3
+Linear interpolating deinterlace
+.RE
+\(bu
+.I ci
+(bool)
+.RS 3
+Cubic interpolating deinterlacer
+.RE
+\(bu
+.I md
+(bool)
+.RS 3
+Median deinterlacer
+.RE
+\(bu
+.I de
+(bool)
+.RS 3
+Default preset (hb:a/vb:a/dr:a/al)
+.RE
+\(bu
+.I fa
+(bool)
+.RS 3
+Fast preset (h1:a/v1:a/dr:a/al)
+.RE
+\(bu
+.I tn
+= \fI%d:%d:%d\fP  [default \fI64:128:256\fP]
+.RS 3
+Temporal Noise Reducer (1<=2<=3)
+.RE
+\(bu
+.I fq
+= \fI%d\fP  [default \fI15\fP]
+.RS 3
+Force quantizer
+.RE
+\(bu
+.I pre
+(bool)
+.RS 3
+Run as a PRE filter
+.RE
+.RE
+.TP 4
+\fBpreview\fP - \fBxv/sdl/gtk preview plugin\fP
+\fBpreview\fP was written by Thomas Oestreich. The version documented here is v0.1.4 (2002-10-08). This is a video filter. It can handle RGB and YUV mode. It is a post-processing only filter.
+.IP
+.RS
+.IP
+XXX: Write me
+.RE
+.TP 4
+\fBpv\fP - \fBxv only preview plugin\fP
+\fBpv\fP was written by Thomas Oestreich, Tilmann Bitterberg. The version documented here is v0.2.3 (2004-06-01). This is a video filter. It can handle YUV and YUV422 mode. It is a post-processing only filter.
+.IP
+.RS
+\(bu
+.I cache
+= \fI%d\fP  [default \fI15\fP]
+.RS 3
+Number of raw frames to cache for seeking
+.RE
+\(bu
+.I skip
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+display only every Nth frame
+.RE
+\(bu
+.I fullscreen
+(bool)
+.RS 3
+Display in fullscreen mode
+.RE
+.IP
+The filter listens to mouse and key strokes. If you click into the preview
+window, the first time say near the upper left corner and the second time near
+the lower right corner, transcode will draw a rectangle and will print out the
+coordinates of this rectangle on stdout and the socket. See the table below for
+available keys.
+
+When you start transcode with the --socket option and the pv filter with (for
+example) cache=20 you can talk to transcode and the pv filter at runtime using
+the socket.
+
+.nf
+transcode -i file.avi -J pv=cache=30 --socket /tmp/sock
+.fi
+
+.RS
+.TP 8
+Available Commands
+.TP
+Key	Socket*	Effect
+.TP
+.I RET
+draw	redraws the image, applying filters.
+.TP
+.I u
+undo	goes to image before draw
+.TP
+.I SPACE
+pause	pause the preview (and transcode)
+.TP
+.I UP
+fastfw	in pause mode, step forward 5 frames
+.TP
+.I RIGHT
+slowfw	in pause mode, step forward 1 frame
+.TP
+.I DOWN
+fastbw	in pause mode, step back 5 frames
+.TP
+.I LEFT
+slowbw	in pause mode, step back 1 frame
+.TP
+.I q
+display	toggle display of frames
+.TP
+.I s
+slower	slow down
+.TP
+.I f
+faster	speed up
+.TP
+.I y
+toggle	toggle displaying only every 5 frames
+.TP
+.I j
+grab	save a JPEG
+.TP
+.I r
+rotate	rotate AVI file after next keyframe
+.TP
+.RE
+(*) all commands must be prefixed with "preview ".
+.RE
+.TP 4
+\fBresample\fP - \fBaudio resampling filter plugin\fP
+\fBresample\fP was written by Thomas Oestreich. The version documented here is v0.1.4 (2003-08-22). This is a audio filter. It is a pre-processing only filter.
+.TP 4
+\fBskip\fP - \fBskip all listed frames\fP
+\fBskip\fP was written by Thomas Oestreich. The version documented here is v0.0.1 (2001-11-27). This is a video and audio filter. It is a pre-processing only filter.
+.IP
+.RS
+\(bu
+.I fstart1-fend1 [ fstart2-fend2 [ .. ] ]
+= \fI%s\fP
+.RS 3
+apply filter [start-end] frames
+.RE
+.RE
+.TP 4
+\fBslowmo\fP - \fBvery cheap slow-motion effect\fP
+\fBslowmo\fP was written by Tilmann Bitterberg. The version documented here is v0.3 (2003-29-11). This is a video filter. It can handle RGB and YUV mode. It is a pre-processing only filter.
+.IP
+.RS
+.IP
+This filter produces a simple slow-motion effect by
+duplicating certain frames. I have seen this effect
+on TV and despite its the simple algorithm it works
+quite well. The filter has no options.
+.RE
+.TP 4
+\fBsmartbob\fP - \fBMotion-adaptive deinterlacing for double-frame-rate output.\fP
+\fBsmartbob\fP was written by Donald Graft, Tilmann Bitterberg. The version documented here is v1.1beta2 (2003-06-23). This is a video filter. It can handle RGB and YUV mode. It is a post-processing only filter.
+.IP
+.RS
+\(bu
+.I motionOnly
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Show motion areas only
+.RE
+\(bu
+.I shiftEven
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Blend instead of interpolate in motion areas
+.RE
+\(bu
+.I threshold
+= \fI%d\fP  [default \fI12\fP]
+.RS 3
+Motion Threshold
+.RE
+\(bu
+.I denoise
+= \fI%d\fP  [default \fI1\fP]
+.RS 3
+Phase shift
+.RE
+.IP
+This filter only makes sense when fed by -J doublefps.
+It will take the field-frames which filter_doublefps
+produces and generates full-sized motion adaptive deinterlaced
+output at the double import framerate.
+.RE
+.TP 4
+\fBsmartdeinter\fP - \fBVirtualDub's smart deinterlacer\fP
+\fBsmartdeinter\fP was written by Donald Graft. The version documented here is v2.7b (2003-02-01). This is a video filter. It can handle RGB and YUV mode. It is a pre-processing only filter.
+.IP
+.RS
+\(bu
+.I motionOnly
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Show motion areas only
+.RE
+\(bu
+.I Blend
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Blend instead of interpolate in motion areas
+.RE
+\(bu
+.I threshold
+= \fI%d\fP  [default \fI15\fP]
+.RS 3
+Motion Threshold
+.RE
+\(bu
+.I scenethreshold
+= \fI%d\fP  [default \fI100\fP]
+.RS 3
+Scene Change Threshold
+.RE
+\(bu
+.I fieldShift
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Phase shift
+.RE
+\(bu
+.I inswap
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Field swap before phase shift
+.RE
+\(bu
+.I outswap
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Field swap after phase shift
+.RE
+\(bu
+.I noMotion
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Disable motion processing
+.RE
+\(bu
+.I highq
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Motion map denoising for field-only
+.RE
+\(bu
+.I diffmode
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Motion Detection (0=frame, 1=field, 2=both)
+.RE
+\(bu
+.I colordiff
+= \fI%d\fP  [default \fI1\fP]
+.RS 3
+Compare color channels instead of luma
+.RE
+\(bu
+.I cubic
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Use cubic for interpolation
+.RE
+.IP
+This filter provides a smart, motion-based deinterlacing
+capability. In static picture areas, interlacing artifacts do not
+appear, so data from both fields is used to provide full detail. In
+moving areas, deinterlacing is performed
+.RE
+.TP 4
+\fBsmartyuv\fP - \fBMotion-adaptive deinterlacing\fP
+\fBsmartyuv\fP was written by Tilmann Bitterberg. The version documented here is 0.1.4 (2003-10-13). This is a video filter. It can handle YUV mode only. It is a pre-processing only filter.
+.IP
+.RS
+\(bu
+.I motionOnly
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Show motion areas only, blacking out static areas
+.RE
+\(bu
+.I diffmode
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Motion Detection (0=frame, 1=field, 2=both)
+.RE
+\(bu
+.I threshold
+= \fI%d\fP  [default \fI14\fP]
+.RS 3
+Motion Threshold (luma)
+.RE
+\(bu
+.I chromathres
+= \fI%d\fP  [default \fI7\fP]
+.RS 3
+Motion Threshold (chroma)
+.RE
+\(bu
+.I scenethres
+= \fI%d\fP  [default \fI31\fP]
+.RS 3
+Threshold for detecting scenechanges
+.RE
+\(bu
+.I highq
+= \fI%d\fP  [default \fI1\fP]
+.RS 3
+High-Quality processing (motion Map denoising)
+.RE
+\(bu
+.I cubic
+= \fI%d\fP  [default \fI1\fP]
+.RS 3
+Do cubic interpolation
+.RE
+\(bu
+.I Blend
+= \fI%d\fP  [default \fI1\fP]
+.RS 3
+Blend the frames for deinterlacing
+.RE
+\(bu
+.I doChroma
+= \fI%d\fP  [default \fI1\fP]
+.RS 3
+Enable chroma processing (slower but more accurate)
+.RE
+\(bu
+.I verbose
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Verbose mode
+.RE
+.IP
+This filter is basically a rewrite of the
+smartdeinter filter by Donald Graft (without advanced processing
+options) for YUV mode only. Its faster than using the smartdeinter
+in YUV mode and is also tuned with its threshold settings for YUV
+mode. The filter detects motion and static areas in an image and
+only deinterlaces (either by blending or by cubic interpolation)
+the moving areas. The result is an image with high detail in
+static areas, no information is lost there.
+
+The threshold settings should be sufficent for most users. As a
+rule of thumb, I recommend setting the chroma threshold to about
+the half of the luma threshold. If you want more deinterlacing,
+lower the thresholds. The scene threshold can be easily found by
+turning on verbose mode and the preview filter. In verbose mode,
+the filter will print out, when it detects a scene change. If
+scenechanges go by unnoticed, lower the scene threshold. You can
+completly disable chroma processing with the doChroma=0 option.
+Here is a sample commandline
+
+-J smartyuv=highq=1:diffmode=2:cubic=1:Blend=1:chromathres=4:threshold=8:doChroma=1
+.RE
+.TP 4
+\fBsmooth\fP - \fB(single-frame) smoothing plugin\fP
+\fBsmooth\fP was written by Chad Page. The version documented here is v0.2.3 (2003-03-27). This is a video filter. It can handle YUV mode only. It is a pre-processing only filter. It supports multiple instances.
+.IP
+.RS
+\(bu
+.I strength
+= \fI%f\fP  [default \fI0.25\fP]
+.RS 3
+Blending factor
+.RE
+\(bu
+.I cdiff
+= \fI%d\fP  [default \fI6\fP]
+.RS 3
+Max difference in chroma values
+.RE
+\(bu
+.I ldiff
+= \fI%d\fP  [default \fI8\fP]
+.RS 3
+Max difference in luma value
+.RE
+\(bu
+.I range
+= \fI%d\fP  [default \fI4\fP]
+.RS 3
+Search Range
+.RE
+.IP
+"single-frame" means it only works with the current frame, it does not need the
+next or the previous frame for operation. Usually smoothing is done by talking
+the data of previous frames into account to see which parts of the picture can
+be "safely" smoothed, this filter only needs one frame.
+.RE
+.IP
+Usage -J subtitler="[no_objects] [subtitle_file=s]
+[color_depth=n]
+[font_dir=s] [font=n] [font_factor=f
+[frame_offset=n]
+[debug] [help]"
+f is float, h is hex, n is integer, s is string.
+
+no_objects           disables subtitles and other objects (off).
+.br
+color_depth=         32 or 24 (overrides X auto) (32).
+.br
+font=                0 or 1, 1 gives strange symbols... (0).
+.br
+font_dir=            place where font.desc is (~/.subtitles/font).
+.br
+font_factor=         .1 to 100 outline characters (10.75).
+.br
+frame_offset=        positive (text later) or negative (earlier) integer (0).
+.br
+subtitle_file=       pathfilename.ppml location of ppml file (~/.subtitles/demo.ppml).
+.br
+debug                prints debug messages (off).
+.br
+help                 prints this list and exit.
+.RE
+.RE
+.TP 4
+\fBtestframe\fP - \fBgenerate stream of testframes\fP
+\fBtestframe\fP was written by Thomas Oestreich. The version documented here is v0.1.3 (2003-09-04). This is a video filter. It can handle RGB and YUV mode. It is a pre-processing only filter.
+.IP
+.RS
+\(bu
+.I mode
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Choose the test pattern (0-4 interlaced, 5 colorfull)
+.RE
+.RE
+.TP 4
+\fBtext\fP - \fBwrite text in the image\fP
+\fBtext\fP was written by Tilmann Bitterberg. The version documented here is v0.1.4 (2004-02-14). This is a video filter. It can handle RGB and YUV mode. It is a post-processing only filter.
+.IP
+.RS
+\(bu
+.I range
+= \fI%u-%u/%d\fP  [default \fI0-4294967295/1\fP]
+.RS 3
+apply filter to [start-end]/step frames
+.RE
+\(bu
+.I string
+= \fI%s\fP
+.RS 3
+text to display (no ':') [defaults to `date`]
+.RE
+\(bu
+.I font
+= \fI%s\fP
+.RS 3
+full path to font file [defaults to arial.ttf]
+.RE
+\(bu
+.I points
+= \fI%d\fP  [default \fI25\fP]
+.RS 3
+size of font (in points)
+.RE
+\(bu
+.I dpi
+= \fI%d\fP  [default \fI96\fP]
+.RS 3
+resolution of font (in dpi)
+.RE
+\(bu
+.I fade
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+fade in/out (0=off, 1=slow, 10=fast)
+.RE
+\(bu
+.I antialias
+= \fI%d\fP  [default \fI1\fP]
+.RS 3
+Anti-Alias text (0=off 1=on)
+.RE
+\(bu
+.I pos
+= \fI%dx%d\fP  [default \fI0x0\fP]
+.RS 3
+Position (0-width x 0-height)
+.RE
+\(bu
+.I posdef
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Position (0=None 1=TopL 2=TopR 3=BotL 4=BotR 5=Cent 6=BotCent)
+.RE
+\(bu
+.I notransparent
+(bool)
+.RS 3
+disable transparency (enables block box)
+.RE
+.IP
+see /docs/filter_text.txt
+.RE
+.TP 4
+\fBtomsmocomp\fP - \fBTom's MoComp deinterlacing filter\fP
+\fBtomsmocomp\fP was written by Tom Barry et al.. The version documented here is v0.1 (2004-07-31). This is a video filter. It can handle YUV and YUV422 mode. It is a pre-processing only filter.
+.IP
+.RS
+\(bu
+.I TopFirst
+= \fI%d\fP  [default \fI1\fP]
+.RS 3
+Assume the top field should be displayed first
+.RE
+\(bu
+.I SearchEffort
+= \fI%d\fP  [default \fI15\fP]
+.RS 3
+CPU time used to find moved pixels
+.RE
+\(bu
+.I UseStrangeBob
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+?Unknown?
+.RE
+\(bu
+.I CpuFlags
+= \fI%x\fP  [default \fI5f\fP]
+.RS 3
+Manual specification of CPU capabilities
+.RE
+.RE
+.TP 4
+\fBunsharp\fP - \fBunsharp mask & gaussian blur\fP
+\fBunsharp\fP was written by Remi Guyomarch. The version documented here is v1.0.1 (2003-10-27). This is a video filter. It can handle YUV mode only. It is a post-processing only filter.
+.IP
+.RS
+\(bu
+.I amount
+= \fI%f\fP  [default \fI0.0\fP]
+.RS 3
+Luma and chroma (un)sharpness amount
+.RE
+\(bu
+.I matrix
+= \fI%dx%d\fP  [default \fI0x0\fP]
+.RS 3
+Luma and chroma search matrix size
+.RE
+\(bu
+.I luma
+= \fI%f\fP  [default \fI0.0\fP]
+.RS 3
+Luma (un)sharpness amount
+.RE
+\(bu
+.I chroma
+= \fI%f\fP  [default \fI0.0\fP]
+.RS 3
+Chroma (un)sharpness amount
+.RE
+\(bu
+.I luma_matrix
+= \fI%dx%d\fP  [default \fI0x0\fP]
+.RS 3
+Luma search matrix size
+.RE
+\(bu
+.I chroma_matrix
+= \fI%dx%d\fP  [default \fI0x0\fP]
+.RS 3
+Chroma search matrix size
+.RE
+\(bu
+.I pre
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+run as a pre filter
+.RE
+.IP
+This filter blurs or sharpens an image depending on
+the sign of "amount". You can either set amount for
+both luma and chroma or you can set it individually
+(recommended). A positive value for amount will sharpen
+the image, a negative value will blur it. A sane range
+for amount is -1.5 to 1.5.
+
+The matrix sizes must be odd and define the
+range/strength of the effect. Sensible ranges are 3x3
+to 7x7.
+
+It sometimes makes sense to sharpen the sharpen the
+luma and to blur the chroma. Sample string is:
+
+luma=0.8:luma_matrix=7x5:chroma=-0.2:chroma_matrix=3x3
+.RE
+.TP 4
+\fBwhitebalance\fP - \fBWhite Balance Filter - correct images with a broken white balance\fP
+\fBwhitebalance\fP was written by Guillaume Cottenceau. The version documented here is v0.1 (2003-10-01). This is a video filter. It can handle RGB and YUV mode. It is a pre-processing only filter.
+.IP
+.RS
+\(bu
+.I level
+= \fI%d\fP  [default \fI40\fP]
+.RS 3
+Level of blue-to-yellow white balance shifting (can be negative)
+.RE
+\(bu
+.I limit
+= \fI%s\fP
+.RS 3
+Limit to specified ranges (+fnumber toggles on, -fnumber toggles off)
+.RE
+.IP
+This filter allows correcting movies with a broken white balance, e.g. bluish movies.
+.RE
+.TP 4
+\fBxharpen\fP - \fBVirtualDub's XSharpen Filter\fP
+\fBxharpen\fP was written by Donald Graft, Tilmann Bitterberg. The version documented here is (1.0b2) (2003-02-12). This is a video filter. It can handle RGB and YUV mode. It is a post-processing only filter.
+.IP
+.RS
+\(bu
+.I strength
+= \fI%d\fP  [default \fI200\fP]
+.RS 3
+How much  of the effect
+.RE
+\(bu
+.I threshold
+= \fI%d\fP  [default \fI255\fP]
+.RS 3
+How close a pixel must be to the brightest or dimmest pixel to be mapped
+.RE
+.IP
+This filter performs a subtle but useful sharpening effect. The
+result is a sharpening effect that not only avoids amplifying
+noise, but also tends to reduce it. A welcome side effect is that
+files processed with this filter tend to compress to smaller files.
+
+  Strength 'strength' (0-255) [200]
+    When this value is 255, mapped pixels are not blended with the original pixel values, so a full-strength effect is obtained. As the value is reduced, each mapped pixel is blended with more of the original pixel. At a value of 0, the original pixels are passed through and there is no sharpening effect.
+
+  Threshold 'threshold' (0-255) [255]
+    This value determines how close a pixel must be to the brightest or dimmest pixel to be mapped. If a pixel is more than threshold away from the brightest or dimmest pixel, it is not mapped.  Thus, as the threshold is reduced, pixels in the mid range start to be spared.
+.RE
+.TP 4
+\fByuvdenoise\fP - \fBmjpegs YUV denoiser\fP
+\fByuvdenoise\fP was written by Stefan Fendt, Tilmann Bitterberg. The version documented here is v0.2.1 (2003-11-26). This is a video filter. It can handle YUV mode only. It can be used as a pre-processing or as a post-processing filter.
+.IP
+.RS
+\(bu
+.I radius
+= \fI%d\fP  [default \fI8\fP]
+.RS 3
+Search radius
+.RE
+\(bu
+.I threshold
+= \fI%d\fP  [default \fI5\fP]
+.RS 3
+Denoiser threshold
+.RE
+\(bu
+.I pp_threshold
+= \fI%d\fP  [default \fI4\fP]
+.RS 3
+Pass II threshold
+.RE
+\(bu
+.I delay
+= \fI%d\fP  [default \fI3\fP]
+.RS 3
+Average 'n' frames for a time-lowpassed pixel
+.RE
+\(bu
+.I postprocess
+= \fI%d\fP  [default \fI1\fP]
+.RS 3
+Filter internal postprocessing
+.RE
+\(bu
+.I luma_contrast
+= \fI%d\fP  [default \fI100\fP]
+.RS 3
+Luminance contrast in percent
+.RE
+\(bu
+.I chroma_contrast
+= \fI%d\fP  [default \fI100\fP]
+.RS 3
+Chrominance contrast in percent.
+.RE
+\(bu
+.I sharpen
+= \fI%d\fP  [default \fI125\fP]
+.RS 3
+Sharpness in percent
+.RE
+\(bu
+.I deinterlace
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Force deinterlacing
+.RE
+\(bu
+.I mode
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+[0]: Progressive [1]: Interlaced [2]: Fast
+.RE
+\(bu
+.I scene_thres
+= \fI%d%%\fP  [default \fI50\fP]
+.RS 3
+Blocks where motion estimation should fail before scenechange
+.RE
+\(bu
+.I block_thres
+= \fI%d\fP  [default \fI1024\fP]
+.RS 3
+Every SAD value greater than this will be considered bad
+.RE
+\(bu
+.I do_reset
+= \fI%d\fP  [default \fI2\fP]
+.RS 3
+Reset the filter for `n' frames after a scene
+.RE
+\(bu
+.I increment_cr
+= \fI%d\fP  [default \fI2\fP]
+.RS 3
+Increment Cr with constant
+.RE
+\(bu
+.I increment_cb
+= \fI%d\fP  [default \fI2\fP]
+.RS 3
+Increment Cb with constant
+.RE
+\(bu
+.I border
+= \fI%dx%d-%dx%d\fP  [default \fI0x0-32x32\fP]
+.RS 3
+Active image area
+.RE
+\(bu
+.I pre
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+run this filter as a pre-processing filter
+.RE
+.IP
+see /docs/filter_yuvdenoise.txt
+.RE
+.TP 4
+\fByuvmedian\fP - \fBmjpegs YUV median filter\fP
+\fByuvmedian\fP was written by Mike Bernson, Tilmann Bitterberg. The version documented here is v0.1.0 (2003-01-24). This is a video filter. It can handle YUV mode only. It can be used as a pre-processing or as a post-processing filter.
+.IP
+.RS
+\(bu
+.I radius_luma
+= \fI%d\fP  [default \fI2\fP]
+.RS 3
+Radius for median (luma)
+.RE
+\(bu
+.I radius_chroma
+= \fI%d\fP  [default \fI2\fP]
+.RS 3
+Radius for median (chroma)
+.RE
+\(bu
+.I threshold_luma
+= \fI%d\fP  [default \fI2\fP]
+.RS 3
+Trigger threshold (luma)
+.RE
+\(bu
+.I threshold_chroma
+= \fI%d\fP  [default \fI2\fP]
+.RS 3
+Trigger threshold (chroma)
+.RE
+\(bu
+.I interlace
+= \fI%d\fP  [default \fI0\fP]
+.RS 3
+Treat input as interlaced
+.RE
+\(bu
+.I pre
+= \fI%d\fP  [default \fI1\fP]
+.RS 3
+Run as a PRE filter
+.RE
+.RE
+.\" Here ends the generated filter part, produced by make-filter-man.sh
+
+.PP
+.SH AUTHORS
+.B transcode
+was written by Thomas Oestreich
+.br
+<ostreich@theorie.physik.uni-goettingen.de> with contributions from
+many others.  See AUTHORS for details.
+.PP
+.SH SEE ALSO
+.BR transcode (1),
+.BR transcode_import (1),
+.BR transcode_export (1),
+.BR tcmodinfo (1),
+.br

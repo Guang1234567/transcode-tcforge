@@ -1,0 +1,111 @@
+		EXPORT MODULE WRITING HOWTO
+		---------------------------
+Changes: 2001-08-13: changed order of init/open
+		   and stop/close calls.
+
+Some very short documentation on writing export modules for transcode
+
+include this file:
+------------------
+
+#include "transcode.h"       //definition of vob_t and transfer_t structure
+
+data exchange structure for modules:
+------------------------------------
+
+typedef struct _vob_t {
+//see transcode.h for details
+} vob_t;
+
+typedef struct _transfer_t {
+
+  int flag;		// specifies context: TC_VIDEO for video
+					      TC_AUDIO for audio
+		        // or passes an integer to the module
+
+  FILE *fd;             // file handle for input stream
+			// NULL if import module performs reading
+			// unused in export module
+
+  int size;             // total amount of bytes in the buffer
+
+  char *buffer;         // pointer to data array with frame data
+
+} transfer_t;
+
+
+single function interface:
+--------------------------
+
+int tc_export(int option, void *para1, void *para2);
+
+exit codes: all handled by transcode
+TC_EXPORT_UNKNOWN option not supported
+TC_EXPORT_OK      no error, hopefully the default
+TC_EXPORT_ERROR   a critical error occured
+
+input parameter:
+option contains the requested action id
+para1/2 its actually meaning depends on option
+
+requested method:
+
+transcode calls the following routines in this order
+for both export modules, i.e., first for video and then for the
+audio context flag set. An export module should in general
+be able to deal with audio and video and write it to
+a common file. But the interface is more general.
+
+[1]
+option=TC_EXPORT_NAME
+para1=_transfer_t
+para2=NULL
+requested action: print out some general modules infos to stderr
+		  and inherit transcode verbosity flag
+		  (optional return capability flag)
+
+		  //>0.3.3 of transcode interpret flag returned
+		  //to read module capabilities for sanity checks
+status: optional
+
+[2]
+option=TC_EXPORT_INIT
+para1=_transfer_t
+para2=_vob_t
+requested action: initialize the encoder
+status: required
+
+
+[3]
+option=TC_EXPORT_OPEN
+para1=_transfer_t
+para2=_vob_t
+requested action: open outputfile
+status: required
+
+
+[4]
+option=TC_EXPORT_ENCODE
+para1=_transfer_t
+para2=NULL
+requested action: use this frame data to encode the next frame
+		  in the sequence
+status: required
+
+
+[5]
+option:TC_EXPORT_CLOSE
+para1=_transfer_t
+para2=NULL
+requested action: close open files
+status: required
+
+
+[6]
+option=TC_EXPORT_STOP
+para1=_transfer_t
+para2=NULL
+requested action: stop the encoder, free memory and prepare for
+		  module removal
+status: required
+

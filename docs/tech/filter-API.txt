@@ -1,0 +1,136 @@
+
+  // ================
+  // API explanation:
+  // ================
+  //
+  // (1) need more infos, than get pointer to transcode global
+  //     information structure vob_t as defined in transcode.h.
+  //
+  // (2) 'tc_get_vob' and 'verbose' are exported by transcode.
+  //
+  // (3) filter is called first time with TC_FILTER_INIT flag set.
+  //
+  // (4) make sure to exit immediately if context (video/audio) or
+  //     placement of call (pre/post) is not compatible with the filters
+  //     intended purpose, since the filter is called 4 times per frame.
+  //
+  // (5) see framebuffer.h for a complete list of frame_list_t variables.
+  //
+  // (6) filter is last time with TC_FILTER_CLOSE flag set. This is important.
+  //     The filter should be left in a state so that it could be called again
+  //     with TC_FILTER_INIT.
+  //
+  // (Anytime) A filter may be called with TC_FILTER_GET_CONFIG to read  the
+  //           current config (optional) See /src/optstr.h for explanation
+
+
+  Notes and Hints about filter programming:
+  * Statics: All information and data you have calculated at INIT time and you
+    want to reuse later must be declared static (tables, flags, etc)
+  * The optstr_get function provides a convenient way for a developer to parse
+    human readable option strings. You are encouraged to use this function.
+  * If your filter shall be called multiple times during and encode session
+    (maybe first as a pre fileter and than as a post process filter) _you_ have
+    to take care to not overwrite your own data. A frame_list_t element has a
+    field called `instance' which will help you to keep your adress space clean.
+    See 32detect for an implementation.
+  * When TC_FILER_GET_CONFIG flag is set, the filter should return its
+    available parameters using the optstr_param and optstr_filter_desc funtions.
+    The last parameters of optstr_param are ranges with valid arguments for
+    this paramter. Sometimes it does not make sense to set the ranges, (e.g. if
+    the parameter "foo" is valid from 0 to "all frames in this file", so it is
+    considered good practice to use "oo" - the mathematical symbol for infinity
+    as the upper limit.
+
+Example filter code:
+
+#define MOD_NAME    "filter_null.so"
+#define MOD_VERSION "v0.1 (2003-10-12)"
+#define MOD_CAP     "demo filter plugin"
+#define MOD_AUTHOR  "Jon Doe <me@there>"
+
+#include "filter.h"
+#include "optstr.h"
+
+int tc_filter(frame_list_t *ptr, char *options)
+{
+
+  int pre, vid;
+  static int dummy_option = 0;
+
+  static vob_t *vob=NULL;
+
+  //----------------------------------
+  //
+  // filter get config
+  //
+  //----------------------------------
+
+  if(ptr->tag & TC_FILTER_GET_CONFIG) {
+    if (options) {
+      optstr_filter_desc (MOD_NAME, MOP_CAP, MOD_VERSION, MOD_AUTHOR, "VARY", "1");
+
+      optstr_param (options, "dummy_options",   // name
+                             "This options does nothing",  // comment
+                             "%d",  // format
+                             "0",   // default value
+                             "0",   // valid from
+                             "255"  // valid to
+                             );
+    }
+    return (0);
+  }
+
+  //----------------------------------
+  //
+  // filter init
+  //
+  //----------------------------------
+
+  if(ptr->tag & TC_FILTER_INIT) {
+
+    if((vob = tc_get_vob())==NULL) return(-1);
+
+    if (options) {
+      optstr_get (options, "dummy_option", "%d", &dummy_option);
+    }
+
+    // filter init ok.
+    if(verbose) printf("[%s] %s %s\n", MOD_NAME, MOD_VERSION, MOD_CAP);
+
+    return(0);
+  }
+
+  //----------------------------------
+  //
+  // filter close
+  //
+  //----------------------------------
+
+
+  if(ptr->tag & TC_FILTER_CLOSE) {
+    // free memory, etc ..
+    return(0);
+  }
+
+  //----------------------------------
+  //
+  // filter frame routine
+  //
+  //----------------------------------
+
+  // tag variable indicates, if we are called before
+  // transcodes internal video/audo frame processing routines
+  // or after and determines video/audio context
+
+
+      if(ptr->tag & TC_PRE_M_PROCESS)  pre=1;
+      if(ptr->tag & TC_POST_M_PROCESS) pre=0;
+
+      if(ptr->tag & TC_VIDEO) vid=1;
+      if(ptr->tag & TC_AUDIO) vid=0;
+
+      printf("[%s] frame [%06d] %s %16s call\n", MOD_NAME, ptr->id, (vid)?"(video)":"(audio)", (pre)?"pre-process filter":"post-process filter");
+
+      return(0);
+}

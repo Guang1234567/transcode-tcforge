@@ -1,0 +1,195 @@
+.TH tcdecode 1 "23th August 2003" "tcdecode(1)"
+.SH NAME
+tcdecode \- read multimedia streams from medium, decode to raw format and print to standard output
+.SH SYNOPSIS
+.TP
+.B tcdecode
+.B -i
+.I name
+[
+.B -x
+.I codec
+] [
+.B -t
+.I package
+] [
+.B -g
+.I WxH
+] [
+.B -s
+.I c,f,r
+] [
+.B -C
+.I s-e
+] [
+.B -y
+.I codec
+] [
+.B -Y
+] [
+.B -Q
+.I mode
+] [
+.B -A
+.I flag
+] [
+.B -d
+.I verbosity
+] [
+.B -v
+]
+.SH COPYRIGHT
+\fBtcdecode\fP is Copyright (C) by Thomas Oestreich.
+.SH DESCRIPTION
+.B tcdecode
+is part of and usually called by \fBtranscode\fP.
+.br
+However, it can also be used independently.
+.br
+\fBtcdecode\fP reads source (from stdin if not explicitely defined) and
+prints on the standard output.
+.SH OPTIONS
+.IP "\fB-i \fIname\fP"
+Specify input source.  If ommited, \fIstdin\fP is assumed.
+\fBtcdecode\fP reads streams from file or from stdin.
+
+.IP "\fB-g \fIWxH\fP"
+video frame width and height [720x576]
+
+.IP "\fB-C \fIs-e\fP"
+decode and print out only this frame interval (video) or bytes (audio) [all].
+
+.IP "\fB-x \fIcodec\fP"
+source codec, if not detected of reading from stdin. This option also specifies video and audio context of the source for decoding. Currently, supported parameter for \fIcodec\fP are
+
+.RS 8
+.TS
+lI c l.
+mp3	MPEG audio	(lame)
+ac3	AC3 audio	(liba52)
+dv	Digital Video DV	(libdv)
+mpeg2	MPEG video	(libmpeg2)
+yv12	Y'CbCr YUV
+mov	Quicktime	(libquicktime)
+.TE
+.RE
+
+.IP "\fB-t \fIpackage\fP"
+Currently only argument supported is "lavc". Use the codec by -x from this package. Available (-x) codecs for \fIlavc\fP are:
+mpeg2, divx3, divx, divx4, mp42, mjpg, rv10, svq1, svq3, vp3, 4xm, wmv1, wmv2, hfyu, indeo3, h263p, h263i
+
+
+.IP "\fB-y \fIcodec\fP"
+target codec. \fB tcdecode \fP only decodes to raw format suitable for transcode. Valid option parameter for \fIcodec\fP are
+
+.RS 8
+.TS
+lI r.
+rgb	RGB 24bit
+yv12	Y'CbCr YUV
+yuy2	4:2:2 YUV
+pcm	SIGNED LE 16bit PCM
+.TE
+.RE
+.IP "\fB-s\fP \fIc,f,r\fP"
+audio gain for AC3 downmixing [1.0,1.0,1.0]
+
+.IP "\fB-Y\fP"
+decoded Digital Video (raw) YUV frame is in YUY2 (packet) format using libdv. Downsample frame to YV12. PAL users should compile libdv with --with-pal-yuv=YV12 to avoid this option [off]
+
+.IP "\fB-A\fP \fIflag\fP"
+audio flag for AC3/A52 decoder [none]. This flag determines the down-mixing
+configuration. Valid choices for \fIflag\fP are determined by the following
+bits set:
+
+.RS 8
+.TS
+l r.
+drc off	1
+demux	2
+dolby off	4
+.TE
+.RE
+
+Add those numbers to turn multiple options on.
+
+.IP "\fB-Q\fP \fImode\fP"
+decoding quality. Certain codecs, e.g., DV with libdv allow for changing
+this parameter if speed is prefered over quality.
+Valid parameter are 1=fastest-5=best [5].
+
+.IP "\fB-d\fP \fIlevel\fP"
+With this option you can specify a bitmask to enable different levels
+of verbosity (if supported).  You can combine several levels by adding the
+corresponding values:
+
+.RS 8
+.TS
+l r.
+QUIET	0
+INFO	1
+DEBUG	2
+STATS	4
+WATCH	8
+FLIST	16
+VIDCORE	32
+SYNC	64
+COUNTER	128
+PRIVATE	256
+.TE
+.RE
+
+.IP "\fB-v\fP"
+Print version information and exit.
+
+.IP "\fB-X\fP \fItype\fP"
+enforce experimental IA32/AMD64 acceleration using a comma-separated list of types [autodetect].
+\fItype\fR may any one of
+.RS 8
+.TS
+lI c l.
+C	No acceleration
+asm	plain x86 assembly
+mmx	MMX instruction set
+3dnow	3DNow! instruction set
+sse	SSE instruction set
+sse2	SSE2 instruction set
+.TE
+.RE
+.RE
+
+.SH NOTES
+\fBtcdecode\fP is a front end for decoding various sources and is used in \fBtranscode(1)\fP's import modules.
+.SH EXAMPLES
+The command
+.nf
+\	tcdecode -i foo.mp3 -x mp3
+.fi
+decodes an MPEG audio stream and prints raw PCM data to stdout.
+
+The command
+.nf
+\	tcextract -i foo.avi -x mp3 | tcdecode -x mp3
+.fi
+extracts an MPEG audio track from the AVI-file foo.avi and pipes the frames into the decoder
+
+.PP
+.SH AUTHORS
+.B tcdecode
+was written by Thomas Oestreich
+.br
+<ostreich@theorie.physik.uni-goettingen.de> with contributions from
+many others.  See AUTHORS for details.
+.SH SEE ALSO
+.BR avifix (1),
+.BR avisync (1),
+.BR avimerge (1),
+.BR avisplit (1),
+.BR tcprobe (1),
+.BR tcscan (1),
+.BR tccat (1),
+.BR tcdemux (1),
+.BR tcextract (1),
+.BR tcdecode (1),
+.BR transcode (1)
+.br

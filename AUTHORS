@@ -1,0 +1,190 @@
+------------------------------------
+Original Author of transcode (core):
+------------------------------------
+	Thomas Oestreich <ostreich@theorie.physik.uni-goettingen.de>
+
+-----------------------------------------------------
+Current and Previous Maintainers of transcode (core):
+-----------------------------------------------------
+	Tilmann Bitterberg <transcode@tibit.org>
+	Erik Slagter <erik@oldconomy.com>
+	Jacob Meuser <jakemsr@jakemsr.com>
+        Francesco Romani <fromani at gmail dot com> (current)
+        Andrew Church <achurch at achurch dot org> (current)
+
+----------------------------------
+Contributors: (also see ChangeLog)
+----------------------------------
+	Tilmann Bitterberg <transcode@tibit.org>
+		o lots of filters
+		o import_nvrec.c
+		o manpages
+		o inverse cropping
+		o tons of bug fixes
+
+	Marek Blaszkowski <mb@intercon.pl>
+		o import_yuv.c
+
+	Gregory Brauer <greg@wildbrain.com>
+		o import_im.c
+
+	Moritz Bunkus <moritz@bunkus.org>
+		o export_ffmpeg.c
+		o import_ffmpeg.c
+		o import_mplayer.c
+
+	Dominique Caron <domi@LPM.univ-montp2.fr>
+		o vob2divx.pl
+
+	Ben Collins <bcollins@debian.org>
+		o export_mjpeg.c
+
+	Arne Driescher <driescher@mpi-magdeburg.mpg.de>
+		o subrip
+
+	German Gomez Garcia <german@piraos.com>
+		o AC3 downmixing patch for -s
+		o import_lav.c
+
+	Carsten Geckeler <geckeler@gmx.net>
+		o gamma correction routine
+		o fast resizing integer arithmetic
+
+	Dirk Gouders <gouders@et.bocholt.fh-ge.de>
+		o manpages
+
+	Juergen Hennerich <s-hej4@jura.uni-tuebingen.de>
+		o long options
+		o fast resizing updates
+
+	Chris C. Hoover <cchoover@charter.net>
+		o avisplit extensions
+		o import_v4l.c ~/.xawtv parser
+
+	Vladimir Kushnir <vkushnir@alfacom.net>
+		o FreeBSD port
+
+	Christoph Lampert <chl@math.uni-bonn.de>
+		o initial two-pass encoding for MPEG-4
+		o export_divx.c
+		o export_xvid.c
+
+	Georg Ludwig <email@georg-ludwig.de>
+		o export_mp2enc.c
+
+	Jason Lunz <lunz+mlist@falooley.org>
+		o --nav_seek patch
+		o NTSC DVD donations
+
+	Marzio Malanchini <Marzio.Malanchini@omnitelvodafone.it>
+		o import_xml.c
+
+	Volker Moell <moell@gmx.de>
+		o spec file
+
+	Gerhard Monzel <gerhard.monzel@sap.com>
+		o bbmpeg port to linux/transcode
+		o encoder parameter settings with avifile
+		o export_mpeg.c
+		o export_mpeg2enc.c
+
+	Guillaume Morin <guillaume@morinfr.org>
+		o Altivec support
+		o PPC patches
+
+	Andreas Neukoetter <anti@webhome.de>
+		o export_toolame.c
+
+	Chad Page <cpage@silcom.com>
+		o see filter plug-ins
+
+	Andreas Pahlsson <andreas.pahlsson@tjohoo.se>
+		o import_nuv.c
+
+	Jan Panteltje <panteltje@yahoo.com>
+		o subtitler
+
+        Eduardo Perez <eperez@dei.inf.uc3m.es>
+                o ISO8601 date compliance
+
+	Joerg Sauer <js-mail@gmx.net>
+		o liba52 fixes
+
+	Nikita Schmidt <cetus@cnds.ucd.ie>
+		o Linux/Alpha port
+
+	Steven M. Schultz <sms@2BSD.COM>
+		o BSD port
+
+	Michel Alexandre Salim <salimma1@yahoo.co.uk>
+		o spec file updates
+
+	Vaclav Slavik <v.slavik@volny.cz>
+		o progress meter patch for option "-c"
+		o high-quality frame resizing, i.e., zooming
+		o audio downsampling patch
+
+	Andrew Stevens <andrew.stevens@nexgo.de>
+		o mjpeg-tools API patch
+
+	Nicolas Vignal <nicolas.vignal@fnac.net>
+		o patch for spaces in filenames
+
+	Christian Vogelgsang <Vogelgsang@informatik.uni-erlangen.de>
+		o import_nuv.c updates
+		o quicktime4linux support
+
+	Charles Wilson <cwilson@ece.gatech.edu>
+		o configure fixes
+
+	Many, Many more, see ChangeLog
+
+
+Credits:
+--------
+o For filter plug-ins author information see:
+  http://www.Theorie.Physik.UNI-Goettingen.DE/~ostreich/transcode/html/filter.html
+
+o antialias algorithm adapted from the Anti-Aliasing plug-in for the GIMP v1.2.
+  Kevin Turner <acapnotic@users.sourceforge.net>
+  http://gimp-plug-ins.sourceforge.net/antialias/
+
+o Port of the original code of Ray Gardener, Daylon Graphics Ltd,
+  from Graphics Gems III, adapted and optimized for use in transcode.
+
+o lame
+  http://www.sulaco.org/mp3
+  Originally developed by Mike Cheng (www.uq.net.au/~zzmcheng).  Now
+  maintained by Mark Taylor (www.sulaco.org/mp3).
+
+o avilib
+  Original source code
+  Copyright (C) 1999 Rainer Johanni <Rainer@Johanni.de>
+
+o export_qt.c (obsolete)
+  Copyright (C) ken@hero.com 2001 (Module Author)
+
+o liba52
+  Aaron Holtzman <aholtzma@ess.engr.uvic.ca> started the project and
+  made the initial working implementation.
+  Michel Lespinasse <walken@zoy.org> did major changes for speed and
+  conformance and is the current maintainer.
+
+o libmpeg2/libvo
+  Aaron Holtzman <aholtzma@ess.engr.uvic.ca> started the project and
+  made the initial working implementation.
+  Michel Lespinasse <walken@zoy.org> did large changes for speed and
+  mpeg conformance and is the current maintainer.
+
+o encore2
+  OpenDivX  http://www.projectmayo.com/
+
+o dvdread
+  Copyright (C) 2000, 2001 by:
+  Bjorn Englund <d4bjorn@dtek.chalmers.se>,
+  Hakan Hjort <d95hjort@dtek.chalmers.se>,
+  Billy Biggs <vektor@dumbterm.net>
+
+o extsub
+  A subtitle extractor for VOB files Version 1.00
+  by Sham Gardner (risctaker@risctaker.de)

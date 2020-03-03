@@ -1,0 +1,161 @@
+
+ScreenCast with transcode and import_x11
+======================================================================
+            Francesco Romani <fromani at gmail dot com> 18 August 2006
+
+
+*********************************************************************
+***                          WARNING:                             ***
+***          import_x11 module is still EXPERIMENTAL!             ***
+***  It may DON'T work for you or it can deliver BROKEN pictures! ***
+***  If you experiences strange (= not explained here) behaviour, ***
+***   PLEASE drop a note on transcode-devel@exit1.org explaining  ***
+***                     your issue. Thanks!                       ***
+*********************************************************************
+
+1. What is this?
+----------------
+
+import_x11 is the new (as in transcode 1.1.0 and later) module and
+infrastructure designed to allow to capture full-screen images from
+a running X-server, in order to partially replace the aging and
+not-widely-appreciated import_vnc module.
+
+import_x11 isn't a drop-in replacement for import_vnc since vnc
+runs nicely on more platforms that X11 (i.e.: windows).
+Despite this, import_x11 features a much better support and (at
+least in intentions) a cleaner design and implementation.
+
+Please also consider the fact that transcode itself DOES NOT
+run on windows/non-posixly platforms, so X11 import module it's
+supposed to cover most of use cases of import_vnc.
+
+
+2. Basic usage
+--------------
+
+transcode's X11 sourcing facilities are accessible via transcode's
+main program or via tcprobe support utility.
+
+tcprobe allows to see the properties of any LOCAL X11 connection.
+That is usefull mailny for transcode internal usage to figure out
+(pseudo)stream properties, but can be also useful for debug purposes.
+
+usage is straightforward, just supply the (LOCAL) DISPLAY identifier
+as input argument, like following example
+
+	tcprobe -i :0.0
+
+that produces, on my box (as for transcode 1.1.0):
+
+	summary for :0.0, <*> = not default, 0 = not detected
+	      stream type: X11 display source
+	     video format: rgb
+	import frame size: 1024x768 [720x576] (-g) <*>
+	     aspect ratio: 1:1 asr=1 (--import_asr) 
+	       frame rate: 10.000 [25.000] frc=11 (-f) <*>
+	   no audio track: (use "null" import module for audio)
+
+Please note that import frame rate it's just a kind suggestion and
+can be overloaded with no theroretical penalty except for performance
+ones.
+
+In order to use X11 source with transcode, a little more is needed.
+Input source must be specified in the same format as for tcprobe,
+and internal colorspace must be set as RGB24, using (as for transcode
+1.1.0) -V rgb24.
+
+example:
+
+	transcode -i :0.0 -V rgb24 [other options]
+
+
+3. Recording a session
+----------------------
+
+As outlined in example above, recording a screen cast using transcode
+is pretty straightforwarded, since it's matter of selecting a proper
+X11 source and change internal image representation to rgb24.
+
+Anyway, there are some issues that must be understanded to avoid
+unpleasent surprises.
+As well as much of multimedia processing, there are two main concerns:
+processing speed and storage size.
+
+First of all, take in mind that X11 connections delivers often BIG
+(1024x768 or even more larger) pictures that aren't trivial to elaborate
+(of course in small amount of times) in plain RGB24 format.
+But since most of popular codecs out there works on YUV flavours,
+a format conversion is needed. Such conversion take time and CAN
+lead to substantial frame rate drop. It's definitively possible
+that transcode just can't capture images at rate superior to a certain
+rate on your box.
+That's partially due to some internal transcode, that are under
+investigation and/or under improvement, but that's also caused by X11
+structure and by the nature of the pictures involved on the process.
+
+On the other hand, NOT compressing the capture stream quickly produces
+HUGE files. Example, with a display running at 1024x768:
+
+one picture (one frame):   1x1024x768x3 = ~2304 KBytes (~2.25 MBytes)
+
+TWO seconds at PAL fps recording (50 frames total):
+~115200 KBytes (~112.5 MBytes)
+
+TEN seconds at PAL fps recording (250 frames total):
+~576000 KBytes (~562.5 MBytes)
+
+and so on.
+
+Of course encoding in raw format delivers a very good encoding speed (read:
+introduce a very few overhead in process except for bandwith usage), but
+it isn't an handy option for space reasons described above.
+Using a lightweight encoder like LZO (see documentation of lzo modules)
+can be usefull.
+
+The other problem is recording rate. There a some factors that severely
+limit the acquisition rato (so the encoded clip fps rate), notably
+the processing power required for each frame, and that is function of
+1) frame conversion (EX: RGB24 -> YUV420P) performed
+2) filter applied, if any (EX: antialiasing)
+3) encoder used (EX: xvid vs lzo)
+
+The other factor is the efficiency of transcode's X11 bridge module.
+The latter factor can be significantly improved, the former can hardly be.
+
+So, if you want/need high-fps screen recording and transcode seems unable to
+achieve this task, try first to perform a two-pass recording before reporting
+the problem on ML :)
+
+first pass: just grab the screencast doing the fewest processing possible,
+and using the most lightweight encoder avalaible.
+second pass: apply all further processing that you want, offline.
+
+
+4. Known issues
+---------------
+
+Only 24-bit depth running X servers are supported. That's a pretty
+severe and annoying constraint and it will go away in future releases.
+
+Only LOCAL (not-networked) X connections are supported. That's was
+a design choice and isn't likely it will be changed soon.
+
+Frame timing could be inaccurate or just wrong. We're working on this,
+but isn't trivial to solve. Stay tuned.
+
+Communications with X server is pretty inefficient, yet, since it doesn't
+use any of advanced X features like Shared Memory, extensions and so on.
+So, communication consume a fair amount of bandwith.
+This can lead to issue above and in general to a slowdown of machine.
+This will be solved or at least improved in future releases.
+
+
+5. Future plans
+---------------
+
+import_vnc will not go away soon. It will stay at least for 1.1.0
+release cycle and most likely for 1.2.x/post-1.1.x too.
+Neverthless, it's legacy and very poorly mantained (and maintanable)
+code, and it will be blasted away in the long shot.
+

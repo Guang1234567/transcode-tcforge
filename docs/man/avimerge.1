@@ -1,0 +1,139 @@
+.TH avimerge 1 "26th January 2004" "avimerge(1)"
+.SH NAME
+avimerge \- merge several AVI-files into one
+.SH SYNOPSIS
+.na
+.B avimerge
+.B -o
+.I name
+.B -i
+.IB file1 " [ " file2 " [ " .\|.\|. " ] ] "
+[
+.B -p
+.IB file
+] [
+.B -a
+.I num
+] [
+.B -A
+.I num
+] [
+.B -b
+.I num
+] [
+.B -c
+] [
+.B -f
+.I commentfile
+] [
+.B -x
+.I indexfile
+]
+.SH COPYRIGHT
+\fBavimerge\fP is Copyright (C) by Thomas Oestreich.
+.SH DESCRIPTION
+.B avimerge
+is a  versatile tool.  It can contatenate several AVI files into one. It can
+also be used to fix an index of a broken file and can also replace audio tracks
+or muxes new ones. It can read raw AC3 and MP3 files for multplexing.
+.SH OPTIONS
+.TP
+.BI "\-o " name
+Specify the name of the output file.
+.TP
+.BI "\-i " file
+Specify the name(s) of the input file(s) to merge into the output
+file.
+.TP
+.BI "\-p " file
+Specify the name of the audio file to multiplex into the output file. The type
+of file can be either another AVI file or an MP3 or AC3 file.
+.TP
+.BI "\-b " num
+Specify if avimerge should write an VBR mp3 header into the AVI file. Default
+is dependent on the input file (and usually correct). \fInum\fP is either 1 or
+0.
+.TP
+.B \-c
+Drop video frames in case audio is missing [off]
+.br
+Only when merging multiple AVI files. Some AVI files run a little bit (usually
+for one or two video frames) short on audio. This means avimerge cannot keep up
+sync when concatinating them. The files play fine when played individually but
+not when merged because audio from the new file gets played back with video
+from the old file.
+.B avimerge
+will print a message like
+.nf
+
+  No audiodata left for track 0->0 (59950.25=59950.25) continuing ..
+
+.fi
+When you turn on the -c option, the video which is too much will be dropped.
+.TP
+.BI "\-f " commentfile
+Read AVI tombstone data for header comments from \fIcommentfile\fP. See
+/docs/avi_comments.txt for a sample.
+.TP
+.BI "\-x " indexfile
+Read the AVI index from
+.I indexfile.
+See aviindex(1) for information on how
+to create such a file.
+.TP
+.BI "\-a " num
+Specify the number of the audio track you want to use from the
+.I input
+file.
+.TP
+.BI "\-A " num
+Specify the number of the audio track you want to use in the
+.I output
+file. If you specify an existing track number, the track will be replaced. If
+omitted, the next free slot will be used.
+.SH EXAMPLES
+The command
+
+.nf
+.B avimerge -o big.avi -i my_file1.avi my_file2.avi my_file3.avi
+.fi
+
+merges the three input files \fImy_file[123].avi\fP into one big AVI-file
+\fIbig.avi\fP.
+
+.nf
+.B avimerge -o out.avi -i in.avi -p audio2.avi -a 1
+.fi
+
+merges track number 1 form in.avi to the next free track number in out.avi. You can
+create audio-only AVI-files using
+
+.nf
+.B  transcode -i song.mp3 -x null,mp3 -g 0x0 -y raw -a 1 -o audio2.avi -u 50
+.fi
+
+The command
+
+.nf
+.B avimerge -o out.avi -i in.avi -p sound.mp3
+.fi
+
+merges the file sound.mp3 as an additional audio track into out.avi.
+
+.SH AUTHORS
+.B avimerge
+was written by Thomas Oestreich
+.br
+<ostreich@theorie.physik.uni-goettingen.de> with contributions from
+many others.  See AUTHORS for details.
+.SH SEE ALSO
+.BR aviindex (1),
+.BR avifix (1),
+.BR avisplit (1),
+.BR tccat (1),
+.BR tcdecode (1),
+.BR tcdemux (1),
+.BR tcextract (1),
+.BR tcprobe (1),
+.BR tcscan (1),
+.BR transcode (1)

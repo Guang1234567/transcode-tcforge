@@ -1,0 +1,387 @@
+I am designing a language to allow more easy control of objects on the
+screen:
+Panteltjes Picture Manipulation Language or PPML
+The filename extention will later become .ppml (lower case).
+
+                   *PLEASE ALSO READ demo.ppml FOR AN EXAMPLE*
+
+Definition and examples of the syntax in ppml file:
+'*rose' reads as 'object rose'.
+nn reads as any integer number, and is the frame number (40ms increments).
+
+line reads:                 signifies:
+;.................          comment
+
+                            empty lines are ignored.
+*roze picture filename      defines *rose to be an object of type picture,
+                             represented by filename.
+*girls movie filename       defines *girls to be an object of type movie,
+                             represented by filename.
+*Intro text	Welcome!    define *Intro to be an object of type text,
+                             represented by anything on the line.
+1 Hello there               is a normal subtitle (bottom of screen),
+                              appearing at frame 1.
+                            An new 'nn' entry that does NOT contain an
+                             object reference will clear this subtitle.
+                             '*' is illegal as the FIRST character in the
+                             text (that would signify an operation on an
+                             object).
+
+12 *rose xpos=100 ypos=10   *rose is added to the display list at x=100 y=10
+                             (any mention of an object after nn will
+                             activate it).
+                             From here on parameters of *rose can be
+                             modified at any time, until *rose is removed.
+51 *rose heading=275 speed=10
+                            This will cause *rose to move west at speed 10.
+60 *rose speed=0            *rose will stop in its tracks...
+61                          a line with only a number will cause the
+                             subtitle to disappear, so now 'Hello there'
+                             disappears.
+115 *rose kill              *rose is removed from the display list.
+177 *rose xpos=1 ypos=30    *rose is added to the display list again.
+177 This is a subtitle      this replaces 'Hello there' from frame 1.
+                             It is legal to have more operations in the same
+                             frame, but use separate lines for each object.
+200 *girls kill=350         Adds object *girls at x=0 y=0, and removes
+                             object *girls at frame 350.
+
+Objects can be defined anywhere, not only at the start of the file.
+If you kill an object, you can use it again later, the data definition
+stays available, the object is only removed from the display list.
+
+Subtitles are internally also objects, sort of pre-defined.
+Subtitles are always put on the screen from a fixed bottom location upwards.
+Reformatting and centering of subtitle text is automatically.
+The zaxis for subtitles is 65534 (just behind the frame counter).
+The zaxis for frame_counter is 65535 (always on top).
+
+In this version re-definition of an object name is not supported.
+-----
+
+All variables EXCEPT frame and end_frame (argument to kill) are of type
+double.
+So you can say for example dxpos=.5
+There are no partial frames, transcode advances ONE frame at the time.
+
+All double variables have a delta, so: xpos had dxpos.
+This delta value is the number by which the variable is incremented in each
+frame.
+deltas have a 'd' prepended to the variable name, and can be posive or
+negative.
+
+There are deltas to deltas.... 'heading' has dheading, setting dheading to
+10 increments the heading by 10 degrees each frame (it will go round at 360
+degrees), so you can make objects for example describe a circle.
+
+color sets U and V for text objects, and has a dcolor.
+Using u and v directly will overrule color and dcolor.
+Color is the color in a 'color cirlce':
+
+      red
+       0
+       |
+270 --- --- 90 blue
+       |
+      180
+
+Some values (approx):
+red       0
+blue     90
+green   200
+yellow  290
+
+Have a go with dcolor=1, for 360 frames, you will see all possible colors,
+beautiful ones you perhaps never see in the real world!
+Perhaps I will add more functions later.
+
+
+The following commands on parameters are active in this version:
+command     delta            obj    default  function
+
+xpos            *            all         0   x position, 0 is left screen.
+ypos            *            all         0   y position, 0 is top screen.
+zpos            *            all         0   z position, 0 is main movie, positive is towards
+                                             you.
+heading         *            all         0   direction according to compas, 0-360 degrees.
+speed           *            all         0   pixels per frame.
+                                             Note: there is also both dpseed AND ddspeed.
+                                             Using ddspeed is pure acceleration!
+transp          *            pic/text    0   transparency, range 0-100, 100 is invisible
+slice           *            pic         0   range 0-255, anything below slice level is not
+                                             drawn.
+sat             *            pic/text  100   multiplier for current saturation in percent.
+contr           *            pic/text  100   multiplier for current contrast in percent.
+bright          *            pic/text    0   range -128 to +128 value added to Y, clipping done.
+hue             *            pic         0   color vector UV rotation, 0-360 degrees.
+hue_ldrift      *            pic         0   horizontal drift of hue (to be able to correct NTSC
+                                             pics and movies that are green on one- and red on
+                                             the other side.
+                                             hue_ldrift will also be able work on the main movie.
+                                             see README.COLOR.PROCESSOR
+color           *            text         0  0-360 degrees in color circle, PLEASE set contrast
+                                             to 70 % or so, to allow for saturated colors.
+ck_color        *            pic          0  chroma key color (color vector) 0-360 degrees.
+ck_sat          *            pic          0  chroma key minimum saturation level to activate,
+                                             0-100%.
+ck_window       *            pic          0  chroma key window (aperture) in degrees (0-360).
+xsize           *            pic,movie    x  xsize, used to resize a picture,
+ysize           *            pic,movie    y  ysize, used to resize a picture.
+rsize           *            pic,movie    -  this restores the original size, and sets the
+                                             size deltas to zero (works on x,y,z).
+aspect                       pic,movie    0  setting this to any other value then zero will
+                                             force the resize functions to keep the aspect.
+center                       subtitles    1  zero or 1, 1 centers any subtitles (not loose
+                                             text objects).
+                                             Use center=x one frame before you add a
+                                             subtitle, and when no subtitle is on the screen.
+zrot            *            pic,movies   0  0-360 degrees, rotates picture (top view).
+xshear          *            pic,movies   0  0-90 degrees, shears (shifts) along xaxis.
+yshear          *            pic,movies   0  0-90 degrees, shears (shifts) along yaxis.
+mask                         pic,movies   0  0-255 at this luminance nothing is drawn
+                                             this is internally used to cut edges ONLY in
+                                             zrotate, xshear, and yshear.
+                                             In that case the value 178 is used.
+                                             If not zero, this is always active, and can
+                                             be used for effects.
+vfactor                      subtitles .042  how much from the bottom the subtitles appear.
+                                             So for a 576 lines screen this would be
+                                             .042 x 576 = 24 lines.
+hfactor                      subtitles  .02  how much the horizontal left (and right-) margin
+                                             is.
+                                             So for a 720 pixels wide screen .02 x 720 = 14
+                                            pixels.
+font_path                    text
+font_dir                     text   ~/.xste/fonts is the default.
+                                             For text objects and subtitles the directory
+                                             where the true type font (for example arial.ttf)
+                                             is located.
+                                             This allows on the fly changing of fonts.
+                                             See also 'outline' below.
+font_name                    text arial.ttf  true type fontname
+font_size                    text        28  fontsize in pixels
+font_iso_extension           text        15  ISO extention, 15 has the Euro symbol,
+                                             man iso_8859_15 will tell you more.
+font_outline_thickness       text       1.0  The border around the characters,
+                                             (normally black), do NOt use zero!.
+font_blur_radius             text      0.01  Blurred border around characters,
+                                             do NOT use zero.
+espace                       text         1  extra space between characters in pixels.
+                                             This can be used to make 'exploding' text for
+                                             example.
+xdest                         all      xpos  x destination, if speed is not zero, the object
+                                             will move towards this position and stop.
+                                             Use together with ydest.
+ydest                         all      ypos  y destination, if speed is not zero, the object
+                                             will move towards this position and stop.
+                                             Use together with xdest.
+/* new in -7.1 for DVD like subs (made with xste):
+palette                      text            16 x rgb palette (r0,g0,b0,r1,g1,b1,---r145,g15,b15).
+                                             if this isspecified, then text will be rendered.
+                                             using the folowing parameters (as in DVD):
+background                   text         0  number background in palette.
+pattern                      text         1  number character body color in palette (0-15)
+emphasis1                    text         2  number character outline in palette
+emphasis2                    text         3  number character outline2 (character-space) in palette.
+
+background_contrast          text         0  background printing area contrast (0-15), 15 is opaque.
+pattern_contrast             text        15  character body contrast.
+emphasis1_contrast           text        15  character outline1 (border around character) contrast.
+emphasis2_contrast           text         0  character outline2 (character-space) contrast.
+
+*
+ Some of these commands also have their delta command, so xpos has dxpos.
+ The deltas are added each frame.
+
+Note:
+
+When using DVD colored subs, *subtitle transp=5- and dtransp will work,
+also contrats wil lwork, so you can fade a DVD type sub in and out too!
+
+Difference between contrast and transparency:
+If you insert an object, and increase transparency (max 100), it wil 'dissolve', you will
+look through it and see hat is behind it.
+If you decrease contrast (max 100, min 0) , it will become less bright, and finally black.
+You will NOT see what is behind it.
+Now to add some confusion, what is called 'contrast' in DVD subtitles is
+actually transparency!
+So a contrast of 0 for a DVD subtitle will show the background.
+A contrast of 15 will show the subtitle maximum.
+
+If you have overlapping lines between fonts, or irregular edges etc. try RGB mode in transcode.
+This is a lot slower, but better quality in some cases.
+In this version I completely rewrote the color routines for the subtitles,
+and added full RGB support.
+
+Reserved for future versions (but not yet implemented) are among others:
+zsize      pic  p       pixels
+xrot       pic  0       rotation 0-360 degrees
+yrot       pic  0       "
+
+So, this are just some things planned, being researched, being written.
+
+The following object types are recognized in this version:
+definition       argument
+
+main_movie       none
+movie            filename (must be a .mpg file for now, that transcode can
+                  read with -xmpeg2,null).
+picture          filename (must be a .ppm file).
+text             any text, '*' is illegal as the first character.
+frame_counter    none
+subtitle         none
+
+Usage:
+*my_file main_movie
+1  *my_file contr=50
+100 *my_file contr=75
+Or also more then one argument per line is possible::
+11 *mypicture xpos=10 ypos=20
+To insert mypicture at 10, 20 (from the top left which is 0.0) at frame 11
+
+A back-slash at the end of the line indicates the line continues:
+Any backslash NOT at the end of line forces an new line.
+*mytext subtitle
+10 Hello there all of you!\
+How are you today?
+
+50 This breaks the line and inserts\\\
+an empty line between the text
+
+
+The above line shows up like this:
+                   This breaks the line and inserts
+
+                    an empty line between the text
+Because of auto center text.
+
+
+The folowing allows you to set properties of the main screen:
+*my_movie main_movie
+*my_subtitles subtitle
+;activate the de-striper
+100 *my_movie de_stripe=1
+
+;switch of auto center
+120 *my_subtitles center=0
+
+;This selects the font.desc in this directory
+;you can select an other font any time
+130 *my_subtitles font_dir=/root/.subtitles/fonts/iso-8859-1/arial-18
+
+*mytext text Hello
+
+140 *mytext xpos=100 ypos=200
+150 *mytext font_dir=/root/.subtitles/fonts/iso-8859-2/arial-28
+;change size text on the fly
+160 *mytext font_dir=/root/.subtitles/fonts/iso-8859-2/arial-14
+
+
+Note that re-formatting of subtitles is done when the line is parsed,
+changing font on a subtitle of more then one line will keep the old
+formatting.
+This may look funny.
+Remove a subtitle first (use empty line with frame number only),
+then specify a new font:
+
+*subtitle subtitle
+
+10 Hello, this is a very long line that will be reformatted automatically
+
+;this empty line will remove the subtitle
+110
+;this will specify a new font to be used
+111 *subtitle font_dir=/root/.subtitles/fonts/iso-8859-2/arial-28
+;reformatting is now done with the new font!
+112 Hello, this is a subtitle with a new font in a very long line too.
+
+Chroma key:
+Added a simple chroma key feature:
+Chroma key is a system that allows you to put an object on the screen,
+visible ONLY where the destination (screen) has a specific color.
+You can set this color that the main screen is required to have, for
+each object.
+Example:
+*new-york movie /video/movies/new-york.mpg
+6 *new-york xpos=200 ypos=10 ck_color=90 ck_window=20 ck_sat=50
+
+
+This shows the movie, at x=200, y=10, in the main screen, ONLY where
+the main screen has color 90 degrees (blue from the color circle), with a
+tolerance of + and - 20 degrees, and a saturation of at least 50%.
+So anywhere where the main screen has a more then 50 % color from 70 to 110
+degrees, your movie will be visible (in the original color).
+Chroma key is commonly used to fill in background in TV studios (things
+are painted blue, and all blue is replaced by a picture from some other
+source, could be for example background of a news-reader, with the news
+playing in the background blue).
+You can make a picture, draw a colored 'mask' and use that picture as
+keyhole.
+There are many possibilities.
+Chroma key is off if ck_sat=0, which is the default.
+'Off' means all will be shown, nothing will be filtered out.
+
+A note about mogrify (ImageMagick):
+That program is used for rotation and shear, it leaves areas of the screen
+in 'bordercolor' and some other areas of the screen in 'X bordercolor'.
+Since the default seems to be (on my system) luminance value (Y) 178,
+I am clipping everything that is 178 in the picture / movie, so it
+is not drawn.
+There always is a small border due to YUV procesing that is visible.
+Also some 'holes' may appear in the rotation if the picture IS 178 at
+that point.
+This needs improving, tried to change the pic first so no 178 was present,
+but that is not working yet.
+You can set 'mask=xxx' to activate other values.
+Since it (mogrify) seems to depend on Xwindows border, I cannot
+guarantee it will work on each system.
+
+
+About xdest and ydest:
+These are 'destinations' which will cause an object to move towards these
+coordinates at the speed specified, and stop on arrival.
+These are very powerful commands, they actually work on heading and speed,
+and calculate the distance towards the target.
+If you do not specify 'speed=', nothing will happen, as the speed default
+is zero.
+If you leave out xpos, it is assumed to be the current position, and the
+object will move only in the y direction.
+Leaving out ypos causes the object to move only in the x direction.
+
+-
+
+Since in this version you can change main movie properties every frame,
+this is extremely powerful for correction of movies with errors.
+
+Plese do not use frame 0, transcode starts at frame 1 it seems.... :-)
+Specifying any action on frame 0, like:
+0 *my_file sat=80 will have NO effect, as that frame never happens...
+
+
+
+
+Suggestions to programmers:
+All sources are written with TABS set to 4, so setting it to 4 should make
+things readable for you.
+
+In object_list.h you can add variables, please use type double.
+Then in parser.c add any sscanf to get the corresponding arguments.
+
+In object_list.c is where all the functions working on object parameters
+should go.
+Gives bit C++ feeling perhaps...
+I have used tabs is 4, please continue using this, the formatting will
+look better.
+
+Any time an object is added to the object list, the list is sorted by
+zaxis, so what is to be in front is displayed front.
+What is last in the object list is diplayed last, on top.
+
+Adding new object types is a bit more complicated, I will need to rewrite
+some more stuff.
+
+Work in progress!
+
+Regards Jan
+panteltje@zonnet.nl
+

@@ -1,0 +1,27 @@
+Audio-Video out of sync after merging encoded DV or VOB clips?
+
+There is a fundamental problem when merging AVI-files with MP3 sound, that
+have been transcoded individually. As far as I know, it needs a certain
+amount of raw PCM data to make a single MP3 encoded frame. At the end of the
+encoding process, this condition is almost never fulfilled. Therefore,
+some audio data are simply not encoded, or, using option -O,
+PCM data (silence) are padded to make a final MP3 frame. In the former case,
+sound is too short in time, whereas in the latter, the audio played
+by a player exceeds the video playtime. This may be only a couple
+milliseconds but adds up when merging the clips.
+
+Why does it work for transcode using option "-t" or DVD chapter mode "-U" ?
+
+In this case, the MP3 encoder is never switched off. Buffered audio data
+never get lost. After merging, audio and video are OK (in theory).
+This is also the reason, why the cluster mode must use this approach encoding
+the audio in a separate step, unless you want to use raw PCM audio data.
+
+Now what to do with tons of DV AVI-file clips, you want to merge, but
+only after encoding?
+
+The "directory mode" with option "-i" also works for DV AVI-files (hopefully).
+Try to put all clips into a directory and use the directory name
+to let transcode extract and merge the raw DV stream for further processing.
+
+

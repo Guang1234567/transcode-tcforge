@@ -1,0 +1,123 @@
+
+filter_logoaway documentation
+-------------------------------
+
+About this filter:
+  This filter removes an image in a user specified area. An image can be a logo of a TV Station, the timestamp
+  of a Camcorder or some ugly artifacts.
+  It's a <PRE> process filter.
+
+Requirements:
+  transcode   - just as you guessed :-)
+  ImageMagick - is used to load the image with the alpha mask.
+
+
+Configuration:                     (possible values)        [default]
+  Options:
+      'help' Short Help
+              Get a short description of all the logoaway options
+
+
+     'range' Frame Range           (0-oo)                   [0-end]
+              The frame region were the filter is active.
+              The default is the whole video.
+
+              range=12-1550   (filter only between frame 12 and 1550)
+
+
+       'pos' Position              (0-width x 0-height)     [0x0]
+              Required. The upper left corner of the area that will be removed.
+            0
+          0 #-------------------------
+            |
+            |           |50
+            |           v
+            |      110->#------
+            |           |
+            |           |
+
+              pos=50x110
+
+
+      'size' Size                  (0-width x 0-height)     [0x0]
+              Required. The width and height of the remove area.
+
+
+      'mode' Filter Mode           (0=none, 1=solid, 2=xy)  [0]
+              There are three mode you can choose of:
+              0=none   - This deactivates the filter. Useful if you want to
+                         keep the settings, but the filter at the moment.
+              1=solid  - Flood fills the remove area with one color. You can
+                         specify the color with the 'fill' option (see below).
+              2=xy     - In this mode the border pixels of the remove area are
+                         used to interpolate the area between them. Interpolation
+                         is done horizontally and vertically at the same time, the
+                         sum of them is used. With the 'xweight' option (see below)
+                         you can specify how much of the horizontally
+                         interpolation is used. 50% xweight (=>50% yweight) gives
+                         mostly the best results.
+              3=shape  - This mode is basically the same as the xy above. An
+                         alpha/shape file (see below) is needed for getting the
+                         information where to render and which pixels to use
+                         for interpolation. This mode is slower than xy and
+                         was made for logos with holes in it or other forms that
+                         are badly covered by a rectangle.
+
+
+    'border' Visible Border
+              Works in every mode and gives you a dotted line around the remove area
+
+      'dump' dumps the image between the given coordinates to the file dump[instance].png continously.
+             That means one image file is written for each filter instance and every frame this image is
+             overwritten with the current content.
+             This is useful for creating exact shape or alpha images.
+             (RGB only)
+
+
+   'xweight' X-Y Weight            (0%-100%)                [50]
+              Only in xy-mode(2). How much of the horizontally interpolation is used
+               0 means  0% horizontally and 100% vertically interpolation.
+              35 means 35% horizontally and  65% vertically interpolation.
+              50 is mostly the best choice.
+
+
+      'fill' Solid Fill Color      (RRGGBB)                 [000000]
+              Only in solid-mode(1). RGB color value in hexadecimal numbers in
+              the format RRGGBB.
+
+              fill=9A01CD   (Purple)
+
+
+      'file' Image with alpha/shape information             []
+              A grayscale image file with the alpha mask, that tells the filter where and
+              how much to render. In shape mode it also used to get the position of the
+              pixels for the interpolation. The first white pixels around a render position
+              are used.
+              The size have to be exacly the same as given with the 'size' option
+              Color index   0     (black) - video pixel fully replaced with the interpolation.
+              Color index   1-254 (gray)  - calculated and original values are blended together.
+              Color index 255     (white) - video pixel left unchanged.
+
+                000000000
+                000###000   0 - White (255)
+                00##0##+0   # - Alpha value
+                0##00+#@+   @ - example pixel
+                0##000##0   + - white pixels whose position
+                00##0##+0       is used to get the pixel in
+                000###000       the video for interpolation
+                000000000       of @
+
+
+Examples:
+  -J logoaway=pos=100x100:size=50x50:border
+      This gives us only a border, because the default mode is 0(none).
+
+  -J logoaway=pos=100x100:size:50x50:mode=1:fill=228B22
+      A 50x50 pixel great area at the topleft position 100x100 is filled with ForestGreen.
+
+  -J logoaway=pos=100x100:size:50x50:mode=2:xweight=25:file=alpha.png
+      1/4 horizontally and 3/4 vetically interpolation with an alpha mask.
+
+
+Author:
+  (c)2002-2004 Thomas Wehrspann <thomas@wehrspann.de>

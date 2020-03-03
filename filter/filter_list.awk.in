@@ -1,0 +1,79 @@
+#!@PATH_TO_AWK@ -f
+
+BEGIN {
+
+  if (ARGC <= 2) {
+    print "Usage: prog MOD_PATH TMPFILE"
+    exit 1
+  } else {
+    indir = ARGV[1]
+    outfile = ARGV[2]
+  }
+  while ( ("ls "indir"/filter_*.so" | getline) > 0) {
+     ++sizeOfArray;
+     sub (/.*filter_/, "");
+     sub (/\.so$/, "");
+     filters[sizeOfArray]= $0;
+  }
+
+  for (i=1; i<= sizeOfArray; i++) {
+     printf ("%2d: %-15s", i, filters[i]);
+     if (! (i%4)) printf ("\n")
+  }
+  printf ("\n");
+
+  done = 0;
+  while (1) {
+     printf ("[%d-%d|name]? ", 1, sizeOfArray);
+     getline reply < "-";
+
+     #is a number
+     if (reply ~ /^[0-9]+$/) {
+	# valid number?
+	if (reply in filters) {
+	      selfilter = filters[reply];
+	      break;
+	} else {
+	   print "** Invalid number";
+	}
+     } else {
+	for (i in filters) {
+	   if (filters[i] == reply) {
+	      selfilter = reply;
+	      done=1;
+	      break;
+	   }
+	}
+	if (done) break;
+	print "** Invalid name";
+	continue;
+     }
+  }
+
+  while (1) {
+     printf ("(c)onfig (d)isable [default (c)]? ");
+     getline reply < "-";
+     if (reply ~ /c|^$/ ) {
+	addstr = "(c)";
+	break;
+     } else if (reply ~ /d/) {
+	addstr = "(d)";
+	break;
+     } else {
+	print "** Invalid response";
+	continue;
+     }
+  }
+
+
+  if (addstr != "(d)") {
+     printf ("Initial string? ");
+     getline str < "-";
+  }
+
+  print "You have entered filter \""selfilter addstr"="str"\".";
+
+  print selfilter"="str > outfile
+  print addstr >> outfile
+
+}

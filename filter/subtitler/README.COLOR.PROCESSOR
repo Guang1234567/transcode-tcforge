@@ -1,0 +1,112 @@
+The color processor was written / designed to abe able to correct hue errors
+in NTSC type movies.
+
+Some basics:
+
+In an NTSC system the oscillator in the receiver, used to demodulate
+the quadrature modulated I and Q signals, is phase sychchronized at the
+start of each 'scan' line, say about every 64 micro seconds, by the
+color burst.
+This color burst is transmitted with the rest of the signal, right
+after the horizontal syn pulse.
+For a correct demodulation of the I and Q signals (and thus the correct
+color) it is required that the local oscillator in the receiver stays
+closely in phase with the one in the transmitter.
+Phase errors of 1 degree or less are noticable.
+
+Because of tolerances, temperature changes, etc, the quartz crystal used
+in the receiver vibrates at a slightly different frequency then the one
+in the transmitter.
+This results is a slight phase drift, zero at the start of the line, where
+the frequency was corrected by the color burst, to any number of degrees
+positive or negative (later or earlier) at the end of a horizontal line.
+THAT is what causes the faces of people to sometimes be one color on the
+left and an other color on the right side of the screen.
+This drift, is usually linear over the dureation of a line (64 us), as
+physical paramaters of the oscillator in the receiver do not normally
+drift that much in such a short time.
+
+
+Subtitler can correct for this shift (and is the only program I know about
+that can do it, especially free program, else you would have to pay several
+thousand dollars perhaps).
+Also of cause subtitler can correct for the normal hue (static) errors.
+
+Example of h phase drift:
+One horizontal line in NTSC:
+
+0             64us
+burst
+|||----------
+ 0 \
+    \
+     \
+      \
+       \ local oscillator phase relative to transmitter
+        \
+         \
+         -12 degrees
+
+
+------
+You can specify a hue_ldrift in the .ppml file:
+
+; give a name to the main movie 'object'
+*my_movie main_movie
+
+; apply the correction, starting at frame 1
+1 *my_movie hue_ldrift=12.0
+
+;this scene starting at frame 150 was OK so no more correction needed:
+150 *my_movie hue_ldrift=0
+
+; but the saturation was wrong, set to 77 %
+150 *my_movie sat=77
+------
+
+If you just want to correct hue (face color):
+120 *my_movie hue=3
+Of cause any other correction can be applied at the same time.
+
+Please note that the color processor uses some math for each pixel, and
+will slow down transcoding considerably.
+The color processor is automatically invoked if you specify a value other
+then zero for:
+hue, dhue, hue_ldrift, dhue_ldrift.
+
+Using dhue_ldrift will ad a small amount to hue_ldrift each frame.
+Perhaps just for special effects.
+The default values for all these are zero.
+
+Finally, I have made the correction symmetrical, this because normally,
+in the original movie, the person who adjusted the color, would have set it
+right in the middle of the screen (on face color likely).
+So now it works like this, for a 12 degree correction:
+
+0             64us
+burst
+|||----------
++6 \
+    \
+     \
+      \0 at 32 us (middle line = horizontal middle screen)
+       \ local oscillator phase relative to transmitter
+        \
+         \
+         -6 degrees
+
+
+Use hue to set the middle right first, then try + and - 1 degree increments
+for hue_ldrift.
+Normally values greater then perhaps 15 degrees are unlikely.
+
+
+It is generally a good idea to run subtitler first on the main movie with
+frame counter in the screen, and then make notes at which frame you want to
+do what.
+Then add the corrections in a .ppml file and subtitler will correct the
+movie for you.
+
+With u_shift, du_shift, v_shift and dv_shift you can give color to a BW
+movie..
+These values are simply added to the U and V vectors.

@@ -1,0 +1,126 @@
+.TH tccat 1 "15th January 2002" "tccat(1)"
+.SH NAME
+tccat \- concatenate multimedia streams from medium and print on the standard output
+.SH SYNOPSIS
+.TP
+.B tccat
+.B -i
+.I name
+[
+.B -t
+.I magic
+] [
+.B -T
+.I title[,chapter[,angle]]
+] [
+.B -L
+] [
+.B -S
+.I n
+] [
+.B -P
+] [
+.B -a
+] [
+.B -d
+.I mode
+] [
+.B -v
+]
+.SH COPYRIGHT
+\fBtccat\fP is Copyright (C) by Thomas Oestreich.
+.SH DESCRIPTION
+.B tccat
+is part of and usually called by \fBtranscode\fP.
+.br
+However, it can also be used independently.
+.br
+\fBtccat\fP reads source (from stdin if not explicitely defined) and
+prints on the standard output. Directory contents is concatenated, if
+source files have the same format. Multiple AVI-files are also
+supported.
+.SH OPTIONS
+.IP "\fB-i \fIname\fP"
+Specify input source.  If ommited, \fIstdin\fP is assumed.
+.br
+You can specify a file, directory, device, mountpoint or host address
+as input source.  \fBtccat\fP usually handles the different types
+correctly.
+.IP "\fB-t\fP \fImagic\fP"
+Tell \fBtccat\fP about the type of input.  Currently only \fBdvd\fP
+is supported - any other parameter will be ignored.
+.IP "\fB-T \fItitle\fP[\fB,\fIchapter\fR[\fB,\fIangle\fR]]"
+Select DVD
+.I title
+and extract only a single
+.I chapter
+with selected viewing
+.I angle\fP.
+Setting the argument
+.I chapter
+to \fB-1\fP means to process all available chapters on the DVD.
+.br
+If this option is given, the input type of \fBdvd\fP will also be
+assumed (see option \fB-t\fP).
+.IP "\fB-L\fP"
+This option tells \fBtccat\fP to loop through all chapters starting at
+the one given with the option \fB-T\fP.
+.IP "\fB-S\fP \fIn\fP"
+Seek to program stream (VOB) offset \fIn\fPx2kB before starting output.
+.IP "\fB-P\fP"
+Stream full DVD title specified by -T.
+.IP "\fB-a\fP"
+Use this option to dump an AVI-file/socket audio stream. The default
+is to extract and concatenate AVI-file video stream.
+.IP "\fB-d\fP \fIlevel\fP"
+With this option you can specify a bitmask to enable different levels
+of verbosity (if supported).  You can combine several levels by adding the
+corresponding values:
+
+QUIET         0
+
+INFO          1
+
+DEBUG         2
+
+STATS         4
+
+WATCH         8
+
+FLIST        16
+
+VIDCORE      32
+
+SYNC         64
+
+COUNTER     128
+
+PRIVATE     256
+.IP "\fB-v\fP"
+Print version information and exit.
+.SH NOTES
+\fBtccat\fP is a front end for streaming various source types and is used in \fBtranscode\fP's import modules.
+.SH EXAMPLES
+The command
+.PP
+.B tccat -i /dev/dvd -T 1,-1 | mplayer -
+.PP
+reads all chapters belonging to title \fI1\fP of a DVD (assuming that
+/dev/dvd/ is a symbolic link to a real DVD device) and pipes a
+MPEG program stream into player.
+.SH AUTHORS
+.B tccat
+was written by Thomas Oestreich
+.br
+<ostreich@theorie.physik.uni-goettingen.de> with contributions from
+many others.  See AUTHORS for details.
+.SH SEE ALSO
+.BR avifix (1),
+.BR avimerge (1),
+.BR avisplit (1),
+.BR tcdecode (1),
+.BR tcdemux (1),
+.BR tcextract (1),
+.BR tcprobe (1),
+.BR tcscan (1),
+.BR transcode (1)

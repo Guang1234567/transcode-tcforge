@@ -1,0 +1,128 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title> import_dvd.so</title>
+</head>
+
+<body bgcolor=#CDB5CD>
+
+<table cellspacing="10" cellpadding="0" border="0" width="100%">
+
+  <tr>
+    <td align=left valign="top" width=30% bgcolor="#a0a0a0">
+
+    <table border="0" cellpadding="10" cellspacing="3" font size=+2 bgcolor="#ffffff" width=100%>
+
+      <tr>
+	<td align="left" bgcolor="#e9e9e9" width=30%>
+	<FONT FACE="Helvetica" font size=+2> module name:
+	</td>
+
+	<td align="left" bgcolor="#e9e9e9" width=70%>
+	<strong>
+	<FONT FACE="Helvetica" font size=+2>import_dvd.so</strong>
+	</td>
+      </tr>
+
+      <tr>
+	<td align="left" valign="top"  >
+	<FONT FACE="Helvetica" font size=+2> description:
+	</td>
+
+	<td>
+	    <FONT FACE="Helvetica" font size=+2>
+	    on-the-fly DVD transcoding (experimental)
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	     <FONT FACE="Helvetica" font size=+2>required executables:
+	</td>
+	<td>
+	     <FONT FACE="Helvetica" font size=+2>
+	     <i>tcextract, tcdecode</i>
+	</td>
+      </tr>
+
+      <tr>
+	<td valign=top>
+	     <FONT FACE="Helvetica" font size=+2>related packages:
+	</td>
+	<td>
+	     <FONT FACE="Helvetica" font size=+2>
+	<a href="http://www.dtek.chalmers.se/~dvd/">     <i>
+	    libdvdread-0.8.0</i></a>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	     <FONT FACE="Helvetica" font size=+2>
+	     input formats:
+	</td>
+	<td>
+	     <FONT FACE="Helvetica" font size=+2">
+	    DVD device
+	</td>
+      </tr>
+
+
+      <tr>
+	<td>
+	     <FONT FACE="Helvetica" font size=+2>
+	     output formats:
+	</td>
+	<td>
+	     <FONT FACE="Helvetica" font size=+2">
+	     (video) RGB/YUV, (audio) AC3/PCM
+	</td>
+      </tr>
+
+
+      <tr>
+	<td>
+	     <FONT FACE="Helvetica" font size=+2>
+	     file type:
+	</td>
+	<td>
+	     <FONT FACE="Helvetica" font size=+2">
+	    absolute path to block device
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	     <FONT FACE="Helvetica" font size=+2>
+	     version:
+	</td>
+
+	<td>
+	     <FONT FACE="Helvetica" font size=+2">
+	     v0.1 (08/08/01)
+	</td>
+
+      </tr>
+           <tr>
+	<td valign="top" >
+	     <FONT FACE="Helvetica" font size=+2>
+	    comments:
+	</td>
+	<td>
+	     <FONT FACE="Helvetica" font size=+2" valign="top" >
+	     <ul>
+	       <li>convenience module for DVD encoding.
+	       <li>currently works only if you provide the absolute
+		   path to your DVD block device for option "-i".
+	       <li>the mountpoint or the top directory of
+		   a DVD copy will stop transcoding at VOB chunk boundaries.
+	       <li>you need <i>libcss</i> in your default library
+		   search path at runtime.
+	     </ul>
+	</td>
+      </tr>
+</table>
+</td>
+</table>
+
+</body> </html>

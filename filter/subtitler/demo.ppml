@@ -1,0 +1,300 @@
+;subtitle file for project test in PPML format,
+;generated with Linux subtitle editor xste.
+
+;this is a comment, empty lines are ignored
+
+
+; define a name for the main movie object
+*main main_movie
+
+*subtitle subtitle
+
+;definition of object rose
+*rose picture /root/rose.ppm
+
+; a 352 x 288 VCD mpeg1 movie
+;*chicago movie /big/video/vie/chicago-22-jul-1998/chicago-pal-vcd-ulead.avi.mpg
+
+;*new-york movie /big/video/vie/NewYork-An-Invitation/new-york-an-invitation-ulead-pal-vcd.mpg
+
+;this is comment 2
+
+*intro text Hi there, showing some possibilities
+;definition of object flower
+*flower picture /root/rose.ppm
+
+;definition of object frame_counter
+*counter frame_counter
+
+;definition of object sun
+*sun picture /root/sun.ppm
+
+;this is comment 3
+
+; set the font path to the true type fonts, (where for example arial.ttf is).
+1 *subtitle font_dir=/root/.xste/fonts/
+
+1 *main show_output=1
+1 *subtitle center=0
+
+;1 *sun ck_color=10 ck_window=20 dck_color=0 xpos=460
+
+;1 *intro u=0 v=-40 du=2 dv=0
+
+;1 *main dhue=1
+
+; put the counter on x,y objects of type frame_counter are always on top
+1 *counter xpos=300 ypos=10
+1 *counter sat=80.0 dcolor=39 contr=70
+
+; fade in subtitle :-)
+1 *subtitle color=0 sat=100 dcolor=0 contr=1 dcontr=0 transp=1 dtransp=0
+
+; select some subtitle font specifics
+1 *subtitle font_name=arial.ttf font_size=28 font_iso_extension=15 font_outline_thickness=1.51 font_blur_radius=0.11
+
+; select some counter font specifics
+1 *counter font_dir=/root/.xste/fonts/ font_name=arial.ttf font_size=15 font_iso_extension=15 font_outline_thickness=1.51 font_blur_radius=0.2
+
+;fade in main movie
+1 *main contr=0.0 dcontr=1 sat=0 dsat=1
+
+; mmm
+;1 *main hue=10 dhue=3 hue_line_drift=-30 dhue_line_drift=33350
+;1 *main du_shift=1
+
+;create 'the land of flower' for this demo
+1 *flower xpos=160 ypos=150
+
+;where it is midnight and dark (contrast to zero and saturation to zero)
+1 *flower contr=0;
+;no colors visible in the dark.
+1 *flower sat=0;
+
+2 *subtitle dypos=-.1
+2 *subtitle color=0 sat=30 contr=70 dcolor=11 dtransp=4
+
+;2 *sun heading=0 slice=128 dxpos=-1
+
+2 *intro font_dir=/root/.xste/fonts/ font_name=arial.ttf font_size=52 font_iso_extension=15 font_outline_thickness=1.51 font_blur_radius=10.0
+
+3 The Panteltje Picture Manipulation Language
+
+; scroll welcome text to west (left) into the picture and out again.
+3 *intro xpos=800 ypos=0 speed=5 heading=270
+
+; dynamically change color of the sun
+;3 *sun dhue=3
+
+;subtitle: explain....
+;3 Hello it is now night, nothing to be seen in the land of rose
+
+;show first movie insert
+5 *chicago xpos=100 ypos=200
+
+;show second movie insert
+6 *new-york xpos=200 ypos=10
+
+6 *new-york zrot=20 dzrot=3 dxsize=-1 dysize=-2 dyshear=10 dxshear=32
+
+;6 *flower ydest=0 speed=3.3
+
+;6 *flower xdest=710 ydest=570 speed=3.3
+
+
+;6 *flower dyshear=10 dxshear=32
+;6 *new-york mask=190 dmask=-1
+
+
+; activate chroma key, only inserting now where more then 1% blue in main
+; picture
+;6 *new-york ck_color=90 ck_window=30 ck_sat=1
+
+;6 *subtitle vfactor=.5 hfactor=.3
+
+6 *counter espace=10 despace=.5 outline=0 doutline=.1
+
+6 *subtitle espace=2 despace=.4
+
+;*counter2 frame_counter
+;7 *counter2 escape=10
+;9 *counter2 xpos=10 ypos=50
+
+;place sun behind earth (zaxis!, earth is main movie is z zero)
+10 *sun xpos=160 ypos=150 zpos=-1
+
+;10 *new-york dxsize=-2 dysize=-3
+
+;up, sunrise, sun moves towards top of screen (north)
+11 *sun heading=0
+
+;sun rizing slowly...
+11 *sun speed=1
+
+;only draw light part of .ppm, this masks out the black in the .ppm picture
+11 *sun slice=128
+
+;increment brightnes and color of the land of rose as the sun rises,
+;creating the illusion it was caused by the sun.
+11 *flower dcontr=1 dsat=1
+
+16 *subtitle espace=1 despace=0
+
+16 *counter despace=-1
+
+; NOTE SET FOR YOUR FONT PATH!
+;19 *subtitle font_dir=/root/.subtitles/font/iso-8859-1/arial-18
+
+19 *subtitle center=1;
+
+;explain
+20 When the sun begins to rise, everything in the land of rose becomes visible and color appears
+
+;20 *sun dxsize=3 dysize=1
+
+25 *subtitle dtransp=-4
+
+;change hue rose
+;30 *flower dhue=1
+
+32 *counter despace=0 espace=1
+
+40 *counter ydest=500 xdest=570 speed=10
+
+50 *subtitle dtransp=4
+
+50 *main debug=1
+
+;move the flower to the left (overrides heading and speed)
+50 *flower dxpos=-1
+
+;and zoom out flower
+;51 *flower dxsize=-3 dysize=-6
+;51 *flower zrot=20 dzrot=3
+
+;hold flower at this size
+80 *flower dxsize=0 dysize=0
+
+;hold sun at this size
+;90 *sun dxsize=0 dysize=0
+
+; restore original sizes, and set size deltas to zero
+91 *sun rsize
+;95 *new-york rsize
+100 *flower rsize
+
+; Uncomment if you have the ImageMagic mogrify program installed.
+
+;101 *flower zrot=20 dzrot=3 dxsize=-1 dysize=-2
+
+100 *subtitle dypos=0 dtransp=0 transp=0
+;transp=0 dtransp=0 contrast=70 dcontrast=0
+
+;zoom flower back in
+;100 *flower dysize=5 dxsize=8
+
+;100 *subtitle dypos=0 transp=100 dtransp=-1 sat=70 color=70 dcol=39
+
+; movie steady and to almost full screen
+;120 *new-york xpos=0 ypos=0 dxsize=0 dysize=0 xsize=700 ysize=500
+
+;show formatted subtitles, this shows also that you can break lines using '\' as the LAST
+;character on a line, back-slashes before that add an empty line.
+;great for title rolls
+;160 PantelCorp Presents:\\\\
+The Panteltje Picture Manipulation Language\\\
+'ppml' by Jan Panteltje\\\\
+Copyright Panteltje Productions\\\
+A PantelWorks Universe Company\\\\
+
+150 *flower drot=0 dzrot=0
+
+;explain :-)
+160 Rose is melting now :-)
+
+;make the rose transparant, 1 step per frame
+160 *flower dtransp=1
+
+; indeed
+249 Cool!
+
+;let the rose re-appear
+250 *flower dtransp=-2
+;away with the rose
+;354 *flower kill
+
+;lets play sun again
+355 using dheading and speed can make circles!
+355 *sun xpos=160 ypos=160 speed=40 heading=0 dheading=10
+
+; closing in
+;356 *sun dxsize=2 dysize=2
+
+; start the second movie invisibly
+360 *chicago xpos=100 ypos=200
+360 *chicago transp=100
+
+;fade in the movie
+370 *chicago dtransp=-1
+
+;390 *sun dxsize=-5 dysize=-5
+
+;remove subtitle after 100 frames (4 seconds)
+455
+
+;this recreates the rose at 455, and it will be killed in frame 870
+455 *rose kill=870
+
+;play again
+455 *rose heading=135 speed=4
+
+;let it bounce
+470 *chicago heading=135 speed=3 dspeed=-1
+
+; restore the sun size, so we can see it again
+480 *sun rsize
+
+
+500 *subtitle dypos=.1 transp=100 dtransp=-1 sat=70 color=70 dcol=39
+;show formatted subtitles, this shows also that you can break lines using '\' as the LAST
+;character on a line, back-slashes befre that add an empty line.
+;great for title rolls
+500 PantelCorp Presents:\\\\
+The Panteltje Picture Manipulation Language\\\
+'ppml' by Jan Panteltje\\\\
+Copyright Panteltje Productions\\\
+A PantelWorks Universe Company\\\\
+
+560 *subtitle dypos=-2
+
+;remove subtitle
+700
+
+759 *subtitle dypos=0 dxpos=3
+
+;subtitle
+760 So here we can do a lot of things, make compositions, etc..
+881 *flower xpos=0 ypos=0 dxpos=3
+
+900 *rose xpos=40 ypos=30 dypos=1 zpos=-50 dzpos=1
+
+920 The left flower is behind the right one, but moving forward, using dzpos
+1000 *rose kill
+1100 *flower kill
+1100 *chicago kill
+
+;remove subtitle
+1100
+
+;a subtitle
+1100 Demo ppml end
+
+;remove text
+1200
+
+2100 *sun kill
+2100 *counter kill
+
+; to be implemeted
+2400 *main exit
+

@@ -1,0 +1,97 @@
+--- README ---
+
+What
+
+This module captures from v4l2-compatible cards. I made it because the
+existing v4l import module uses the v4l-compatibility-layer of most
+cards nowadays, which is not what you want. Also the v4l module does not
+keep track of audio-to-video synchronisation in any way. This may be
+sufficient for some capturing cards, but my own SAA7134-based looses a
+frame every now and then so audio and video will become unsynchronised
+after a while.
+
+Who
+
+Anyone using a capturing card compatible to v4l2 should be able to use
+the module, there are some warnings applicable though. First, I can only
+test on a SAA7134-based card. I do follow general v4l2 programming
+directives, so in theory it should work on any v4l2 compatible card. The
+SAA7134 driver does have some quirks though. The module detects SAA7134
+based cards and enables some workarounds. I can imagine that other
+drivers that also need workarounds, these are of course not present in
+the module. Second, the v4l2 api changes frequently. If you'd like to
+compile the module yourself, you may run into all sorts of problems,
+including compiling errors and errors during runtime of transcode.
+Sometimes these problems can be solved by adding another include file to
+the source, but you need to have linux kernel version > 2.4.20 anyway
+and also with the latest v4l2 patches applied (see
+http://www.bytesex.org). Linux version >= 2.6.0 should work in theory,
+but I didn't test on it.
+
+How
+
+1) Set v4l2 parameters (station, bright, volume, etc.) using your
+favourite tv viewing program or something like v4lctl. I deliberately
+did not include any setting of parameters in the module as these
+external programs are much better at it anyway ;-)
+
+2) Try!!! You should be able to record from v4l2 now with transcode
+using "-x v4l2". You may have to use "-D" to correct any static (!)
+difference between audio and video, this depends on your card etc. You
+should also use -V, because the SAA7134 driver seems to have a problem
+with RGB capturing, which crashed my computer, so I disabled the
+capture-in-RGB mode for the moment. Most encoders work much better and
+faster with YUV anyway.
+
+For SAA7134 cards, you may choose to record audio from the card directly
+(using direct PCI transfers, not using sound cards etc.) To enable this
+mode, add "oss=1" to the saa7134 driver module parameters. You now
+should have another dsp device (mostly /dev/dsp1, sometimes /dev/dsp2).
+To use this  device for capturing, pass it to transcode with the -p
+flag. Keep in mind that this device can only capture at 32 Khz, although
+it will happily accept any other rate. You may have to use the resample
+filter.
+
+3) If your cpu can hardly keep up it is advisable to boost up the number
+of internal transcode buffers to e.g. 128 (-u 128). You may run into
+this situation if you're encoding to mpeg2 in real time. If that's not
+enough, you cpu is simply too slow for what you want :-( You'll have to
+tweak. Sometimes, if you're also using filters, it helps to change the
+number of threads.
+
+4) If your cpu can cope and also the number of v4l2 buffers is
+sufficient  (full screen capture should report six buffers) and the
+transcode buffers are not overrun (watch the number between
+parenthesises), and your audio and video become out-of-sync, then you
+should try the force resync mode. Else happy capturing! ;-)
+
+5) You can enable and tune the resync mode using parameters to
+the v4l2 module (-x v4l2="<param>:<param>:etc").
+
+Possible parameters:
+
+resync_margin=x     this many frames the audio and video may drift
+    apart before frame dropping or cloning starts.
+resync_interval=x   this many frames between each resynchronisation
+    check
+overrun_guard=x     set this to 1 if you have a saa7134 and a very old
+    driver (pre-2004)
+crop=wxh+txl        use hardware cropping width * height at top / left;
+    only works on recent saa7134 driver
+convert=x           specifiy conversion scheme manually.
+    x is a number, obtained with convert=-1, -2 = auto (default)
+format=x            specify colour format manually, use format=list
+    to obtain a list.
+
+Please note: if you do not need the resync mode, do not enable it! If
+your card produces good a/v sync ON AVERAGE (although short variations
+may exist) the resync code will do more harm than good. Resyncing works
+by cloning and dropping frames and yes, this is visible! On the other
+hand, a hickup every now and then may be more acceptable than audio
+running before or behind. Your milage may vary ;-) If you determined
+that you definitely need the resync mode, then you should tune the
+resync parameters. A good start is resync_margin=2,resync_interval=15.
+Whenever "info output" is "on" (-q 1) and a frame is cloned or dropped,
+transcode will show a line with some parameters, like whether the frame
+is dropped or cloned and the sequence numbers of audio and video. When
+finished encoding, a summary is shown.

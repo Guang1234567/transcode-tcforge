@@ -1,0 +1,170 @@
+FRAME RATES
+
+This section is intended for users who want to convert the framerate of the
+input file to a different output framerate. It also handles the case
+when the input file is of variable framerate.
+
+=========================
+Jargon used in this file.
+=========================
+
+  fps : Frames-per-second / framerate. The number of frames which
+        will be displayed during 1 second.
+  frc : Frame rate code. This is directly related to fps. When
+	dealing with fractional framerates, it is more convenient
+	and accurate to give transcode a code. The most commonly
+	used codes are
+                1  :  23.976 (24000/1001.0)
+                3  :  25
+                4  :  29.970 (30000/1001.0)
+
+Its worth noting that none of these filters intent to change the
+runtime of the movie; if one -- for example -- goes from 29.9 to
+23.9 the movie will not be shorter or anything, every frame will be
+displayed for a longer time period. Because there will be fewer
+frames in the resulting movie and the display time of each frame is
+longer, the movie will have the same running.
+
+For convenience, a table relating fps and display time
+
+ frc |  fps  | Display time (sec) | Milliseconds
+ ----+-------+--------------------+-------------
+  1  | 23.97 |  1 / (24000/1001)  |   41.71
+  3  | 25.00 |  1 / (25000/1000)  |   40.00
+  4  | 29.97 |  1 / (30000/1001)  |   33.37
+
+When converting from fps1 to fps2 it must be clear that the audio
+stream will not be touched at all. Since the resulting movie has the
+same display length, the audio in the new file must be equal to the
+audio in the old file. You currently cannot use transcode to slow
+down or speed up a movie.
+
+
+================================
+Meaningful fields of application
+================================
+
+Changing the framerate of a movie can be neccessary to improve the
+quality, shrink the size or to prepare a movie for a specific output
+medium.
+
+o A lot of digital (photo) cameras have the ability to record -- more
+  or less -- small video clips. These clips are often not suiteable
+  for watching on TV because of the framerate. My device records
+  MJPG clips at 20 fps. To convert them to (s)VCD, the framerate
+  needs to get converted to 29.9 (NTSC) or 25 (PAL).
+  Note that converting the framerate does not make the clip
+  smoother, it merely preserves the jerkyness it already had.
+
+o Telecine removal. Telecine is a process to prepare films (movies)
+  shot at 24 fps for (NTSC) television at 29.9 fps. The opposite is
+  called inverse telecine or ivtc. For a really well done in-depth
+  explanation about telecine see the file README.Inverse.Telecine.txt
+  by Thanassis Tsiodras in the /docs/ directory of transcode.
+  By doing ivtc, the movie will look less jerky and therefore
+  smoother.
+
+o Preparing NTSC or film sources for PAL or the other way round.
+
+
+=================
+Available Modules
+=================
+
+There are several ways (as always) in transcode to do framerate
+conversions (in lexicographical order)
+
+o Overview
+
+  Filter(s)     | Smartness | Versatility | Intented Use
+  --------------+-----------+-------------+---------------
+  29to23        |   none    |  little     | 29.9 -> 23.9
+  32drop        |   high    |  little     | 29.9 -> 23.9
+  ivtc+decimate | very high |   none      | 29.9 -> 23.9
+  modfps        |   fair    |   high      | any  -> any
+  fps           |   none    |   high      | any  -> any
+  tc_video      |   none    |  little     | 23.9 -> 29.9
+
+o 29to23
+  The filter takes no options. It basically skipps every 5th frame.
+  It interpolates the other 4 frames out of the 5 it recieves.
+  Since it skipps every 5th frame it can also be used for converting
+  25 fps to 20 fps.
+
+o 32drop
+  The filter takes no options. It does a simple inverse telecine.
+  Its algorithm works best when used in RGB mode. It tries to find
+  interlaced frames and adjusts its pattern.
+
+o ivtc+decimate
+  These two filters working hand in hand. The first filter (ivtc)
+  inverts the telecine and the second one (decimate) drops 1 frame
+  out of 4 so that the output will be at 23.9 fps. These two filters
+  are really smart and do their job very well. The ivtc filter can
+  deal with a changing telecine pattern and adjusts its algorithm to
+  fit it. The decimate filter searches for two similar frames out of
+  five and drops one of which look similar.
+
+o modfps
+  This filter tries to reach the desired framerate by cloning and
+  dropping of frames.  In its default mode it will buffer the last
+  5 frames, and drop the frame with the least difference with the
+  frame that follows it, or clone the frame with the most
+  difference.  Additionally, it can blend frames or mingle frame
+  fields when  cloning.  Additionally it has a fast mode, but results
+  look poor.
+
+o fps
+  This filter is basically the same as the fast mode of `modfps' its
+  just doing its work a slightly different way.
+
+o tc_video
+  This filter increases the framerate by doing telecine. It takes no
+  options. It makes 5 frames out of 4 by clever dealing with the
+  fields ( == "lines") of a frame.
+
+
+===================================
+Framerate related transcode options
+===================================
+
+Transcode has two options dealing with framerates, `-f'and
+`--export_fps'. Both options take one to two arguments. The first
+argument is the framerate as a floating point number, the second
+argument is the frameratecode. The frc always overwrites the
+supplied fps value, so one can write `-f 0,1 ... --export_fps 0,4'.
+
+Transcode tries to do the right thing with these options, the
+following table shows the interdependencies. Import is `-f' and
+Export is `--export_fps'
+
+  Import  | Export  | Result
+ ---------+---------+--------------------------------------------
+  omitted | omitted | import will be probed, export set to import
+  given   | omitted | export set to import
+  omitted | given   | import will be probed, export used as given
+  given   | given   | Both will used as given
+
+The audio is always read at the export rate.
+
+There is another option related to framerates which is --export_frc.
+This option is only there because of backward-compatibility. It does
+the same like the second argument to --export_fps.
+
+
+========================
+Variable Framerate Input
+========================
+
+Some video sources are not of constant framerate. This is mostly
+true for Anime and some DVD Releases of TV series. Use this command
+line (XXX: Write much more here :)
+
+transcode -i vobs/ -V -x vob,vob -f 0,4 -M2 -R3 -w2 --export_frc 1 \
+-J ivtc -J decimate -B 3,9,16 --hard_fps --print_status 10 \
+-J 32detect=verbose=1:force_mode=5:chromathres=2:chromadi=9 \
+-y xvid -o next1.avi
+
+
+(C) 2003 (v0.1) Tilmann Bitterberg <transcode at tibit.org>
+// vim: tw=68

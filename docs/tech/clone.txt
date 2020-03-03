@@ -1,0 +1,101 @@
+----------------------------------------------------
+More accurate and up-to-date information is in /docs/architecture.txt
+----------------------------------------------------
+
+HOWTO clone frames
+
+I want to contribute a quick how-to how to use the new attribute
+TC_FRAME_IS_CLONED.
+
+I have written two filters tc_video and tc_audio as an
+demonstration example of the clone flag doing actually something
+useful. These filters telecine a NTSC_FILM to NTSC_VIDEO
+(23.9->29.9 fps) for video and audio. The input material must be
+in 23.9 fps or weird results come out. Of course, you can use
+ivtc+decimate to reverse the process and restore the original
+video :)
+
+The best documentation is (as always) the source but let me
+summarize my experience.
+
+A filter can clone (duplicate) a frame by setting the clone flag
+to a frame by
+  ptr->attributes |= TC_FRAME_IS_CLONED;
+
+The encoder then deletes the flag and sets another flag named
+TC_FRAME_WAS_CLONED. This is necessary for the filter because
+frame IDs never get incremented.
+
+The filter has to live in the TC_POST_M_PROCESS or in the
+TC_POST_S_PROCESS (synchronous) slot for this to work and its
+quite a difference between TC_POST_M_PROCESS and TC_POST_S_PROCESS
+
+TC_POST_M_PROCESS:
+  The filter can set the the clone flag which causes the frame
+  to get encoded twice. The filter WON'T see the frame again, so
+  it cannot make modifications to the frame. This is what the
+  demo filter_clone uses.
+
+  import -> .. -> filter (set_clone) -> encoder (frame)-,
+                                     /                  /
+                                     \______<<<________/
+
+TC_POST_S_PROCESS:
+  The filter can set the clone flag which causes the frame to
+  get encoded and run through the filter again with the
+  was_cloned flag set.  The filter can now check if this frame
+  already was cloned and not clone it again. This is very handy
+  when doing modulo insertions of frames.
+
+  import -> .. -> filter (if !was_cloned  -> encoder (frame)-,
+               /          then set_clone)                   /
+               \_________<<<________________<<<____________/
+
+
+Definitions:
+The frame ID never gets incremented to reflect the count of
+cloned frames. If the filter decides to clone a frame, it gets the
+frame back with the same ID but with TC_FRAME_WAS_CLONED set, so
+its easy to distinguish between the frame with the original ID
+and the duplicated ID.
+
+Limitations/Bugs:
+- It is not possible to rerun the frame through the complete
+  filter pipeline. TC_POST_S_PROCESS is the most far away point
+  the frame can get back.
+
+- transcode's encoding frame counter is wrong, but the final
+  message, ie
+  [transcode] encoded 331 frames (0 dropped), clip length  11.04 s
+  is correct.
+
+Notes:
+TC_FRAME_WAS_CLONED is introduced in this patch and is not
+available in earlier transcode versions.
+
+Notes on the included filters:
+The tc_video filter is pretty straight forward, doing a normal
+telecine. Thanks to Thanassis Tsiodras who explained very
+precise what telecine and what inverse telecine is. The code is
+commented to show its work flow and workings.
+
+The tc_audio filter is a bit trickier, because the audio frames
+have to get "repackaged". The audio import bufsize is tweaked to
+read the frames in chunks suitable for 23.9 fps and the filter
+then moves them back and forth to repackage them suitable for
+29.9 fps. Considering this example.
+
+  Import: 48000,16,2 @ 23.9 fps -> bufsize = 8008
+  export: 48000,16,2 @ 29.9 fps -> bufsize = 6408
+
+  The filter does a conversion from 4 frames * 8008 to
+  5 frames * 6408
+
+No data is added or removed.
+
+I think this feature is now pretty usable so start hacking on
+frame rate conversion filters :)
+
+Version 0.1
+
+2002 Tilmann Bitterberg <transcode@tibit.org>

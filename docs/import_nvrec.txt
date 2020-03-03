@@ -1,0 +1,245 @@
+Import_nvrec Documentation
+
+* Index
+-------
+  - Overview
+  - Schematics
+  - Usage
+  - Requierements
+  - Examples
+  - Tips
+  - Changes
+
+* Overview
+----------
+
+This import module connects NVrec - a very good v4l1/v4l2 grabber -
+and transcode. NVrec is very good, because of its audio/video synch
+mechanism which maintains perfect A/V synch over a really long time.
+Read more about NVrec at http://www.ee.up.ac.za/~justin/
+
+"Isn't this braindead? I though NVrec can write divx/divx4/... files
+as well?" You might ask. Yes, this is true, but transcode has much
+more features, such as better deinterlacing, video postprocessing,
+clipping, etc.
+
+In order to accomplish the connection between NVrec and transcode I
+wrote an "export module" for NVrec called RAWrec (which is now
+divx4rec -o raw://) In this mode, divx4rec basically writes its
+video data to stdout (where it gets capured from transcode) and the
+audio data to a mp3 file in an AVI container.
+
+Before you get completly confused, here are some usage examples
+
+  $ transcode -V -i /dev/v4l2/capture0 -x nvrec,null -y xvidcvs,null \
+  -o video.avi -g 512x384 -u 100 -m audio.avi -H0
+
+Since import_nvrec only works in YUV mode '-V' is mandatory.
+Use your v4l1/2 device as the input file or transcode will assume
+/dev/video.
+Write encoded video stream to video.avi.
+Write audio stream to audio.avi.
+Framesize is 512x384.
+Use 100 buffers.
+
+You now have two AVI files: The video only in video.avi and the
+audio only in audio.avi. Use avimerge to multiplex them.
+
+  $ avimerge -i video.avi -p audio.avi -a 0 -o complete.avi
+
+Easy, eh?
+
+* Schematics
+------------
+                                                  /---\
+                                                  |YOU|
+                                                  \---/
+                                                    |
+                                                   \|/
+  /--------\                                  /-----------\
+  |        | <----- recording parameters <--- |           |
+  |divx4rec|                                  | transcode |
+  |-o raw: | -----> video stream -----------> |           |
+  \--------/                                  \-----------/
+     |                                              |
+    \|/                                            \|/
+  /---------\                                 /---------\
+  |audio.avi|                                 |video.avi|
+  \---------/                                 \---------/
+     \______________________________________________/
+                           |
+                        avimerge
+			   |
+                          \|/
+                     /------------\
+                     |complete.avi|
+                     \------------/
+
+
+* Usage
+----------------
+
+divx4rec gets its options from transcode meaning transcode's defaults
+apply.
+
+Audio parameters can be specified through transcodes '-e' option,
+the mp3 bitrate is controlled with '-b' , eg
+
+ $ transcode (..) -e 44100,16,2 -b 192
+
+Everything should work like you expect it to work.
+
+If you don't specify the '-m' option, audio will be written to
+audio.avi. If you need to pass special options to divx4rec, you can
+pass options by supplying a string after the module name, just write
+down the divx4rec options. This can be useful if you want to control
+NVrecs buffer usage
+
+ $ transcode (..) -x nvrec="-H 90 -L 10 -M 50"
+
+The divx4rec command to be executed will get printed out, look for
+something like
+
+ [import_nvrec.so] divx4rec -o raw://audio.avi -w 512 -h 384 -s -b 16 -r 48000 -ab 128 -aq 5
+
+
+* Requierements
+---------------
+
+RAWrec is now integrated into NVrec. Since it was heavily based on divx4rec
+anyway it became a special output mode of divx4rec. NVrec lives at
+http://nvrec.sf.net
+
+If you only want divx4rec out of NVrec, configure with
+
+  $ ./configure --without-avifile --without-rte  \
+  --without-ffmpeg --without-quicktime --without-sdl --without-mad
+
+and copy divx4rec to some place in your $PATH.
+
+  $ install -m 755 divx4rec /usr/local/bin
+
+Done
+
+
+* Examples
+----------
+
+Record video at 512x384 to XviD, audio to mp3 at bitrate 128
+
+  $ transcode -V -i /dev/video -x nvrec,null -y xvidcvs,null \
+  -g 512x384 -u 100 -o video.avi -H0
+
+Record video at 512x384 to XviD, audio to mp3 at bitrate 192 with
+parameters 44100,16,2
+
+  $ transcode -V -i /dev/video -x nvrec,null -y xvidcvs,null \
+  -g 512x384 -u 100 -o video.avi  -b 192 -e44100,16,2 -H0
+
+Write audio stream to audio-only.avi
+
+  $ transcode -V -i /dev/video -x nvrec,null -y xvidcvs,null \
+  -g 512x384 -u 100 -o video.avi -m audio-only.avi -H0
+
+Get audio from /dev/sound/dsp and video from /dev/v4l2/capture0
+
+  $ transcode -V -i /dev/v4l/capture0 -p /dev/sound/dsp \
+  -x nvrec,null -y xvidcvs,null \
+  -g 512x384 -u 100 -o video.avi -m audio-only.avi -H0
+
+Multiplex the files
+
+  $ avimerge -i video.avi -p audio.avi -a 0 -o complete.avi
+
+
+* Tips
+-------
+
+To squeeze out even more fps you can tell divx4rec to not encode the audio
+to mp3 and write a WAV file instead. Sebastian <scut@nb.in-berlin.de>
+writes in http://www.theorie.physik.uni-goettingen.de/
+pipermail/transcode-users/2002-June/002575.html (in one line)
+(adjusted by tibit to reflect the new syntax)
+
+  "I use this command line to record from TV (after setting the correct channel
+with xawtv):
+
+transcode --duration 01:00:00 \
+        -x nvrec="-wav",null
+	-i /dev/video0 -V -H0 -u 100 \
+        -g 576x432 \
+        -y divx5,null -w 1200 -o output-video.avi \
+        -e 44100,16,2 \
+        -J dilyuvmmx
+
+This produces the files "output-video.avi" and "audio.avi", which is just a
+WAV file. By using this method instead of encoding directly to MP3, I can
+archieve a +3 or +4 frame rate and can encoder a higher solution. After
+recording, I merge both files:
+
+transcode -i output-video.avi -p audio.wav -P 1 -b 128,0 \
+	-o output-complete.avi -y raw
+
+The output-complete.avi file is the finished recording, but with ads. I use
+'avidemux' to cut out the commercials, which is easy since avidemux has a
+"skip to next keyframe" button. Usually at the end of commercials there is a
+new keyframe. Use the markers begin/end and the delete option from the
+"mark" menu to cut the ads out. Then write a new file with A/V to disk. For
+me the smart mode sometimes segfaults, and I do not use it."
+---------
+Another Usage scenario is described by Christoph Gaitzsch
+<christoph.gaitzsch@t-online.de> in
+http://www.theorie.physik.uni-goettingen.de/pipermail/transcode-users/2002-August/003946.html
+(adjusted by tibit to reflect the new syntax)
+
+"I also use my PC as a video recorder on a Athlon 1G. After
+experimenting much with transcode, nvrec, lavrec, etc. I now capture
+with transcode via nvrec, save this as yuv4mpeg raw stream to a fast
+disk and postprocess later. I found that the quality is much better
+when encoding in a separate step than live, even when I have no
+framedrops.
+
+Basically I record with the following commands:
+
+Pass 1 (recording)
+
+transcode -V -i /dev/video0 -x nvrec="-N 32",null -y yuv4mpeg,null
+        -o out_video.yuv4mpeg -g 384x288 -u 100 -m out_audio.avi
+	-H0 -f 25
+
+Pass 2 (encoding)
+
+nice -19 transcode -i out_video.yuv4mpeg -p out_audio.avi
+		-g 384x288 -f 25 -x yuv4mpeg,mp3 -y ffmpeg4 -w 3000
+		-o out.avi -u 100 -J dnr,yuvdenoise,32detect=force_mode=3
+
+The advantage is, that the recording stage needs ~5% CPU time, so I
+have no framedrops even when the machine runs updatedb or other,
+CPU-consuming cron jobs. It is also possible to record while encoding
+(because it's niced). Since I schedule my recordings via at and the
+second pass lasts very long (~4fps), it's an issue to record at low
+CPU usage.
+
+The filters used in this way, dnr first, then yuvdenoise give me very
+good picture quality. Thanks to Jason Lunz' for his work on filter
+comparison."
+
+
+
+
+* Changes
+---------
+(newest last)
+- NVrec interface changed based on discussion with Justin. RAWrec is now
+  divx4rec -o raw:// in raw file mode.
+- Use -i ... as input video device.
+- Use -H0 to disable conflicting autoprobing with import_v4l
+- Added Sebastians tip for encoding to wav
+- Justin renamed DIVX4rec to divx4rec
+- Syntax changed. Do not use transcode's -F anymore, if you need to pass special
+  options to nvrec use
+    -x nvrec="-S2 -N32",null
+
+Have fun
+
+08/2002 Tilmann Bitterberg <transcode@tibit.org>

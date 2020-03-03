@@ -1,0 +1,258 @@
+===============================
+ Transcode 1.1.0 Release Notes
+===============================
+:Info: See <http://www.transcoding.org> for more documentation.
+:Author: Francesco Romani <fromani@gmail.com>
+:Date: $Date: 2008-10-01 17:12:47 $
+:Revision: $Revision: 1.2 $
+
+
+Introduction
+============
+
+The transcode team is pleased to announce the avalbility of transcode 1.1.0.
+Transcode 1.1.0 is our new major release, that establishes a new milestone for
+the project: we have started a massive reorganization of the code, aiming to
+address some historical weakness of the project and to prepare land for next
+major enhancements.
+Despite the huge effort expended, 1.1.0 is a transitional release.
+Most of the resources were employed to make the project foundations better, 
+and a very few benefits surfaced so far; But our effort was fruitful, so
+we are ready to develop some new exciting news for next releases. Expect
+quicker and more interesting releases soon.
+
+
+Overview
+========
+
+This section outlines the changes between transcode 1.0.x and 1.1.0.
+
+---
+
+(transcode) Command line reorganization
+  Some options are renamed, some other are merged, a few others are removed,
+  in order to make the command line more rational and consistent; online help
+  (-h) layout was massively reorganized to improve readability.
+
+(transcode) Module cleanup
+  During 1.1.0 development cycle the duplicated, obsolete or even broken modules
+  are been dropped in order to reduce the maintenance burden without reducing the
+  feature set. Some modules that duplicates the functionalities of the core are 
+  been removed as well, and core functionalities was enhanced.
+
+(overall) Internal colorspace rationalization
+  Usage of default colorspace (YUV420P) used internally in transcode is made
+  consistent through core and modules. No more random usage of -k option,
+  that is still of course avalabile, and no more blue people.
+
+(transcode) Frame counter improvements
+  The output of frame counter, that also acts as progress meter, was rewritten
+  and improved. Now it shows more precisely the extimate finishing time, and
+  it now precisely shows the number of frames in every processing step.
+
+(tools) New output modes for tcprobe
+  tcprobe features two now output modes: extended output (option -X) is more
+  human-friendly and less cluttered; raw output (-R) is intended to be more stable
+  in time and easier to parse for machines. Old output mode is of course still
+  the default.
+
+(overall) **LOT** of bugfixes
+  **ALL** bugfixes, and much more, applied to 1.0.x branch are of course
+  applied as well on this release.
+
+(transcode) new multiple input mode (**technology preview**)
+  In the past releases, a few modules where capable to handle a directory as a source
+  and join all file contained. This feature extend trasparently this capability to *all*
+  modules, allowing the user to specify a collection of -of course, homogeneous- sources
+  that will be intelligently join. This feature can be enabled using --multi_input mode,
+  but is still a preview, only a few modules are supported. See transcode(1) for details.
+
+(overall) new experimental modules (**technology preview**)
+  As part of internal reorganization and rationalization (see below), a new, revised, improved
+  architecture for writing transcode modules was introduced. New architecture (*NMS* in transcode
+  jargon) allows to write more specialized modules, enhances their combinations and reduces
+  code replication. A fair number of new modules are been written, and more are avalaible
+  in CVS; those modules are fairly stable, but disabled by default to simplify things for the user.
+  We expect to fully switch to new modules at least for export side for transcode 1.2.0.
+
+(overall) better module introspection (**technology preview**)
+  Another important benefit of new module architecture is to allow the modules to communicate
+  with transcode core in more complete and unified fashion. The immediate benefit is that
+  now tcmodinfo is capable to show some module properties (of NMS-compliant modules).
+  In the long term, this will allow some more juicy things like autocalculation of optimum
+  buffer size, auto colorspace negotiation and so on.
+
+(modules) new modules
+  * import_vag:
+    decodes VAG audio from PlayStation.
+  * import_pv3:
+    provides access to Earth Soft PV3 audio/video streams using
+    win32 binary codecs and an internal win32 emulation layer (NO wine needed).
+
+(modules) improved modules
+  * import_mplayer:
+    this module was greatly improved to better integrate with mplayer, autodetecting the proper
+    settings. A -M option was also added to tcprobe, to let the program use mplayer internally 
+    for probing, in order to have coherent settings.
+    A further option --mplayer_probe was added to transcode. This option automatically loads
+    mplayer import modules both for audio and video streams and also force mplayer for
+    detection of streams parameters.
+    Using --mplayer_probe will (Just Work[tm]) in a broad amount of cases.
+  * import_avi:
+    internal colorspace conversion for raw content was added. Now this module trasparently
+    convert the raw content to selected colorspace.
+  * filter_logo:
+    Sebastian Kun kindly provided a patchset to enhance the capabilities of this filter.
+    Highlights:
+    - allow multiple instances of filter.
+    - added support for alpha transparency; added an optional
+      parameter 'fade:x-y' that makes the image fade in for x
+      frames and fade out for y frames.
+    - add new UV rescale algorhytm to achieve better results.
+      added a new parameter 'hqconv' to control this behavior
+      (default off).
+  * all LZO-related modules:
+    those modules are ported, and thus now require, to liblzo version 2.
+  * import_vob:
+    The `nodemux' option was added. This option allow to skip the internal synchronization
+    code that can deliver broken results in some still unknown cases.
+  * import_ffmpeg:
+    The `nopad' option was added. This option allow to force to off the input padding setting
+    that is sometims incorrectly setup by libavcodec in some still unknown cases.
+    Use this setting if you see the 'slice end reached but...' message during your transcoding.
+
+  You can see the full list of modules options by reading the new split manpages (see below).
+
+(overall) massive architectural reorganization
+  A great amount of effort was spended in order to reorganize, modularize and document the
+  transcode codebase. The first result is the introduction of the following libraries:
+
+  * aclib      - ASM accelerated low-level routines.
+  * libtc      - utilities and common infrastructure.
+  * libtcvideo - high-level video conversion/handling routines.
+  * libtcaudio - high-level audio conversion/handling routines.
+
+(overall) growing testsuite
+  During the 1.1.0 development cycle, we've steadily incremented the amount of automated tests for
+  the codebase. The long-term goal is to have a comprehensive and automatic test suite, including
+  the autogeneration of sample test files.
+
+(documentation) documentation improvements
+  The improvement of documentation for both user and developer side was another goal of this
+  new development cycle. Foundations are been laid with the reorganization of manpages.
+  Much more effort was spent -and will be spent- with the careful and comprehensive introduction
+  of source code comments, describing internal APIs; with the introduction of developer-oriented
+  documentation and tutorial. More will come. Keep your eyes on docs/tech tree and on our sites.
+
+(documentation) manpage revision and split
+  The transcode manpage was a huge, scaring beast. We're splitted it into four pieces, describing
+  the transcode core and the modules, divided per module class (import, filter, export).
+  Splitted manpages are now the official reference for the options of the modules.
+
+(tools) more helper tools
+  * tcexport    - provides direct access to transcode export layer.
+  * tcmodchain  - test if two modules can be joined together.
+
+
+User visible Changes
+====================
+
+See the document `CHANGES-1.0-1.1' for a detailed list of user-visible changes,
+including commandline options and their syntax, and transcode's output.
+
+
+For Developers
+==============
+
+A big amount of effort during the development cycle of the 1.1.0 release was spent
+to make transcode a much more friendlier development environment. We laid substantial
+infrastructural changes that will allow substantial improvements during the next cycles.
+Anyway, on the infrastructural side, more has still to come.
+
+---
+
+* Coding Guidelines
+  The coding guidelines for the project are been reorganized and formalized.
+  See the STYLE file for the complete description of guidelines.
+  Every change to transcode is now required to conform to such guidelines, with
+  the partial exception of thirdy-party patches being merged. In that case
+  the STYLE can be adjusted after the merge. Of course providing patches
+  conformant to STYLE is the best option.
+
+  With the introduction of the STYLE guidelines, a series of conventions emerged as well.
+  Some coding principles are now established in the transcode development:
+  - Document your code: don't *FORCE* the developer to read the source to figure out
+    how something actually works. In the common case, reading comments/docs should be enough.
+  - Don't duplicate code: cut'n'paste is banned. If two or more pieces of code share
+    a common part, this part will be extracted, polished, documented and moved into an
+    upper layer/utility library.
+  - Divide and conquest: promote and enforce modularization. A piece of code should do
+    just one thing, and it should rely on other parts to compose something bigger
+    
+  See docs/tech/html/tc_libraries.html for a list of existing ancillary libraries.
+  For further discussion, use the transcode-devel mailing list.
+
+* NMS: New Module System
+  The New Module System (NMS) is an ongoing effort to reorganize and improve the other
+  big component of transcode: the modules.
+  The NMS was designed from scratch in order to solve the following problems with
+  the old module system:
+  . poor granularity: a former `export' module includes both encoding and multiplexing
+    (and output handling), so it is impossible to add a new encoder alone, or muxer alone,
+    and any way to combine both aspect will lead in code duplication (compare
+    export_dv and export_dvraw, and export_xvid and encode_xvidraw and so on);
+    The same applies for import side (`import' means both demultiplexing and decoding).
+  . poor module capability inspection: transcode core has very limited way to query
+    the module capabilities and/or needs, so module autoloading or efficient resource
+    usage (es, buffer sizing) is hard or impossible.
+  . old API promotes bad coding practices (`the huge function syndrome') while NMS
+    promotes division of functionalties in small pieces (short: modularization).
+  . new API has built-in multiple instances support, while this was handled per-module
+    in the past system.
+
+  Documentation for NMS is avalaible in 
+    docs/tech/module-system-API.txt
+
+  the NMS headers are also worth reading, because they are heavily commented. See
+    libtc/tcmodule*.h
+
+  For the 1.1.0 release, an almost complete NMS export layer, including a collection
+  of encode and multiplex modules is shipped disabled by default as technology preview
+  for developers and brave users. Built it by configuring transcode with
+    ./configure --enable-experimental [options]
+
+  The switch to a full NMS-powered export layer is scheduled for the next major release
+  (1.2.0). Then, the other layers will follow.
+
+* Testing
+  While transcode is note, and it will likley never be, test-driven, we think automated
+  tests are a _very_ valuable tool. So, a growing subset of the codebase has now automated
+  tests in testsuite/.
+  The testsuite will stay up-to-date and will be expanded to cover more and more of the code.
+  The long-term purpose is to have a full-automated regression suite which can cover
+  both basic routines and both high-level transcodes, even by autogenerating sources.
+  If you want to contribute to transcode, it is recommended to
+  - run the testsuite when you developing, in order to avoid regressions.
+  - add more tests to testsuite, in order to reduce the risk of uncaught regressions.
+
+
+Bugs
+====
+
+Despite the effort spent and the new focus on testing, due to large amount of code
+changed or being changed, there are likely new bugs in this release, and a few regressions
+are possible as well.
+Please help us in improving the quality of transcode by reporting bugs and crashes
+using the procedure described here:
+
+  http://www.transcoding.org/cgi-bin/transcode?Reporting_Problems
+  http://www.transcoding.org/cgi-bin/transcode?Reporting_Crashes
+
+Bugs should be reported in our bug-tracker (listed on http://www.transcoding.org) first;
+mailing list should be used as last resort.
+
+
+Last Words
+==========
+
+EOF

@@ -1,0 +1,66 @@
+Der DNR-Filter
+==============
+
+die Syntax ist wie folgt:
+
+-J "dnr=<lt>:<ll>:<ct>:<cl>:<sc>"
+
+wobei	<lt> = Wert für Luma-Thresold, Wertebereich [1,128], Default 10
+	<ll> = Wert für Luma-Pixellock, [1,128], 4
+	<ct> = Wert für Chroma-Threshold, [1,128], 16
+	<cl> = Wert für Chroma-Pixellock, [1,128], 8
+	<sc> = Wert für Szenenwechsel-Erkennung [1,90], 30
+
+Wenn Werte außerhalb des erlaubten Bereichs angegeben werden, dann wird
+automatisch durch den jeweiligen Defaultwert ersetzt.
+Auch für ausgelassene Paremeter werden die Defaultwerte  verwendet.
+
+Beispiele:
+	"dnr=20"		=> lt = 20, Rest default
+	"dnr=::::60"	=> sc = 60, Rest default
+	"dnr=20::32"	=> lt = 20, ct = 32, Rest default usw.
+
+
+Funktionsbeschreibung:
+
+Der Filter arbeitet am Besten bei Video im YUV-Format, kann aber auch bei
+RGB-Format benutzt werden.
+Er wird nur auf ein Bild angewendet, wenn kein Szenewechsel erkannt wurde.
+Dieser wird anhand des prozentualen Anteils an Pixeln eines Bildes, die alle
+
+Schwellwerte überschritten haben, festgestellt (also wenn dieser Anteil den
+vorgegebenen <sc>-Wert überschreitet).
+
+Der Filter untersucht jeden Pixel eines Bildes getrennt nach Luma- und
+Chroma-Anteilen (YUV-Mode) bzw. R/G/B-Anteilen (RGB-Mode), damit sowohl
+Helligkeits- als auch Farbrauschen separat behandelt werden können.
+
+Die Schwellwerte <lt> und <ct> geben an bis zu welchem Unterschied zwischen
+einem Pixel des letzten Bildes und einem Pixel des aktuellen Bildes eine
+"Überblendung" erfolgt. <lt> wird auf den Luma-Anteil (bzw. R) angewendet,
+<ct> auf die Chroma-Anteile (bzw. B/G).
+
+Die Schwellwerte <ll> und <cl> geben an bis zu welchem Unterschied zwischen
+einem Pixel des letzten Bildes und einem Pixel des aktuellen Bildes eine
+"Ersetzung" durch den Pixel des letzten Bildes erfolgt, d.h ob der Pixelwert
+
+festgehalten ("gelockt") wird. <ll> wird auf den Luma-Anteil (bzw. R) ange-
+wendet, <cl> auf die Chroma-Anteile (bzw. B/G). Ein Pixel wird aber
+spätestens nach 30 "locks" aufgefrischt !
+
+Grundsätzlich sollten die <*t>-Schwellwerte größer als die <*l>-Schwellwerte
+
+sein, damit ein ausgewogenes Verhältnis zwischen "Locking" und "Überblenden"
+
+gegeben ist.
+Die Schwellwerte werden mit den Differenzen (biased) von Pixeln verglichen,
+d.h. größere Schwellwerte verstärken den Filtereffekt, weil somit auch
+größere Unterschiede (Differenzen) gefiltert werden.
+
+Die Default-Werte für die einzelnen Parameter sollten in den meisetn Fällen
+Ein brauchbares Ergebnis erziehlen. Der Filter hat (dann) insgesamt neben
+der Rausch- verminderung eine weichzeichnende Wirkung jedoch ohne
+"Nachzieheffekte" bei Bewegungen.
+Bei rauschbehaftetem Material kann nach Filterung z.B. bei der MPEG-
+Komprimierung bis zu 25% Bitrate eingespart werden (dies kann aber je nach
+Material auch deutlich mehr oder weniger sein).

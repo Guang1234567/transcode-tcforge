@@ -1,0 +1,98 @@
+.TH avifix 1 "16th January 2002" "avifix(1)"
+.SH NAME
+avifix \- fix header of AVI-file
+.SH SYNOPSIS
+.na
+.B avifix
+[
+.B -i
+.I name
+[
+.B -F
+.I string
+] [
+.B -f
+.IB val1 , val2
+] [
+.B -N 0x
+.I NN
+] [
+.B -b
+.I bitrate
+] [
+.B -e
+.IB rate [, bits [, channels ]]
+] [
+.B -a
+.I num
+] [
+.B -v
+] ]
+.SH COPYRIGHT
+\fBavifix\fP is Copyright (C) by Thomas Oestreich.
+.SH DESCRIPTION
+.B avifix
+fixes the header of an AVI-file with the supplied parameters.
+.SH OPTIONS
+.TP
+\fB-i\fP \fIname\fP
+Specify the name of the AVI-file.
+.TP
+\fB-F\fP \fIstring\fP
+Specify the video codec as FourCC.
+.br
+Possible values are \fBRGB\fP, \fBRIFF\fP and \fBTIFF\fP. ???
+.TP
+.BI -f " val1,val2"
+Use this option to change the frame rate and scale information in the
+header of the AVI-file.  Both values must not be < 0.
+.TP
+.BI -N " 0xnn"
+Use this option to change the audio format identifier in the header of
+the AVI-file.  Here are some possible values:
+
+0x1    PCM uncompressed audio
+
+0x50   MPEG layer-2 aka MP2
+
+0x55   MPEG layer-3 aka MP3
+
+0x2000 AC3 audio
+.TP
+.BI -b " bitrate"
+Use this option to change the encoder bitrate in the header of the
+AVI-file.  \fIbitrate\fP has to be given in units of kbps.
+.TP
+.BI -e " rate[,bits[,channels]]"
+Use this option to change the audio stream parameters of in the header
+of the AVI-file.
+.TP
+.BI -a " num"
+Use this option to change the audio stream parameters of audio track number
+\fInum\fP in the header of the AVI-file.
+.TP
+.B -v
+Print version information and exit.
+.SH EXAMPLES
+The command
+.PP
+.B avifix -i my_file.avi -f 30,1
+.PP
+changes the header of the file \fImy_file.avi\fP and sets the frame
+rate to 30 fps.
+.SH AUTHORS
+.B avifix
+was written by Thomas Oestreich
+.br
+<ostreich@theorie.physik.uni-goettingen.de> with contributions from
+many others.  See AUTHORS for details.
+.SH SEE ALSO
+.BR avimerge (1),
+.BR avisplit (1),
+.BR tccat (1),
+.BR tcdecode (1),
+.BR tcdemux (1),
+.BR tcextract (1),
+.BR tcprobe (1),
+.BR tcscan (1),
+.BR transcode (1)

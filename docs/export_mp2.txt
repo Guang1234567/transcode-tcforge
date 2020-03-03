@@ -1,0 +1,130 @@
+export_mp2 Documentation
+========================
+
+Last update 2004-08-03, Simone Karin Lehmann < simone at lisanet dot de >
+
+
+General:
+--------
+
+Some time ago I spend a lot of time to convert short movie clips to
+vcd compliant mpeg files. And with some of them I had the need to convert them
+from NTSC 23.976 fps to PAL 25 fps. I decided to do it the same way as it's usualy
+done with native film material, meaning the movie is just played faster. No
+additional frames should be generated. So I began to hack the transcode sources and
+wrote this module.
+
+For more information on changing the speed of the video stream please take a
+look at section - Changing video speed - at the end of this documentation.
+
+I've coded a new audio export module instead of a filter plugin because it was
+easier to implement this audio speed changing stuff by using pipes. And pipes are
+easy to implement in export modules.
+
+IMO this isn't a drawback, because most needs to change audio speed will be
+in cases mentioned above where native film material (24 fps) should be converted
+to PAL (25 fps) or from PAL to NTSC (23.976 fps, 29.97 pulldown) and be played
+on hardware DVD players. Therefor MPEG 1 Layer 2 was choosen as audio codec.
+
+This module processes audio streams only. There are no compile time
+depencies. It uses the ffmpeg encoder to process audio and therefor it's very fast.
+For speed changing issues you need the sox binary.
+
+
+Depencies:
+----------
+
+At run time ffmpeg and sox must be present.
+
+
+Usage:
+------
+
+To use this module just do
+
+-y <video_module>,mp2
+
+Additionaly, if you want to change the speed of the audio, you can append a factor
+to the module. Use the module the following way
+
+-y <video_module>,mp2=speed=N
+
+where N is an unsigned float. N < 1.0 will slow down audio (meaning playing
+time will increase) whereas N > 1.0 will speed up audio (meaning playing time
+will decrease) The pitch of the audio is not corrected. E.g. to speed up
+audio by 25/23.976 (this is used to convert NTSC film material to PAL) use
+
+-y <video_module>,mp2=speed=1.0427093
+
+
+Changing video speed:
+---------------------
+
+Well, the basic idea is to bypass the internal transcode calculations and settings
+of the export frame rate. The bypass has to be done because otherwise transcode will
+call some frame rate modifying filters to generated new frames or drop existing frames.
+
+The -f option is used by transcode to overwrite the autoprobed value of the input stream.
+The --export_fps, if not given on the command line, will be set to the same value as -f
+and handed over to the export module and therefor to the encoder.
+Now if you specify a --export_fps value which differs from -f (or autoprobe) transcode
+just calls the fps filter plugin automaticly. This is the same as using transocde
+with "-J fps" or the like. And this will generate or drop some frames.
+
+But just remeber, we want to change the speed, meaning the total playing time, and not
+the amount of frames.
+
+With mpeg videos this can simply be done by setting a flag in headers of the output
+video stream. For the ffmpeg and mpeg2enc export module this i decribed now.
+
+export_ffmpeg:
+
+Use somewhere in your ffmpeg.cfg (or ~/.ffmpeg.cfg) config file the option
+
+fps_code = VALUE
+
+where VALUE has the same range and meaning as transcode's frame rate code (-f 0,N)
+
+VALUE   means
+0       use transcodes fps settings, this is the default
+1       23.976 fps
+2       24
+3       25
+4       29.970
+5       30
+6       50
+7       59.940
+8       60
+
+If this option is set, all transcode frame rate settings (-f, --export_fps or
+autoprobed values) are ignored. The encoder frame rate is set to the
+corresponding value shown above. This is useful, if you want to "convert" from
+PAL to NTSC or vice versa by speeding up or slowing down the video. No frame
+will be dropped or added, only the frame rate entries in the headers are set
+to the new value.
+
+To "convert" from 23.976 fps to 25 fps put
+fps_code = 2
+
+or from 25 to 23.976 fps
+fps_code = 1
+
+
+expot_mpeg2enc:
+
+The mpeg2enc binyry which is driven by this modules know about an option called to
+set the frame rate in the resulting output stream. You can specify this option by adding
+a string to transcode's -F option. E.g. if you are using mpeg2enc to encode to standard
+dvd compliant streams do
+
+-y mpeg2enc,<audio_module> -F 8,"-F 1"
+
+But please don't mix them up. -F 8 is recognized by the transcode export module and
+"-F 1" is passed to the mpeg2enc binary itself. Just take a look at the manpages of
+transcode and mpeg2enc.
+
+
+
+... hope you enjoy.
+
+Simone Karin Lehmann

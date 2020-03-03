@@ -1,0 +1,453 @@
+Transcode compiles even if you do not have all additional libs
+installed. You do not *need* to have a "yes" on every configure check.
+
+You will need to have libavcodec (also known as ffmpeg libraries)
+installed somewhere on your computer. Without libavcodec and libavformat
+transcode doesn't compile. The best way to accomplish this is to get FFmpeg 
+from svn (ffmpeg.mplayerhq.hu), configure it with at least --enable-shared
+and --enable-pthreads compile and install it. (Also see the notes below
+about libpostproc if you plan to use filter_pp.) A package of some kind
+that includes libavcodec.so and the headers will do as well. If the
+files are installed in a non-default location (transcode assumes prefix:
+/usr), then you will need to tell transcode where they live. Very
+important: you _need_ both the header files _and_ shared libraries files.
+The static libraries won't do!
+
+Depending on what you want to do with transcode you may need additional
+packages installed. In particular, a recent version of lame is needed
+for encoding MP2/MP3 audio, and liba52 is required for decoding AC3
+audio (as is used on some DVDs).
+
+If you obtained transcode using CVS, you will need to generate the
+"configure" script yourself while in the snapshot tarballs it's
+included. To do this you need _recent_ versions of autoconf (>= 2.59),
+automake (>= 1.8) and libtool (>= 1.5) utilities. Now to make the
+configure script, run "autoreconf -i -f". Do not use "autoreconf -if"
+because this does not work on some distributions.
+
+Now run
+
+ ./configure --help
+
+to get some idea of the many optional packages that can be incorporated.
+Note the *--enable-$$$* and *--with-$$$* flags.
+
+ONLY PACKAGES THAT ARE ENABLED EXPLICITLY USING CONFIGURE ARE ACTUALLY
+USED TO BUILD MODULES.
+
+If you have any optimisations your C compiler supports and you want to
+use, put them in the environment ./configure is run in. It pays off to
+study all the optimisation flags your C compiler offers. Some of these
+may be useful, and some may cause problems, that is why transcode itself
+does not use any optimization flags unless absolutely necessary. For
+instance, if you are going to be running transcode on a Pentium4 system
+and building with *gcc*, you can invoke configure like this:
+
+ $ env CFLAGS="-O3 -march=pentium4" ./configure ...
+
+to create an optimised build,
+
+or
+
+ $ env CFLAGS="-g" ./configure ...
+
+to build transcode for debugging.
+
+Don't forget the relevant configure options, described below.
+
+Then:
+
+  make
+  make install
+
+------------------------------------------------------------------------
+*Configure options for transcode*
+
+Configure will not test for a package unless support is enabled. For
+example, configure will not look for SDL unless the option
+'--enable-sdl' is used. If a package distributes pkg-config information,
+or if a package distributes it's own -config script (like libquicktime's
+lqt-config), configure will use information from pkg-config or the
+package's script to find the package's headers and libraries.  Otherwise,
+configure will look in the default prefix, /usr.  This means that by
+default configure will look for the headers in /usr/include and the
+libraries in /usr/lib.
+
+The options dealing with file locations can be used to tell configure
+to look in other locations for headers and libraries. The prefix to
+search can be changed with the --with-$$$-prefix options. Specific
+directories for libraries and headers can be given with --with-$$$-libs
+and --with-$$$-includes, respectively. If the header and library
+specific options are used, configure will use the paths given with
+those options, and will not use paths from pkg-config or a package's
+-config script. NOTE: the --with-$$$-prefix option does not override
+pkg-config or -config information. configure will use the prefix to
+search for a package's -config script.
+
+If configure is unable to find support for a mandatory or optionally
+enabled package, configure will exit with an error and display a message
+about the error.
+
+For the options described below, the default value is in parenthesis
+after the option.
+
+General options:
+
+  --enable-statbuffer (enabled)
+      enable internal static framebuffer support
+  --enable-netstream (disabled)
+      enable network streaming support
+  --enable-xio (disabled)
+      link to the xio library
+  --enable-warnings-as-errors (disabled)
+      treat warnings as errors
+  --with-x (with)
+      use the X Window System
+  --with-default-xvid=<default xvid> (xvid4)
+      Default xvid version.  Valid options: xvid2, xvid3, xvid4
+  --with-mod-path (${prefix}/lib/transcode)
+      directory where export/import modules are installed
+
+Mandatory packages:
+
+  libz
+  libm
+  pkg-config
+    (these generally come with any and all OSes)
+
+OS dependent packages:
+
+  v4l
+    related options:
+      --enable-v4l (disabled)
+          if enabled, builds v4l and v4l2 modules, which imports video
+          from video capture hardware on Linux using the Video4Linux(2)
+          API.
+            please note: use import_v4l2 if possible; v4l is deprecated.
+    affected modules: import_v4l.so import_v4l2.so
+
+  OSS
+    related options:
+      --enable-oss (disabled)
+          if enabled, builds OSS import module, which imports audio
+          from audio hardware on several platforms using the OSS API.
+    affected modules: import_oss.so
+
+  bktr
+    related options:
+      --enable-bktr (disabled)
+          if enabled, builds bktr import module, which imports video
+          from video capture hardware on *BSD using the bktr(4) API.
+    affected modules: import_bktr.so
+
+  sunau
+    related options:
+      --enable-sunau (disabled)
+          if enabled, builds sunau import module, which imports raw PCM
+          audio from hardware on *BSD using the audio(4) API.
+    affected modules: import_sunau.so
+
+Optional packages:
+  libavcodec from FFmpeg SVN (snapshot >= 20080706)  http://ffmpeg.mplayerhq.hu/
+    related options:
+      --with-libavcodec-prefix=PFX (/usr)
+          prefix where libavcodec is installed
+      --with-libavcodec-includes=DIR (/usr/include)
+          directory where libavcodec headers [ffmpeg/avcodec.h] are installed
+      --with-libavcodec-libs=DIR (/usr/lib)
+          prefix where libavcodec libraries [libavcodec.so] are installed
+
+  libavformat from FFmpeg >= 20080706 (SVN)  http://ffmpeg.mplayerhq.hu/
+    related options:
+      --with-libavformat-prefix=PFX (/usr)
+          prefix where libavformat is installed
+      --with-libavformat-includes=DIR (/usr/include)
+          directory where libavformat headers [ffmpeg/avformat.h] are installed
+      --with-libavformat-libs=DIR (/usr/lib)
+          prefix where libavformat libraries [libavformat.so] are installed
+
+  libpostproc (part of FFmpeg) http://ffmpeg.mplayerhq.hu/
+    related options:
+      --enable-libpostproc (disabled)
+          build with libpostproc support for video processing
+      --with-libpostproc-prefix=PFX (/usr)
+          prefix where libpostproc is installed
+      --with-libpostproc-includes=DIR (/usr/include)
+          directory where libpostproc header [postprocess.h] is installed
+      --with-libpostproc-libs=DIR (/usr/lib)
+          directory where libpostproc library [libpostproc.so] is installed
+    affected modules: filter_pp.so
+    NOTE: It is highly recommended to use a shared libpostproc.  To
+          build a shared libpostproc, build FFmpeg with
+          '--enable-pp --enable-shared-pp'.
+
+  FreeType2  http://freetype.sourceforge.net/
+    related options:
+      --enable-freetype2 (enabled)
+          build with FreeType2 support for rendering text
+      --with-freetype2-prefix=PFX (/usr)
+          prefix where FreeType is installed
+      --with-freetype2-includes=DIR (/usr/include)
+          directory where FreeType headers [ft2build.h] are installed
+      --with-freetype2-libs=DIR (/usr/lib)
+          directory where FreeType libraries [libfreetype.so] are installed
+    affected modules: filter_text.so, filter_subtitler.so
+
+  libmpeg2 from mpeg2dec >= 0.4.0b  http://libmpeg2.sourceforge.net/
+  libmpeg2convert is needed as well (shipped in the same package of libmpeg2)
+    related options:
+      --with-libmpeg2-prefix=PFX (/usr)
+          prefix where libmpeg2 is installed
+      --with-libmpeg2-includes=DIR (/usr/include)
+          directory where libmpeg2 headers [mpeg2dec/mpeg2.h] are installed
+      --with-libmpeg2-libs=DIR (/usr/lib)
+          prefix where libmpeg2 libraries [libmpeg2.so] are installed
+
+  liba52  http://liba52.sourceforge.net/
+    related options:
+      --enable-a52 (disabled)
+          build with support for AC3/A52 audio decoding
+      --with-a52-prefix=PFX (/usr)
+          prefix where liba52 is installed
+      --with-a52-includes=DIR (/usr/include)
+          directory where liba52 headers are installed
+      --with-a52-libs=DIR (/usr/lib)
+          directory where liba52 libraries are installed
+    affected modules: a52_decore.so
+
+  faac  http://www.audiocoding.com/
+    related options:
+      --enable-faac (disabled)
+          build with support for AC3/FAAC audio decoding
+      --with-faac-prefix=PFX (/usr)
+          prefix where libfaac is installed
+      --with-faac-includes=DIR (/usr/include)
+          directory where libfaac headers are installed
+      --with-faac-libs=DIR (/usr/lib)
+          directory where libfaac libraries are installed
+    affected modules: encode_faac.so
+     
+  mjpegtools  http://mjpeg.sourceforge.net/
+  You need version >= 1.8.0 of mjpegtools.
+    related options:
+      --enable-mjpegtools (disabled)
+          build with mjpegtools support for YUV4MPEG video streams
+      --with-mjpegtools-prefix=PFX (/usr)
+          prefix where mjpegtools is installed
+      --with-mjpegtools-includes=DIR (/usr/include)
+          directory where mjpegtools headers are installed
+      --with-mjpegtools-libs=DIR (/usr/lib)
+          directory where mjpegtools libraries are installed
+    affected modules: import_yuv4mpeg.so export_yuv4mpeg.so,
+      export_mpeg2enc.so, export_mp2enc.so
+
+  SDL  http://www.libsdl.org/
+    related options:
+      --enable-sdl (disabled)
+          build with SDL support for video display
+      --with-sdl-prefix=PFX (/usr)
+          prefix where SDL is installed
+      --with-sdl-includes=DIR (/usr/include)
+          directory where SDL headers are installed
+      --with-sdl-libs=DIR (/usr/lib)
+          directory where SDL libraries are installed
+    affected modules: filter_preview.so
+
+  lame  http://www.mp3dev.org/
+    related options:
+      --enable-lame (enabled)
+          build with libmp3lame support for mpeg audio encoding
+      --with-lame-prefix=PFX (/usr)
+          prefix where lame is installed
+      --with-lame-includes=DIR (/usr/include)
+          directory where lame headers are installed
+      --with-lame-libs=DIR (/usr/lib)
+          directory where lame libraries are installed
+    affected modules: encode_lame.so, export_dv.so, export_raw.so,
+      export_divx5.so, export_ppm.so, export_ffmpeg.so, export_lame.so,
+      export_yuv4mpeg.so, export_mpeg2enc.so, export_mp2enc.so,
+      export_xvid4.so, import_mp3.so
+
+  XviD  http://www.xvid.org/
+    related options:
+      --enable-xvid (disabled)
+          build with xvid support for video encoding
+      --with-xvid-prefix=PFX (/usr)
+          prefix where xvid is installed
+      --with-xvid-includes=DIR (/usr/include)
+          directory where xvid headers are installed
+      --with-xvid-libs=DIR (/usr/lib)
+          directory xvid lame libraries are installed
+    affected modules: encode_xvid.so
+
+  ogg  http://www.xiph.org/ogg/
+    related options:
+      --enable-ogg (disabled)
+          build with support for importing OGG audio
+      --with-ogg-prefix=PFX (/usr)
+          prefix where ogg is installed
+      --with-ogg-includes=DIR (/usr/include)
+          directory where ogg headers [ogg/ogg.h] are installed
+      --with-ogg-libs=DIR (/usr/lib)
+          directory where ogg libraries [libogg.so] are installed
+    affect modules: none
+
+  vorbis  http://www.xiph.org/ogg/vorbis/
+    related options:
+      --enable-vorbis (disabled)
+          build with support for importing Vorbis audio
+      --with-vorbis-prefix=PFX (/usr)
+          prefix where vorbis is installed
+      --with-vorbis-includes=DIR (/usr/include)
+          directory where vorbis headers [vorbis/codec.h] are installed
+      --with-vorbis-libs=DIR (/usr/lib)
+          directory where vorbis libraries [libvorbis.so] are installed
+      affected modules: none
+
+  theora  http://www.theora.org/
+    related options:
+      --enable-theora (disabled)
+          build with support for importing theora video (work in progress)
+      --with-theora-prefix=PFX (/usr)
+          prefix where theora is installed
+      --with-theora-includes=DIR (/usr/include)
+          directory where theora headers [theora/theora.h] are installed
+      --with-theora-libs=DIR (/usr/lib)
+          directory where theora libraries [libtheora.so] are installed
+      affected modules: none
+
+  x264  http://www.videolan.org/x264.html
+    related options:
+      --enable-x264 (disabled)
+          build with support for encoding x264 video
+      --with-x264-prefix=PFX (/usr)
+          prefix where x264 is installed
+      --with-x264-includes=DIR (/usr/include)
+          directory where x264 headers [x264.h] are installed
+      --with-x264-libs=DIR (/usr/lib)
+          directory where x264 libraries [libx264.so] are installed
+      affected modules: encode_x264.so
+
+  libdvdread  http://www.dtek.chalmers.se/groups/dvd/
+    related options:
+      --enable-libdvdread (enabled)
+          build with libdvdread support for reading DVDs
+      --with-libdvdread-prefix=PFX (/usr)
+          prefix where libdvdread is installed
+      --with-libdvdread-includes=DIR (/usr/include)
+          directory where libdvdread headers [dvd_reader.h] are installed
+      --with-libdvdread-libs=DIR (/usr/lib)
+          directory where libdvdread libraries [libdvdread.so] are installed
+    affected modules: import_dvd.so
+
+  PVM3  http://www.netlib.org/pvm3/ [UNSUPPORTED, probably BROKEN]
+    related options:
+      --enable-pvm3 (disabled)
+          build with pvm3 support for parallelizing transcode
+      --with-pvm3-prefix=PFX (/usr)
+          prefix where pvm3 is installed
+      --with-pvm3-includes=DIR (/usr/include)
+          directory where pvm3 headers [pvm3.h] are installed
+      --with-pvm3-libs=DIR (/usr/lib)
+          directory where pvm3 libraries [libpvm3.so] are installed
+    affected modules: export_pvm.so
+
+  libdv  http://libdv.sourceforge.net/
+    related options:
+      --enable-libdv (disabled)
+          build with libdv support for DV encoding and decoding
+      --with-libdv-prefix=PFX (/usr)
+          prefix where libdv is installed
+      --with-libdv-includes=DIR (/usr/include)
+          directory where libdv headers [libdv/dv.h] are installed
+      --with-libdv-libs=DIR (/usr/lib)
+          directory where libdv libraries [libdv.so] are installed
+    affected modules: export_dvraw.so, export_dv.so, filter_preview.so
+
+  libquicktime  http://libquicktime.sourceforge.net/ (requires version 1.0.x)
+    related options:
+      --enable-libquicktime (disabled)
+          build with libquicktime support for reading and writing MOV files
+      --with-libquicktime-prefix=PFX (/usr)
+          prefix where libquicktime is installed
+      --with-libquicktime-includes=DIR (/usr/include)
+          directory where libquicktime headers [quicktime/lqt.h]  are installed
+      --with-libquicktime-libs=DIR (/usr/lib)
+          directory where libquicktime libraries [libquicktime.so] are installed
+    affected modules: export_mov.so, import_mov.so
+
+  lzo  http://www.oberhumer.com/opensource/lzo/
+    LZO version >= 2.0 is required.
+    LZO support is required to enable NUV/NuppelVideo import support.
+    related options:
+      --enable-lzo (disabled)
+          build with liblzo support
+      --with-lzo-prefix=PFX (/usr)
+          prefix where lzo is installed
+      --with-lzo-includes=DIR (/usr/include)
+          directory where lzo headers [lzo/lzo1x.h] are installed
+      --with-lzo-libs=DIR (/usr/lib)
+          directory where lzo libraries [liblzo2.so] are installed
+    affected modules: export_lzo.so, import_lzo.so, import_nuv.so
+
+  libxml2  http://xmlsoft.org/
+    related options:
+      --enable-libxml2 (disabled)
+          build with libxml2 support for accessing XML content
+      --with-libxml2-prefix=PFX (/usr)
+          directory where libxml2 is installed
+      --with-libxml2-includes=DIR (/usr/include)
+          directory where libxml2 headers [libxml/parser.h]  are installed
+      --with-libxml2-libs=DIR (/usr/lib)
+          directory where libxml2 libraries [libxml2.so] are installed
+    affected modules: import_xml.so
+
+  ImageMagick  http://www.imagemagick.com/
+    related options:
+      --enable-imagemagick (disabled)
+          build with ImageMagick support for accessing various image types
+      --with-imagemagick-prefix=PFX (/usr)
+          prefix where imagemagick is installed
+      --with-imagemagick-includes=DIR (/usr/include)
+          directory where imagemagick headers [magick/api.h] are installed
+      --with-imagemagick-libs=DIR (/usr/lib)
+          directory where imagemagick libraries [libMagick.so] are installed
+    affected modules: export_im.so, import_im.so, import_imlist.so,
+      filter_logo.so, filter_logoaway.so, filter_compare.so
+
+  libjpeg  http://www.ijg.org/
+    related options:
+      --enable-libjpeg (enabled)
+          build with libjpeg support for accessing JPEG files
+      --with-libjpeg-prefix=PFX (/usr)
+          prefix where libjpeg is installed
+      --with-libjpeg-includes=DIR (/usr/include)
+          directory where libjpeg headers [jpeglib.h] are installed
+      --with-libjpeg-libs=DIR (/usr/lib)
+          directory where libjpeg libraries [libjpeg.so] are installed
+    affected modules: export_jpg.so
+
+  LoRS/IBP  http://loci.cs.utk.edu/
+    related options:
+      --enable-ibp (disabled)
+          build with ibp support for accessing files on depots
+      --with-libfdr=DIR ()
+          base directory for libfdr
+      --with-libibp=DIR ()
+          base directory for libibp
+      --with-libexnode=DIR ()
+          base directory for libexnode
+      --with-liblbone=DIR ()
+          base directory for liblbone
+      --with-libend2end=DIR ()
+          base directory for libend2end
+      --with-liblors=DIR ()
+          base directory for liblors
+    affected modules: none (only core).
+
+Optional modules:
+
+  --enable-pv3
+      enable PV3 support (http://earthsoft.jp/PV3/dv.html)
+  --enable-nuv
+      enable NuppelVideo support

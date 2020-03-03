@@ -1,0 +1,332 @@
+<html>
+<head>
+<title> Linux Video Stream Processing Tool - Examples</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="keywords" content="DVD, digital video, DV, encoder, divx,
+DivX;-), lame, source, posix, avifile, opendivx, codec, linux, AC3,
+program stream, video, audio, transcode, decoder, stream, YV12">
+</head>
+
+<body bgcolor=#CDB5CD>
+
+
+<a name=top></a>
+<table cellspacing="10" cellpadding="0" border="0" width="100%">
+  <tr>
+    <td align=left valign="top" width=30% bgcolor="#a0a0a0">
+    <table border="0" cellpadding="10" cellspacing="3" font size=+2 bgcolor="#ffffff" width=100%>
+      <td align="left" bgcolor="#e9e9e9"> <FONT
+      FACE="Lucida,Helvetica"> <font>Subtitles:
+      </font>
+    </tr>
+    <tr>
+
+      <td>
+
+	  This chapter gives a short introduction on handling and
+	  processing subtitles with transcode and related programs.
+
+	  <ul>
+	    <li> <a href="#extsub"> <FONT FACE="Lucida,Helvetica">
+		DVD subtitle overlay mode with <i> -J extsub</i></font></a> <p>
+	    <li> <a href="#subrip"><FONT FACE="Lucida,Helvetica">
+		generating subtitle files with <i>subrip</i></font></a><p>
+	    <li> <a href="#subtitler"><FONT FACE="Lucida,Helvetica">
+		adding custom subtitles with <i> -J subtitler</i></font></a><p>
+
+	  </ul>
+      </td>
+    </tr>
+</table>
+</table>
+
+
+
+<a name=extsub></a>
+<table cellspacing="10" cellpadding="0" border="0" width="100%">
+  <tr>
+    <td align=left valign="top" width=30% bgcolor="#a0a0a0">
+    <table border="0" cellpadding="10" cellspacing="3" font size=+2 bgcolor="#ffffff" width=100%>
+      <td align="left" bgcolor="#e9e9e9">
+
+      <font> DVD subtitle overlay mode </font>
+    </tr>
+    <tr>
+      <td>
+
+	  transcode provides a filter plugin <i> filter_extsub.so</i> for elementary DVD
+	  subtitle rendering in connection with <i>-x vob</i>. Use it with<p>
+
+	   <table>
+	    <tr>
+	      <td align=left valign="top" bgcolor="#ccffcc">
+	      transcode [...] -J extsub=&lt;options&gt;</td>
+	    </tr>
+      </table><p>
+
+      The option string looks as follows (all options default to 0): <p>
+
+      <table>
+	<tr>
+	  <td align=left valign="top" bgcolor="#ccffcc">
+	  s:h:t:f:w:a:b:p:q
+	    </tr>
+      </table><p>
+
+      	<ul>
+
+		  <li>  s  &nbsp; subtitle track id (0-31)<br>
+
+		      Use <i>tcprobe -H N</i> with N>1 to find out
+		      if subtitle any packs are available in the program stream.<p>
+
+
+		  <li>  h  &nbsp; offset of subtitle with respect to bottom
+		      of frame in rows.<br>
+
+		      Subtitles are placed at the bottom of the
+		      frame. Try this option to shift them up or down.<p>
+
+		  <li>  t &nbsp;  global display start time correction
+		      in msec.<br>
+		      If you feel, subtitles are displayed not timely,
+		      adjust it with this option. This will affect all subtitles.<p>
+
+
+		  <li>  f  &nbsp; fast rendering, i.e., no anti-aliasing (0=off,1=on).<br>
+		      Anti-aliasing of the font is performed by
+		      default. Switch it of (1) if your font is tiny
+		      and messed up by this feature.<p>
+
+
+		  <li>  w &nbsp;  render on post-processing (0=off,
+		      1=on).<br>
+		      Setting this option to 1 will render the
+		      subtitle on post-processing instead of pre-processing.
+		      This may improve subtitle quality but makes no
+		      sense after extensive resizing of the frame.<p>
+
+		  <li>  a  &nbsp; graylevel value a (0-255).
+		  <li>  b &nbsp;  graylevel value b (0-255).<br>
+		      Make another subtitle color visible with full
+		      intensity equal to 255. May lead to fatter fonts.<p>
+
+		  <li>  p  &nbsp; assign subtitle color p [0-3] to
+		      graylevel value a.
+		  <li>  q  &nbsp; assign subtitle color q [0-3] to graylevel value b.<br>
+		      Shuffle the color assignment by choosing another
+		      subtitle color between 0 and 3. Useful for black fonts on white background.<p>
+
+		</ul>
+		<p>
+
+		Example (1) changing color assignment:
+
+		<ul>
+
+		  <li>
+		      <table>
+			<tr>
+			  <td align=left valign="top" bgcolor="#ccffcc">
+			  -J extsub
+			</tr>
+		  </table>
+
+		  this one looks not as expected without any further options.
+
+		  <p>
+
+		  <img align="top" src="mes0-00000.png"> <p>
+
+
+
+	      <li>
+		  <table>
+		    <tr>
+		      <td align=left valign="top" bgcolor="#ccffcc">
+		      -J extsub=0:0:0:0:0:0:0:1:2
+		    </tr>
+	      </table>
+
+	      shuffle the font color assignment
+	      using 1:2 looks like this, but has an ugly 3D effect.
+
+	      <p>
+
+	      <img align="top" src="mes4-00000.png"> <p>
+
+	  <li>
+		  <table>
+		    <tr>
+		      <td align=left valign="top" bgcolor="#ccffcc">
+		      -J extsub=0:0:0:0:0:0:0:1:3
+		    </tr>
+	      </table>
+
+	      shuffle the color assignment using 1:3 looks better,
+	      but shows white shadows that make the font fatter but blurry
+
+	      <p>
+
+	      <img align="top" src="mes5-00000.png"> <p>
+
+
+	  <li>
+		  <table>
+		    <tr>
+		      <td align=left valign="top" bgcolor="#ccffcc">
+		      -J extsub=0:0:0:0:0:0:0:2:3
+		    </tr>
+	      </table>
+
+	      shuffle the color assignment using 2:3 seems to be perfect.
+	      Nice and smooth looking letters.
+	      <p>
+
+	      <img align="top" src="mes6-00000.png"> <p>
+
+
+	  <li>
+	      <table>
+		<tr>
+		  <td align=left valign="top" bgcolor="#ccffcc">
+		  -J extsub=0:0:0:1:0:0:0:2:3
+		</tr>
+	  </table>
+
+	  for comparison, we switch off anti-aliasing, see the difference?
+
+	  <p>
+
+	  <img align="top" src="mes7-00000.png"> <p>
+
+
+	    </ul>
+
+	    Example (2) adding another white color:
+
+	    <ul>
+
+	      <li>
+		  <table>
+		    <tr>
+		      <td align=left valign="top" bgcolor="#ccffcc">
+		      -J extsub
+		    </tr>
+	      </table>
+
+	      this one looks already perfect without any options.
+
+		  <p>
+
+	      <img align="top" src="sub0-00000.png"> <p>
+
+
+	      	      <li>
+		  <table>
+		    <tr>
+		      <td align=left valign="top" bgcolor="#ccffcc">
+		      -J extsub=0:0:0:1
+		    </tr>
+	      </table>
+
+	      same as above with-out ant-aliasing.
+
+		  <p>
+
+	      <img align="top" src="sub1-00000.png"> <p>
+
+
+	  <li>
+	      <table>
+		<tr>
+		  <td align=left valign="top" bgcolor="#ccffcc">
+		  -J extsub=0:0:0:0:0:0:255
+		</tr>
+	  </table>
+
+	  We make switch another color to full intensity (white) to
+	  make the subtitle appear fatter, maybe too much.
+
+	  <p>
+
+	  <img align="top" src="sub2-00000.png"> <p>
+
+
+      <li>
+	  <table>
+	    <tr>
+	      <td align=left valign="top" bgcolor="#ccffcc">
+	      -J extsub=0:0:0:1:0:0:255
+	    </tr>
+      </table>
+
+      The above fat one without anti-aliasing.
+
+      <p>
+
+      <img align="top" src="sub3-00000.png"> <p>
+
+
+
+
+
+	</ul>
+
+
+    </table>
+</table>
+
+
+<a name=subrip></a>
+<table cellspacing="10" cellpadding="0" border="0" width="100%">
+  <tr>
+    <td align=left valign="top" width=30% bgcolor="#a0a0a0">
+    <table border="0" cellpadding="10" cellspacing="3" font size=+2 bgcolor="#ffffff" width=100%>
+      <td align="left" bgcolor="#e9e9e9">
+
+      <font>generating subtitle files</font>
+    </tr>
+    <tr>
+      <td>
+
+
+	  Please find some documentation on Arne Driescher's
+	  <i>subrip</i> program in the <code>contrib/subrip/</code> directory
+	  or visit the  <a
+	  href=http://subtitleripper.sourceforge.net/>project page</a>
+	  for more information.
+</table>
+</table>
+
+
+
+<a name=subtitler></a>
+<table cellspacing="10" cellpadding="0" border="0" width="100%">
+  <tr>
+    <td align=left valign="top" width=30% bgcolor="#a0a0a0">
+    <table border="0" cellpadding="10" cellspacing="3" font size=+2 bgcolor="#ffffff" width=100%>
+      <td align="left" bgcolor="#e9e9e9">
+
+      <font> generating custom subtitles</font>
+    </tr>
+    <tr>
+      <td>
+
+
+	  Please find some documentation on Jan Panteltje's
+	  <i>subtitler</i> plugin in the <code>filter/subtitler/</code> directory
+	  or visit the <a
+	  href=http://www.home.zonnet.nl/panteltje/subtitles/>
+	  project page</a>
+	  for more information.
+
+</table>
+</table>
+
+
+<!-- hhmts start -->
+Last modified: Thu May 16 12:52:34 CEST 2002
+<!-- hhmts end -->
+
+</body> </html>

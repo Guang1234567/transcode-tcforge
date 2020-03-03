@@ -1,0 +1,102 @@
+Filter_text Documentation
+
+This filter allows you to render arbitrary text into the video stream
+It uses libfreetype2 to render the font so it can handle all fonts
+libfreetype can handle.
+
+You need libfreetype2 installed and enabled during configure time to
+make use of this filter.
+
+
+PARAMETERS
+
+As usual, the default setting should get you going, still there a tons
+of options to play with.
+
+* 'string' text to print [date]
+  This is probably the most important option you want to change. It is
+  the text which will be rendered into the video. If the string is not
+  specified, the filter will render the current time and date.
+
+* 'dpi' dots-per-inch resolution [96]
+  The dots-per-inch resolution of the rendered letters.
+
+* 'points' point size of font in 1/64 [25]
+  The point size of the rendered letters.
+
+* 'font' full path to font file [/usr/X11R6/.../arial.ttf]
+  Specifies which font file to use. You must supply the full path to the
+  file. Default is /usr/X11R6/lib/X11/fonts/TrueType/arial.ttf
+
+* 'fade' Fade in and/or fade out [0=off, 1=slow, 10=fast]
+  turns on a smooth fadein and fadeout. As higher the argument is, the
+  faster the text will be blended. If you specify a range for the filter
+  to apply, the fadein will start at the beginning of the range and
+  fadeout will be finished at the end of the range. See below for an
+  ascii art.
+
+* 'notransparent' disable transparency
+  Default is to enable transparency. Sometimes the text is unreadable
+  especially on bright background so you may wish to disable it. The
+  text will be drawn in a black box.
+
+* 'pos' Position (0-width x 0-height) [0x0]
+  Position of the text (in pixels) The "origin" of the text is the
+  upper left corner of the bounding box.
+
+* 'posdef' Position (0=None, 1=TopL 2=TopR 3=BotL 4=BotR 5=Cent 6=BotCent) [0]
+  Predefined Position.
+      1: Top Left
+      2: Top Right
+      3: Bottom Left
+      4: Bottom Right
+      5: Center
+      6: Center Bottom
+
+* 'range' apply filter to [start-end]/step frames [0-oo/1]
+  defines a frame range in which the image should appear in the
+  video
+
+
+'range' together with 'fade'
+  Say you want the text to be visible from frame 50 until frame 250
+  and you also want a slow fade (e.g. 2). The number of frames the fade
+  will take is 100/2 = 50 frames, so
+
+  0        50         100         150        200        250
+  |---------|----------|-----------|----------|----------|------> Frames
+         fadein      full                  fadeout   invisible
+          start    visible                  start
+
+
+EXAMPLES
+
+* The above example with the fade:
+
+  $ transcode [...] -J text=string="Hello World":fade=2:range=50-250
+
+* Place the text in the center of the image
+
+  $ transcode [...] -J text=string="Hello World":posdef=5
+
+* Make the text to appear larger in the center
+
+  $ transcode [...] -J text=string="Hello World":posdef=5:points=30
+
+* No transparency, fast fadein/out, range and center at bottom
+
+  -J text=string="Hello World":posdef=6:notransparent:fade=7:range=50-250
+
+
+LIMITATIONS
+
+* The text is always white and does not look very good on bright
+  background probably because of antialiasing artifacts.
+
+* The filter does not handle linebreaks. If the text is too long to be
+  displayed on one line, the output will look garbled.
+
+
+(C) 2003 Tilmann Bitterberg <transcode@tibit.org>
+
+Tue Apr 29 14:57:38 CEST 2003

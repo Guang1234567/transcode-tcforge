@@ -1,0 +1,18 @@
+Module info:
+module can read YUV frames from a given dir (-i option)
+it start to search the files:
+0000.yuv
+0001.yuv
+... and so on.
+
+If some frames are missing module try to find a next aviable frame
+until it counts MAXFRM (MAXFRM=10000). If You need more - redefine it in
+import_yuv.c
+Remeber to add the following options to transcode:
+-V (only YUV mode is supported)
+-g widthxheight   (e.g. -g 384x288)
+If red is swapped with blue add option:
+-k
+
+Marek Blaszkowski
+mb@intercon.pl

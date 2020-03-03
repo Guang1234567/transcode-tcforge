@@ -1,0 +1,137 @@
+.TH tcmodinfo 1 "21th January 2003" "tcmodinfo(1)"
+.SH NAME
+tcmodinfo \- Get and Set information in transcode modules
+.SH SYNOPSIS
+.na
+.B tcmodinfo
+[
+.B -i
+.I name
+] [
+.B -m
+.I path
+] [
+.B -t
+.I type
+] [
+.B -M
+.I param
+] [
+.B -C
+.I param
+] [
+.B -s
+.I socket
+] [
+.B -p
+] [
+.B -d
+.I verbosity
+] [
+.B -v
+]
+.SH COPYRIGHT
+\fBtcmodinfo\fP is Copyright (C) by Tilmann Bitterberg/Transcode Team
+.SH DESCRIPTION
+.B tcmodinfo
+loads a supplied transcode(1) module and prints its parameters, or
+inquiry about default settings. It can also connect to transcode through
+a socket to do runtime configuration of transcode and its filters.
+Anyway, this last feature may be moved to some other helper program
+in future releases.
+.SH OPTIONS
+.TP
+\fB-i\fP \fIname\fP
+Specify the name of the module. \fIName\fP is specified without the prefix
+.B (i.e., filter_)_
+and without the suffix
+.B \.so
+So if you want information about filter_smooth.so, just supply
+.B smooth
+.TP
+\fB-m\fP \fIpath\fP
+Look in \fIPath\fP instead of the compiled-in module path for a module.
+.TP
+\fB-t\fP \fItype\fP
+Specify the \fIType\fP of module to load. Default is filter modules.
+In current (1.1.0) release, tcmodinfo support 'filter', 'encode' and 'multiplex'
+module types. More types will be added in future releases, to cover all
+the transcode module range.
+.TP
+\fB-M\fP \fIparameter\fP
+Print out the default setting of given parameter of a given (use -i/-t options
+too) module. If parameter isn't known, nothing will be print out.
+.br
+Caution: -M can't be used together with -C
+.TP
+\fB-C\fP \fIconfiguration string\fP
+Request to configure the module using given configuration string.
+Meaning of configuration string is of course module dependent, but format
+is always
+.br
+param1:key1=val1:param2:param3:key2=val2
+.br
+This option is used for debug purposes, you usually shouldn't need it.
+.br
+Caution: -C can't be used together with -M
+.TP
+\fB-s\fP \fIsocket\fP
+Connect to socket \fIsocket\fP. You can use this socket to do runtime
+configuration of transcode. For all the boring details about the socket
+protocol have a look at /docs/filter\-socket.txt. transcode has to be started
+with the \fB\-\-socket\fP option to open the socket.
+.TP
+\fB-d\fP \fIverbosity\fP
+Specify the verbosiness level to use, like transcode does. Default value
+is 1 (TC_INFO verbosiness).
+.TP
+.B -p
+Print the compiled-in module path and exit.
+.TP
+.B -v
+Print version information and exit.
+.SH EXAMPLES
+The command
+.PP
+.B tcmodinfo \-i smooth
+.PP
+prints information about the smooth filter.
+.PP
+.B tcmodinfo \-i levels -t filter
+.PP
+same as above for levels filter (-t filter it's the default)
+.PP
+.B tcmodinfo \-i raw -t multiplex
+.PP
+same as above for raw multiplexor
+.PP
+.B tcmodinfo \-i xvid -t encode
+.PP
+same as above for XviD encoder
+.PP
+.B transcode \-\-socket /tmp/tc\-socket &
+.br
+.B echo help | tcmodinfo \-s /tmp/tc\-socket
+.PP
+prints the socket help text and exits.
+.PP
+.B tcmodinfo \-s /tmp/tc\-socket
+.PP
+Will drop you into an interactive "shell" where you can talk to the socket.
+.SH AUTHORS
+.B tcmodinfo
+was written by Tilmann Bitterberg
+.br
+<transcode@tibit.org> with contributions from
+many others.  See AUTHORS for details.
+.SH SEE ALSO
+.BR avimerge (1),
+.BR avisplit (1),
+.BR tccat (1),
+.BR tcdecode (1),
+.BR tcdemux (1),
+.BR tcextract (1),
+.BR tcprobe (1),
+.BR tcscan (1),
+.BR transcode (1)
+

@@ -1,0 +1,404 @@
+NOTE:
+This file contains additional notes about filters. The text here will be copied
+verbose to the resulted generating manpage. If you add a section, you must
+ensure that the encapsulatiing boundaries are maintained because the
+make-filter-man.sh script greps for that. A blanko section for copy&paste:
+
+*** SNIP START ***
+---------------------->[ NAME.help ]
+Description of filter NAME
+<----------------------|
+
+*** SNIP END ***
+NAME is the basename of the filter filename. So if the filter library has the
+name filter_foo.so, the basename of the filter is "foo".
+If your filter supports the TC_FILTER_GET_CONFIG interface (which it should)
+there is no point to repeat the description of the filter options.
+
+
+---------------------->[ 32detect.help ]
+This filter checks for interlaced video frames.
+Subsequent de-interlacing with transcode can be enforced with 'force_mode' option
+<----------------------|
+
+---------------------->[ compare.help ]
+Generate a file in with information about the times, frame, etc the pattern
+defined in the image parameter is observed.
+<----------------------|
+
+---------------------->[ control.help ]
+The format of the command file is framenumber followed by at least one whitespace followed
+by the command followed by at least one whitespace followed by arguments for the command.
+Empty lines and lines starting with a `#' are ignored. The frame numbers must be sorted ascending.
+
+      # Example file
+      # At frame 10 load the smooth filter
+      10 load smooth
+      # reconfigure at 20
+      20 configure smooth=strength=0.9
+      99 disable smooth
+<----------------------|
+
+---------------------->[ cpaudio.help ]
+Copies audio from one channel to another
+<----------------------|
+
+---------------------->[ decimate.help ]
+see /docs/README.Inverse.Telecine.txt
+<----------------------|
+
+---------------------->[ detectclipping.help ]
+Detect black regions on top, bottom, left and right of an image.  It is suggested that the filter is run for around 100 frames.  It will print its detected parameters every frame. If you don't notice any change in the printout for a while, the filter probably won't find any other values.  The filter converges, meaning it will learn.
+<----------------------|
+
+---------------------->[ denoise3d.help ]
+What:
+The denoise3d filter from mplayer (sibling of hqdn3d). Works very crude and
+simple but also very fast. In fact it is even faster than the original from
+mplayer as I managed to tweak some things (a.o. zero frame copying).
+
+Who:
+Everyone who wants to have their captured frames thoroughly denoised (i.e. who
+want to encode to mpeg or mjpeg) but do not have enough processing power to
+real-time encode AND use hqdn3d (better quality but a lot slower) or dnr (yet
+slower), not to mention the other denoisers that are even slower. Quality is
+really good for static scenes (if fed with the right parameters), moving
+objects may show a little ghost-image (also depends on parameters) though. Your
+milage may vary.
+
+How:
+Parameters are the same as the hqdn3d module, although in practice you'll not
+end up with exactly the same values. Just experiment.  Particular for this
+version of the filter is that if you supply -1 to either component's parameters
+(luma/chroma), that component will not have the filter applied to. If you're
+still short on CPU cycles, try disabling the luma filter, this will not make
+much difference in the effectiveness of the filter!
+<----------------------|
+
+---------------------->[ dnr.help ]
+see /docs/filter_dnr.txt (german only)
+<----------------------|
+
+---------------------->[ doublefps.help ]
+Converts interlaced video into progressive video with half the
+original height and twice the speed (FPS), by converting each
+interlaced field to a separate frame.  Optionally allows the two
+fields to be shifted by half a pixel each to line them up correctly
+(at a significant expense of time).
+<----------------------|
+
+---------------------->[ fields.help ]
+The 'fields' filter is designed to shift, reorder, and
+generally rearrange independent fields of an interlaced
+video input.  Input retrieved from broadcast (PAL, NTSC,
+etc) video sources generally comes in an interlaced form
+where each pass from top to bottom of the screen displays
+every other scanline, and then the next pass displays the
+lines between the lines from the first pass.  Each pass is
+known as a "field" (there are generally two fields per
+frame).  When this form of video is captured and manipulated
+digitally, the two fields of each frame are usually merged
+together into one flat (planar) image per frame.  This
+usually produces reasonable results, however there are
+conditions which can cause this merging to be performed
+incorrectly or less-than-optimally, which is where this
+filter can help.
+
+The following options are supported for this filter
+(they can be separated by colons):
+
+  shift - Shift the video by one field (half a frame),
+          changing frame boundaries appropriately.  This is
+          useful if a video capture started grabbing video
+          half a frame (one field) off from where frame
+          boundaries were actually intended to be.
+
+  flip  - Exchange the top field and bottom field of each
+          frame.  This can be useful if the video signal was
+          sent "bottom field first" (which can happen
+          sometimes with PAL video sources) or other
+          oddities occurred which caused the frame
+          boundaries to be at the right place, but the
+          scanlines to be swapped.
+
+  flip_first
+        - Normally shifting is performed before flipping if
+          both are specified.  This option reverses that
+          behavior.  You should not normally need to use
+          this unless you have some extremely odd input
+          material, it is here mainly for completeness.
+
+  help  - Print this text.
+
+Note: the 'shift' function may produce slight color
+discrepancies if YV12 is used as the internal transcode
+video format (-V flag).  This is because YV12 does not
+contain enough information to do field shifting cleanly. For
+best (but slower) results, use RGB mode for field shifting.
+<----------------------|
+
+---------------------->[ fps.help ]
+options: <input fps>:<output fps>
+example: -J fps=25:29.97 will convert from PAL to NTSC
+If no options are given, defaults or -f/--export_fps/--export_frc will be used.
+Some examples:
+
+	-J fps=10:5:pre		convert from 10 fps to 5 fps, preprocess
+	-J fps=10:post:12	convert from 10 to 12, postprocess
+	-J fps=pre=1:7:5	convert from 7 to 5, postprocess
+	-J fps=9:3.1:post=-0x7	convert from 9 to 3.1, postprocess
+
+If that last one is confusing you, remember that 0 is false and everything
+else is true. Of course, octal and hexadecimal numbers are supported too.
+This is intended to be backward compatible with the old format.
+<----------------------|
+
+---------------------->[ hqdn3d.help ]
+This filter aims to reduce image noise producing smooth images and making still images really still (This should enhance compressibility).
+<----------------------|
+
+---------------------->[ ivtc.help ]
+see /docs/README.Inverse.Telecine.txt
+<----------------------|
+
+---------------------->[ logo.help ]
+This filter renders an user specified image into the video.
+Any image format ImageMagick can read is accepted.
+Transparent images are also supported.
+Image origin is at the very top left.
+
+see /docs/filter_logo.txt
+<----------------------|
+
+---------------------->[ logoaway.help ]
+This filter removes an image in a user specified area from the video.  You can
+choose from different methods.
+
+see /docs/filter_logoaway.txt
+<----------------------|
+
+---------------------->[ mask.help ]
+This filter applies an rectangular mask to the video.  Everything outside the mask is set to black.
+<----------------------|
+
+---------------------->[ modfps.help ]
+This filter aims to allow transcode to alter the fps
+of video.  While one can reduce the fps to any amount,
+one can only increase the fps to at most twice the
+original fps.
+
+There are two modes of operation, buffered and unbuffered,
+unbuffered is quick, but buffered, especially when dropping frames
+should look better.
+
+For most users, modfps will need either no options, or just mode=1
+
+see /docs/README.filter.modfps
+<----------------------|
+
+---------------------->[ msharpen.help ]
+This plugin implements an unusual concept in spatial sharpening.
+Although designed specifically for anime, it also works well with
+normal video. The filter is very effective at sharpening important
+edges without amplifying noise.
+
+  * Strength 'strength' (0-255) [100]
+    This is the strength of the sharpening to be applied to the edge detail areas. It is applied only to the edge detail areas as determined by the 'threshold' parameter. Strength 255 is the strongest sharpening.
+  * Threshold 'threshold' (0-255) [10]
+    This parameter determines what is detected as edge detail and thus sharpened. To see what edge detail areas will be sharpened, use the 'mask' parameter.
+  * Mask 'mask' (0-1) [0]
+    When set to true, the areas to be sharpened are shown in white against a black background. Use this to set the level of detail to be sharpened. This function also makes a basic edge detection filter.
+  * HighQ 'highq' (0-1) [1]
+    This parameter lets you tradeoff speed for quality of detail detection. Set it to true for the best detail detection. Set it to false for maximum speed.
+<----------------------|
+
+---------------------->[ preview.help ]
+XXX: Write me
+<----------------------|
+
+---------------------->[ pv.help ]
+The filter listens to mouse and key strokes. If you click into the preview
+window, the first time say near the upper left corner and the second time near
+the lower right corner, transcode will draw a rectangle and will print out the
+coordinates of this rectangle on stdout and the socket. See the table below for
+available keys.
+
+When you start transcode with the --socket option and the pv filter with (for
+example) cache=20 you can talk to transcode and the pv filter at runtime using
+the socket.
+
+.nf
+transcode -i file.avi -V -J pv=cache=30 --socket /tmp/sock
+.fi
+
+.RS
+.TP 8
+Available Commands
+.TP
+Key	Socket*	Effect
+.TP
+.I RET
+draw	redraws the image, applying filters.
+.TP
+.I u
+undo	goes to image before draw
+.TP
+.I SPACE
+pause	pause the preview (and transcode)
+.TP
+.I UP
+fastfw	in pause mode, step forward 5 frames
+.TP
+.I RIGHT
+slowfw	in pause mode, step forward 1 frame
+.TP
+.I DOWN
+fastbw	in pause mode, step back 5 frames
+.TP
+.I LEFT
+slowbw	in pause mode, step back 1 frame
+.TP
+.I q
+display	toggle display of frames
+.TP
+.I s
+slower	slow down
+.TP
+.I f
+faster	speed up
+.TP
+.I y
+toggle	toggle displaying only every 5 frames
+.TP
+.I j
+grab	save a JPEG
+.TP
+.I r
+rotate	rotate AVI file after next keyframe
+.TP
+.RE
+(*) all commands must be prefixed with "preview ".
+<----------------------|
+
+---------------------->[ slowmo.help ]
+This filter produces a simple slow-motion effect by
+duplicating certain frames. I have seen this effect
+on TV and despite its the simple algorithm it works
+quite well. The filter has no options.
+<----------------------|
+
+---------------------->[ smartbob.help ]
+This filter only makes sense when fed by -J doublefps.
+It will take the field-frames which filter_doublefps
+produces and generates full-sized motion adaptive deinterlaced
+output at the double import framerate.
+<----------------------|
+
+---------------------->[ smartdeinter.help ]
+This filter provides a smart, motion-based deinterlacing
+capability. In static picture areas, interlacing artifacts do not
+appear, so data from both fields is used to provide full detail. In
+moving areas, deinterlacing is performed
+<----------------------|
+
+---------------------->[ smartyuv.help ]
+This filter is basically a rewrite of the
+smartdeinter filter by Donald Graft (without advanced processing
+options) for YUV mode only. Its faster than using the smartdeinter
+in YUV mode and is also tuned with its threshold settings for YUV
+mode. The filter detects motion and static areas in an image and
+only deinterlaces (either by blending or by cubic interpolation)
+the moving areas. The result is an image with high detail in
+static areas, no information is lost there.
+
+The threshold settings should be sufficent for most users. As a
+rule of thumb, I recommend setting the chroma threshold to about
+the half of the luma threshold. If you want more deinterlacing,
+lower the thresholds. The scene threshold can be easily found by
+turning on verbose mode and the preview filter. In verbose mode,
+the filter will print out, when it detects a scene change. If
+scenechanges go by unnoticed, lower the scene threshold. You can
+completly disable chroma processing with the doChroma=0 option.
+Here is a sample commandline
+
+-J smartyuv=highq=1:diffmode=2:cubic=1:Blend=1:chromathres=4:threshold=8:doChroma=1
+<----------------------|
+
+---------------------->[ smooth.help ]
+"single-frame" means it only works with the current frame, it does not need the
+next or the previous frame for operation. Usually smoothing is done by talking
+the data of previous frames into account to see which parts of the picture can
+be "safely" smoothed, this filter only needs one frame.
+
+<----------------------|
+
+---------------------->[ subtitler.help ]
+Usage -J subtitler="[no_objects] [subtitle_file=s]
+[color_depth=n]
+[font_dir=s] [font=n] [font_factor=f
+[frame_offset=n]
+[debug] [help]"
+f is float, h is hex, n is integer, s is string.
+
+no_objects           disables subtitles and other objects (off).
+.br
+color_depth=         32 or 24 (overrides X auto) (32).
+.br
+font=                0 or 1, 1 gives strange symbols... (0).
+.br
+font_dir=            place where font.desc is (~/.subtitles/font).
+.br
+font_factor=         .1 to 100 outline characters (10.75).
+.br
+frame_offset=        positive (text later) or negative (earlier) integer (0).
+.br
+subtitle_file=       pathfilename.ppml location of ppml file (~/.subtitles/demo.ppml).
+.br
+debug                prints debug messages (off).
+.br
+help                 prints this list and exit.
+<----------------------|
+
+---------------------->[ text.help ]
+see /docs/filter_text.txt
+<----------------------|
+
+---------------------->[ unsharp.help ]
+This filter blurs or sharpens an image depending on
+the sign of "amount". You can either set amount for
+both luma and chroma or you can set it individually
+(recommended). A positive value for amount will sharpen
+the image, a negative value will blur it. A sane range
+for amount is -1.5 to 1.5.
+
+The matrix sizes must be odd and define the
+range/strength of the effect. Sensible ranges are 3x3
+to 7x7.
+
+It sometimes makes sense to sharpen the sharpen the
+luma and to blur the chroma. Sample string is:
+
+luma=0.8:luma_matrix=7x5:chroma=-0.2:chroma_matrix=3x3
+<----------------------|
+
+---------------------->[ whitebalance.help ]
+This filter allows correcting movies with a broken white balance, e.g. bluish movies.
+<----------------------|
+
+---------------------->[ xsharpen.help ]
+This filter performs a subtle but useful sharpening effect. The
+result is a sharpening effect that not only avoids amplifying
+noise, but also tends to reduce it. A welcome side effect is that
+files processed with this filter tend to compress to smaller files.
+
+  Strength 'strength' (0-255) [200]
+    When this value is 255, mapped pixels are not blended with the original pixel values, so a full-strength effect is obtained. As the value is reduced, each mapped pixel is blended with more of the original pixel. At a value of 0, the original pixels are passed through and there is no sharpening effect.
+
+  Threshold 'threshold' (0-255) [255]
+    This value determines how close a pixel must be to the brightest or dimmest pixel to be mapped. If a pixel is more than threshold away from the brightest or dimmest pixel, it is not mapped.  Thus, as the threshold is reduced, pixels in the mid range start to be spared.
+<----------------------|
+
+---------------------->[ yuvdenoise.help ]
+see /docs/filter_yuvdenoise.txt
+<----------------------|
+
